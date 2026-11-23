@@ -1,0 +1,188 @@
+/* ------------------------------------------------------------------
+   Design tokens. Light is the default; dark applies via [data-theme=dark].
+   index.html resolves the theme (saved choice, else OS) before first paint.
+   Role colours: client · server · data · net · auth · neutral
+   ------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+
+  --font-display: 'Bricolage Grotesque Variable', 'Inter Variable', system-ui, sans-serif;
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --bg: #f5f4ef;
+  --bg-2: #eeece5;
+  --surface: #ffffff;
+  --surface-2: #faf9f6;
+  --surface-3: #f2f0ea;
+  --line: #e3e0d7;
+  --line-soft: #ecebe4;
+  --line-strong: #cbc6b8;
+  --ink: #15171c;
+  --ink-2: #353942;
+  --muted: #646a74;
+  --muted-2: #959aa3;
+  --dot: rgba(21, 23, 28, 0.1);
+  --stage-bg: #fbfaf7;
+  --focus: #2563eb;
+
+  --client: #2563eb;
+  --client-soft: #e6eefd;
+  --client-line: #b8cbf6;
+  --server: #d16a0b;
+  --server-soft: #fdefdf;
+  --server-line: #f1c79b;
+  --data: #13803b;
+  --data-soft: #e1f3e6;
+  --data-line: #a8d9b6;
+  --net: #6c47db;
+  --net-soft: #eee8fd;
+  --net-line: #ccbef6;
+  --auth: #cc2f68;
+  --auth-soft: #fce6ee;
+  --auth-line: #f2b4ca;
+  --neutral: #55606c;
+  --neutral-soft: #eef0f2;
+  --neutral-line: #d2d7dd;
+  --danger: #d92626;
+  --danger-soft: #fde6e6;
+  --danger-line: #f4b0b0;
+  --warn: #b86e00;
+  --warn-soft: #fcf0d6;
+  --warn-line: #ecd096;
+  --ok: #13803b;
+  --ok-soft: #e1f3e6;
+  --ok-line: #a8d9b6;
+  /* interactive "Try it" steps */
+  --try: #0d9488;
+  --try-soft: #dcf3f0;
+  --try-line: #9fd8d1;
+
+  /* packets: what is travelling */
+  --pk-req: #2563eb;
+  --pk-res: #16a34a;
+  --pk-data: #e08a00;
+  --pk-err: #e02424;
+  --pk-event: #7c4dff;
+  --pk-auth: #db2777;
+
+  /* story beats */
+  --beat-setup: var(--neutral);
+  --beat-problem: var(--danger);
+  --beat-solution: var(--ok);
+  --beat-technique: var(--client);
+  --beat-tradeoff: var(--warn);
+  --beat-insight: var(--net);
+  --beat-try: var(--try);
+  --beat-recap: var(--ink);
+
+  /* syntax */
+  --syn-kw: #a626a4;
+  --syn-fn: #2f5fd0;
+  --syn-str: #3f8f2f;
+  --syn-num: #b55a00;
+  --syn-com: #9198a1;
+  --syn-tag: #c2185b;
+  --syn-attr: #b55a00;
+  --syn-prop: #0b7285;
+  --syn-punc: #6b7280;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --shadow-1: 0 1px 0 rgba(21, 23, 28, 0.04), 0 1px 2px rgba(21, 23, 28, 0.06);
+  --shadow-2: 0 1px 0 rgba(21, 23, 28, 0.04), 0 4px 14px -6px rgba(21, 23, 28, 0.14);
+  --shadow-3: 0 2px 0 rgba(21, 23, 28, 0.03), 0 18px 40px -18px rgba(21, 23, 28, 0.28);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0c0e12;
+  --bg-2: #111419;
+  --surface: #161a21;
+  --surface-2: #1a1f27;
+  --surface-3: #20262f;
+  --line: #262c36;
+  --line-soft: #1e232b;
+  --line-strong: #3a4250;
+  --ink: #eef1f5;
+  --ink-2: #c8ced8;
+  --muted: #8d95a3;
+  --muted-2: #636b79;
+  --dot: rgba(255, 255, 255, 0.075);
+  --stage-bg: #0f1217;
+  --focus: #79a8ff;
+
+  --client: #79a8ff;
+  --client-soft: rgba(121, 168, 255, 0.13);
+  --client-line: rgba(121, 168, 255, 0.4);
+  --server: #ffa451;
+  --server-soft: rgba(255, 164, 81, 0.13);
+  --server-line: rgba(255, 164, 81, 0.4);
+  --data: #4ade80;
+  --data-soft: rgba(74, 222, 128, 0.12);
+  --data-line: rgba(74, 222, 128, 0.38);
+  --net: #b197fc;
+  --net-soft: rgba(177, 151, 252, 0.14);
+  --net-line: rgba(177, 151, 252, 0.4);
+  --auth: #ff7eab;
+  --auth-soft: rgba(255, 126, 171, 0.13);
+  --auth-line: rgba(255, 126, 171, 0.4);
+  --neutral: #9ba6b5;
+  --neutral-soft: rgba(155, 166, 181, 0.12);
+  --neutral-line: rgba(155, 166, 181, 0.32);
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.13);
+  --danger-line: rgba(255, 107, 107, 0.42);
+  --warn: #fcc451;
+  --warn-soft: rgba(252, 196, 81, 0.12);
+  --warn-line: rgba(252, 196, 81, 0.38);
+  --ok: #4ade80;
+  --ok-soft: rgba(74, 222, 128, 0.12);
+  --ok-line: rgba(74, 222, 128, 0.38);
+  --try: #2dd4bf;
+  --try-soft: rgba(45, 212, 191, 0.12);
+  --try-line: rgba(45, 212, 191, 0.4);
+
+  --pk-req: #6ea8ff;
+  --pk-res: #4ade80;
+  --pk-data: #fbbf24;
+  --pk-err: #ff5c5c;
+  --pk-event: #b197fc;
+  --pk-auth: #ff7eab;
+
+  --syn-kw: #d38cf5;
+  --syn-fn: #7fb0ff;
+  --syn-str: #93d677;
+  --syn-num: #ffb46b;
+  --syn-com: #6b7584;
+  --syn-tag: #ff8fb5;
+  --syn-attr: #ffc27a;
+  --syn-prop: #6fd6e8;
+  --syn-punc: #8d95a3;
+
+  --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 1px 0 rgba(0, 0, 0, 0.3), 0 6px 16px -6px rgba(0, 0, 0, 0.6);
+  --shadow-3: 0 2px 0 rgba(0, 0, 0, 0.3), 0 22px 44px -18px rgba(0, 0, 0, 0.8);
+}
+
+/* Tone helpers: any element with data-tone gets --tone / --tone-soft / --tone-line */
+[data-tone='client'] { --tone: var(--client); --tone-soft: var(--client-soft); --tone-line: var(--client-line); }
+[data-tone='server'] { --tone: var(--server); --tone-soft: var(--server-soft); --tone-line: var(--server-line); }
+[data-tone='data'] { --tone: var(--data); --tone-soft: var(--data-soft); --tone-line: var(--data-line); }
+[data-tone='net'] { --tone: var(--net); --tone-soft: var(--net-soft); --tone-line: var(--net-line); }
+[data-tone='auth'] { --tone: var(--auth); --tone-soft: var(--auth-soft); --tone-line: var(--auth-line); }
+[data-tone='neutral'] { --tone: var(--neutral); --tone-soft: var(--neutral-soft); --tone-line: var(--neutral-line); }
+[data-tone='danger'] { --tone: var(--danger); --tone-soft: var(--danger-soft); --tone-line: var(--danger-line); }
+[data-tone='warn'] { --tone: var(--warn); --tone-soft: var(--warn-soft); --tone-line: var(--warn-line); }
+[data-tone='ok'] { --tone: var(--ok); --tone-soft: var(--ok-soft); --tone-line: var(--ok-line); }
+
+[data-beat='setup'] { --beat: var(--beat-setup); }
+[data-beat='problem'] { --beat: var(--beat-problem); }
+[data-beat='solution'] { --beat: var(--beat-solution); }
+[data-beat='technique'] { --beat: var(--beat-technique); }
+[data-beat='tradeoff'] { --beat: var(--beat-tradeoff); }
+[data-beat='insight'] { --beat: var(--beat-insight); }
+[data-beat='try'] { --beat: var(--beat-try); }
+[data-beat='recap'] { --beat: var(--beat-recap); }
