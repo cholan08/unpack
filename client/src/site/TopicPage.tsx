@@ -1,11 +1,14 @@
 /**
- * A main topic (/frontend, /backend, /database, /devops) or /projects: every lesson labelled
- * with it, across every course, listed under the part it comes from. Parts are not reshaped —
- * a part that mixes topics shows only this topic's lessons, and links to where the rest live.
+ * A topic page. The main topics (/frontend … /aiml) show their skill plan: what to learn, stage
+ * by stage, linked to the lessons, notebooks, cheatsheets and Skill Pack topics for each skill
+ * (./plan). The lessons in course order live on the course map, so they are not repeated here.
+ *
+ * /projects (no plan) lists every lesson labelled with it, under the part it comes from, plus the
+ * Capstone. Parts are not reshaped — a part that mixes topics shows only this topic's lessons.
  */
 import { useEffect } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, Flag, Route, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Flag, Map as MapIcon, Route, ShieldCheck } from 'lucide-react';
 import { COURSES, type LessonEntry } from '@/content/registry';
 import { MAIN_PILLARS, getPillar } from '@/content/pillars';
 import { CAPSTONE_MILESTONES } from '@/content/courses/mern/capstone';
@@ -16,11 +19,142 @@ import { prefetchLessonPage } from './prefetch';
 import { PILLAR_ICON } from './AppShell';
 import { continueTarget, statsFor, topicGroups, topicStats } from './learner';
 import { Glide, Ring, fmtHours } from './ui';
+import { getPlan, type PlanStage } from './plan/data';
+import { SkillPlan } from './plan/SkillPlan';
+import { lessonHref, planStatus, type PlanStatus } from './plan/status';
 import './topic.css';
 
 const key = (e: LessonEntry) => `${e.part.id}/${e.stub.id}`;
 
 export function TopicPage({ id }: { id: PillarId }) {
+  const plan = getPlan(id);
+  return plan ? <PlanTopic id={id} plan={plan} /> : <SyllabusTopic id={id} />;
+}
+
+/* ================= main topics: the skill plan ================= */
+
+function PlanTopic({ id, plan }: { id: PillarId; plan: PlanStage[] }) {
+  const pillar = getPillar(id)!;
+  const progress = useProgress();
+  useEffect(() => {
+    document.title = `${pillar.label} — Unpacked`;
+  }, [pillar]);
+
+  const status = planStatus(plan, progress);
+  const index = MAIN_PILLARS.findIndex((p) => p.id === id);
+  const Icon = PILLAR_ICON[id];
+  const course = COURSES[0];
+  // "lessons in order" opens the course map at the first part holding this topic's lessons
+  const firstPart = topicGroups(id)[0]?.part;
+  const courseMap = course && firstPart ? `/${course.id}#${firstPart.id}` : undefined;
+  const cur = status.current ? status.stages.indexOf(status.current) + 1 : 0;
+
+  return (
+    <main className="topic" data-tone={pillar.tone}>
+      <div className="wrap">
+        <TopicSwitch current={id} />
+
+        <header className="topic-head">
+          <div className="topic-head-text">
+            <span className="eyebrow topic-kicker">
+              <Icon size={14} strokeWidth={2.4} />
+              Topic {index + 1} of {MAIN_PILLARS.length} · Skill plan
+            </span>
+            <h1 className="page-title">{pillar.label}</h1>
+            <p className="page-lede">{pillar.blurb}</p>
+            <ul className="topic-facts">
+              <li>
+                <strong>{plan.length}</strong> stages
+              </li>
+              <li>
+                <strong>{status.skills}</strong> skills
+              </li>
+              {status.lessons > 0 && (
+                <li>
+                  <strong>{status.lessons}</strong> lessons
+                </li>
+              )}
+              {status.notebooks > 0 && (
+                <li>
+                  <strong>{status.notebooks}</strong> {status.notebooks === 1 ? 'notebook' : 'notebooks'}
+                </li>
+              )}
+            </ul>
+            {status.lessons === 0 && (
+              <span className="pill topic-soon-pill" data-tone={pillar.tone}>
+                Lessons coming soon · notebooks and topic lists are ready now
+              </span>
+            )}
+          </div>
+
+          <div className="topic-progress card">
+            <Ring pct={status.pct} size={64} stroke={5} label={`${status.coreDone} of ${status.core} core skills`}>
+              <span className="topic-progress-pct mono">{Math.round(status.pct * 100)}%</span>
+            </Ring>
+            <div className="topic-progress-text">
+              <strong>
+                {status.coreDone} of {status.core} core skills
+              </strong>
+              <span>{status.current ? `Stage ${cur} of ${plan.length}: ${status.current.stage.title}` : 'Every stage done. Nice work.'}</span>
+            </div>
+            <PlanNext status={status} />
+            <span className="topic-progress-links">
+              {courseMap && (
+                <Link className="tlink" to={courseMap}>
+                  <MapIcon size={14} /> Lessons in order
+                </Link>
+              )}
+              {course && (
+                <Link className="tlink" to={`/${course.id}/roadmap`}>
+                  <Route size={14} /> Roadmap
+                </Link>
+              )}
+            </span>
+          </div>
+        </header>
+
+        <div className="pl-intro">
+          <h2>The plan</h2>
+          <p>
+            Work down the stages. <strong>Core</strong> skills are the path; <strong>good to know</strong> ones are extras and
+            alternatives. Tick a skill when you know it — finishing its lessons ticks it for you.
+          </p>
+        </div>
+
+        <SkillPlan status={status} />
+      </div>
+    </main>
+  );
+}
+
+/** The one button that moves the plan on: resume a lesson left part-way, else the next core skill. */
+function PlanNext({ status }: { status: PlanStatus }) {
+  const course = COURSES[0];
+  if (status.resume) {
+    const l = status.resume;
+    const warm = () => course && prefetchLessonPage(course, l.meta.id);
+    return (
+      <Link className="btn btn--tone btn--block" to={lessonHref(l)} onMouseEnter={warm} onFocus={warm}>
+        Continue: {l.meta.title} <ArrowRight size={15} />
+      </Link>
+    );
+  }
+  const s = status.nextSkill;
+  if (!s || !status.current) return null;
+  const l = s.nextLesson && !s.nextLesson.done ? s.nextLesson : undefined;
+  const { notebook, tool, name } = s.skill;
+  const to = l ? lessonHref(l) : notebook ? `/notebooks/${notebook}` : tool ? `/skillpack/${tool}` : `#${status.current.stage.id}`;
+  const what = l ? l.meta.title : notebook ? `${name} notebook` : tool ? `${name} topics` : name;
+  return (
+    <Link className="btn btn--tone btn--block" to={to}>
+      Next: {what} <ArrowRight size={15} />
+    </Link>
+  );
+}
+
+/* ================= projects: lessons by part, plus the capstone ================= */
+
+function SyllabusTopic({ id }: { id: PillarId }) {
   const pillar = getPillar(id)!;
   const progress = useProgress();
   useEffect(() => {

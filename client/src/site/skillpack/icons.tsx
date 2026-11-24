@@ -498,6 +498,58 @@ export const SKILL_ICONS: Record<string, ReactNode> = {
       <path d="M6 7h3M7.5 5.5v3" stroke="rgba(255,255,255,.6)" strokeWidth="1" strokeLinecap="round" />
     </>
   ),
+
+  /* ---------- AI / ML (topic skill plans) ---------- */
+  pytorch: (
+    <>
+      <path d="M12.2 2.5 7.4 7.3a6.7 6.7 0 1 0 9.5 0" fill="none" stroke="#EE4C2C" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="15.6" cy="5.4" r="1.3" fill="#EE4C2C" />
+    </>
+  ),
+  tensorflow: (
+    <>
+      <path d="M12 2.5 3.5 7.3v4.4l5-2.8V21l3.5 2V2.5z" fill="#FF6F00" />
+      <path d="M12 2.5l8.5 4.8v4.4l-5-2.8v3.4l2.5 1.4v3.6L15.5 16V21L12 23z" fill="#FFA800" />
+    </>
+  ),
+  sklearn: (
+    <>
+      <circle cx="9" cy="12" r="6.6" fill="#F7931E" />
+      <circle cx="15.4" cy="12" r="6.6" fill="#3499CD" fillOpacity="0.92" />
+      <T x={12.2} y={15.2} s={8.6} fill={W}>sk</T>
+    </>
+  ),
+  numpy: (
+    <>
+      <path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7z" fill="none" stroke="#4DABCF" strokeWidth="1.6" strokeLinejoin="round" />
+      <T y={15.2} s={9} fill="#4D77CF">np</T>
+    </>
+  ),
+  pandas: (
+    <>
+      <rect x="5" y="3" width="3" height="7" rx="0.6" fill="currentColor" />
+      <rect x="5" y="14" width="3" height="7" rx="0.6" fill="currentColor" />
+      <rect x="10.5" y="9" width="3" height="6" rx="0.6" fill="#E70488" />
+      <rect x="16" y="3" width="3" height="7" rx="0.6" fill="currentColor" />
+      <rect x="16" y="14" width="3" height="7" rx="0.6" fill="currentColor" />
+    </>
+  ),
+  jupyter: (
+    <g fill="none" stroke="#F37626" strokeWidth="2.2" strokeLinecap="round">
+      <path d="M4 9.5c3.6-4.6 12.4-4.6 16 0" />
+      <path d="M4 14.5c3.6 4.6 12.4 4.6 16 0" />
+      <circle cx="18.6" cy="4" r="1.2" fill="#767677" stroke="none" />
+      <circle cx="5" cy="20.4" r="1" fill="#767677" stroke="none" />
+    </g>
+  ),
+  huggingface: (
+    <>
+      <circle cx="12" cy="12" r="9.5" fill="#FFD21E" />
+      <circle cx="8.6" cy="10" r="1.3" fill="#3A3B45" />
+      <circle cx="15.4" cy="10" r="1.3" fill="#3A3B45" />
+      <path d="M8 14c1 2.4 7 2.4 8 0" fill="#3A3B45" />
+    </>
+  ),
 };
 
 export function SkillIcon({ name, size = 30 }: { name: string; size?: number }) {

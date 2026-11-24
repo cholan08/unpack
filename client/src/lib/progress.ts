@@ -64,6 +64,8 @@ interface Store {
     noAiMode?: boolean;
   };
   dash: DashStats;
+  /** Skill-plan skills the learner ticked as "I know this" (id → when). Optional: older saves lack it. */
+  known?: Record<string, number>;
 }
 
 const KEY = 'unpacked:progress:v2';
@@ -225,6 +227,14 @@ export function saveExplainBack(result: ExplainBackResult) {
     ...state,
     explainBacks: [...state.explainBacks.filter((e) => e.stepKey !== result.stepKey), result],
   });
+}
+
+/** Tick or untick a skill on a topic's skill plan. */
+export function toggleKnown(id: string) {
+  const known = { ...state.known };
+  if (known[id]) delete known[id];
+  else known[id] = Date.now();
+  save({ ...state, known });
 }
 
 export function saveTutorKey(key: string) {

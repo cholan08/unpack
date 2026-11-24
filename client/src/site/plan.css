@@ -1,0 +1,162 @@
+/* =====================================================================
+   Skill plan on a topic page (/frontend … /aiml): stages down a rail,
+   each a grid of skill tiles. <main data-tone> gives --tone / --tone-soft
+   / --tone-line the topic's colour.
+   ===================================================================== */
+
+/* the progress card's two text links side by side */
+.topic-progress-links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; font-size: 13px; }
+.topic-progress-links .tlink { color: var(--muted); }
+.topic-progress-links .tlink:hover { color: var(--ink); }
+
+/* ---------------- intro line ---------------- */
+.pl-intro { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; padding: 30px 0 6px; }
+.pl-intro h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tone); }
+.pl-intro p { flex: 1 1 360px; max-width: 760px; font-size: 14px; line-height: 1.55; color: var(--muted); }
+.pl-intro strong { color: var(--ink-2); font-weight: 650; }
+
+/* ---------------- stages down a rail ---------------- */
+.pl-stages { list-style: none; margin: 0; padding: 10px 0 48px; }
+.pl-stage { position: relative; display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 22px; padding-bottom: 40px; scroll-margin-top: 24px; }
+.pl-stage:last-child { padding-bottom: 0; }
+@media (max-width: 1079px) { .pl-stage { scroll-margin-top: calc(var(--top-h) + 12px); } }
+
+/* the line joining one stage marker to the next */
+.pl-stage::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 44px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--line);
+}
+.pl-stage:last-child::before { display: none; }
+.pl-stage[data-state='done']::before { background: var(--ok-line); }
+
+.pl-rail { position: relative; z-index: 1; padding-top: 2px; }
+.pl-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+}
+.pl-mark-n { font-size: 12px; font-weight: 700; color: var(--muted); }
+.pl-rail .ui-ring { background: var(--surface); border-radius: 50%; }
+.pl-rail .ui-ring .pl-mark-n { color: var(--tone); }
+.pl-mark--done { border: 0; background: var(--ok); color: #fff; }
+[data-theme='dark'] .pl-mark--done { color: #0b0d11; }
+
+/* ---------------- stage header ---------------- */
+.pl-body { min-width: 0; }
+.pl-stage-head { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; margin-bottom: 16px; }
+.pl-stage-kicker { display: inline-flex; align-items: center; gap: 10px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--tone); }
+.pl-now,
+.pl-done-tag { padding: 2px 8px; border-radius: 999px; font: 650 11px var(--font-sans); letter-spacing: 0; text-transform: none; }
+.pl-now { background: var(--tone-soft); box-shadow: inset 0 0 0 1px var(--tone-line); color: var(--tone); }
+.pl-done-tag { background: var(--ok-soft); box-shadow: inset 0 0 0 1px var(--ok-line); color: var(--ok); }
+.pl-stage-head h2 { font-size: clamp(22px, 2.4vw, 27px); line-height: 1.15; letter-spacing: -0.02em; }
+.pl-goal { max-width: 720px; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.pl-stage-meta { font-size: 12px; color: var(--muted-2); }
+.pl-stage[data-state='next'] .pl-stage-head h2 { color: var(--ink-2); }
+
+/* ---------------- skill tiles ---------------- */
+.pl-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.pl-grid > li { display: flex; min-width: 0; }
+
+.pl-skill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px 14px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.pl-skill:hover { border-color: var(--tone-line); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 10%, transparent), var(--shadow-1); }
+.pl-skill[data-level='extra'] { border-style: dashed; background: color-mix(in srgb, var(--surface) 55%, transparent); box-shadow: none; }
+.pl-skill[data-done] { border-color: var(--ok-line); border-style: solid; }
+
+.pl-skill-top { display: flex; align-items: center; gap: 11px; }
+.pl-skill-ico { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2); color: var(--tone); }
+.pl-skill-title { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.pl-skill-name { margin: 0; font: 700 15px var(--font-sans); letter-spacing: -0.01em; color: var(--ink); overflow-wrap: anywhere; }
+.pl-skill-level { font: 600 10.5px var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--tone); }
+.pl-skill[data-level='extra'] .pl-skill-level { color: var(--muted-2); }
+.pl-skill-what { font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+
+/* the "I know this" tick */
+.pl-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s, transform 0.15s var(--ease);
+}
+.pl-check:hover { border-color: var(--ok); color: var(--ok); }
+.pl-check:active { transform: scale(0.92); }
+.pl-check:focus-visible { outline: 2px solid var(--tone); outline-offset: 2px; }
+.pl-check[aria-pressed='true'] { border-color: var(--ok); background: var(--ok); color: #fff; }
+[data-theme='dark'] .pl-check[aria-pressed='true'] { color: #0b0d11; }
+.pl-check:disabled { cursor: default; }
+
+/* links to what the site has on the skill */
+.pl-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 4px; }
+.pl-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.pl-link svg { color: var(--muted); transition: color 0.15s; }
+.pl-link:hover { border-color: var(--tone-line); background: var(--tone-soft); color: var(--ink); }
+.pl-link:hover svg { color: var(--tone); }
+.pl-link--lesson { border-color: var(--tone-line); color: var(--tone); }
+.pl-link--lesson svg { color: var(--tone); }
+.pl-link-tick { color: var(--ok) !important; }
+
+/* the build that proves the stage */
+.pl-build {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--line);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.pl-build svg { flex: none; margin-top: 2px; color: var(--tone); }
+.pl-build strong { color: var(--ink); font-weight: 650; }
+
+@media (max-width: 600px) {
+  .pl-stage { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .pl-stage::before { display: none; }
+  .pl-rail { display: flex; }
+  .pl-grid { grid-template-columns: minmax(0, 1fr); }
+}
