@@ -19,15 +19,119 @@ import type {
   NotebookDef,
   OpItem,
   PageContent,
+  PageStub,
   Row,
   Section,
   Sketch,
+  SketchEdge,
+  SketchNode,
   TableSpec,
   Tone,
 } from './types';
 
 export const defineNotebook = (def: NotebookDef) => def;
 export const definePage = (page: PageContent) => page;
+
+/* ---- page list (notebook.ts) ---- */
+
+/** A page and the sections it will cover: `pg('jsx', 'JSX & Components', 'What JSX compiles to', 'Props')`. */
+export const pg = (id: string, title: string, ...outline: string[]): PageStub => ({ id, title, outline });
+
+/** The closing "Quick Revision & Interview Questions" page every notebook ends with. */
+export const revision = (...differences: string[]): PageStub =>
+  pg(
+    'revision',
+    'Quick Revision & Interview Questions',
+    'Summary tables of the key terms',
+    ...(differences.length ? [`Important differences: ${differences.join(' · ')}`] : []),
+    'Top interview questions',
+    'Key takeaways (final revision)',
+  );
+
+/* ---- cover art: small generated doodles, so a new cover needs words, not coordinates ---- */
+
+type Doodle = 'db' | 'pc' | 'server' | 'laptop' | 'user' | 'cloud';
+const DOODLE_SIZE: Record<Doodle, { w: number; h: number; bands?: number }> = {
+  db: { w: 78, h: 92, bands: 2 },
+  pc: { w: 90, h: 74 },
+  server: { w: 60, h: 86 },
+  laptop: { w: 104, h: 70 },
+  user: { w: 66, h: 78 },
+  cloud: { w: 118, h: 82 },
+};
+
+/** Top-left: one big doodle with a word under it. */
+export function iconArt(shape: Doodle, label: string, tone: Tone = 'blue'): Sketch {
+  return {
+    w: 130,
+    h: 136,
+    alt: label,
+    nodes: [
+      { id: 'i', shape, x: 65, y: 54, ...DOODLE_SIZE[shape], tone },
+      { id: 't', shape: 'text', x: 65, y: 122, text: label, size: 20, bold: true },
+    ],
+  };
+}
+
+/** Top-right: up to four steps, snaking left → right, then back. */
+export function flowArt(steps: string[], tone: Tone = 'blue'): Sketch {
+  const at: [number, number][] = [[72, 32], [212, 32], [212, 118], [72, 118]];
+  const nodes: SketchNode[] = steps.slice(0, 4).map((text, i) => ({
+    id: `s${i}`,
+    shape: 'pill',
+    x: at[i][0],
+    y: at[i][1],
+    w: 128,
+    h: 40,
+    text,
+    size: text.length > 14 ? 12.5 : 14,
+    bold: true,
+    tone: i === 0 ? tone : undefined,
+  }));
+  const edges: SketchEdge[] = nodes.slice(1).map((n, i) => ({ from: nodes[i].id, to: n.id }));
+  return { w: 284, h: 150, nodes, edges, alt: steps.join(' → ') };
+}
+
+/** Left: a tiny editor window with a few lines of code (keep lines under ~24 characters). */
+export function codeArt(lines: string[], title = 'Code'): Sketch {
+  const top = 30;
+  const boxH = 30 + lines.length * 19;
+  const nodes: SketchNode[] = [
+    { id: 'h', shape: 'text', x: 95, y: 13, text: title, size: 15, bold: true },
+    { id: 'b', shape: 'box', x: 95, y: top + boxH / 2, w: 186, h: boxH, tone: 'plain' },
+    ...[0, 1, 2].map((i): SketchNode => ({ id: `d${i}`, shape: 'circle', x: 14 + i * 11, y: top + 9, w: 6, h: 6, tone: (['pink', 'yellow', 'green'] as Tone[])[i] })),
+    ...lines.map((text, i): SketchNode => ({ id: `l${i}`, shape: 'text', x: 12, y: top + 30 + i * 19, text, size: 12.5, anchor: 'start' })),
+  ];
+  return { w: 190, h: top + boxH + 4, nodes, alt: `${title}: ${lines.join(' ')}` };
+}
+
+/**
+ * Centre: a hub with four labels around it. The two top labels flow in, the two bottom ones flow out.
+ * `shape: 'box'` puts the word inside a box; any doodle draws it with the word underneath.
+ */
+export function hubArt(centre: string, around: [string, string, string, string], shape: Doodle | 'box' = 'box', tone: Tone = 'blue'): Sketch {
+  const hub: SketchNode[] =
+    shape === 'box'
+      ? [{ id: 'c', shape: 'box', x: 170, y: 112, w: Math.max(120, centre.length * 11 + 36), h: 62, text: centre, size: 18, bold: true, tone }]
+      : [
+          { id: 'c', shape, x: 170, y: shape === 'db' ? 104 : 100, ...(shape === 'db' ? { w: 108, h: 124, bands: 2 } : { w: DOODLE_SIZE[shape].w * 1.25, h: DOODLE_SIZE[shape].h * 1.25 }), tone },
+          { id: 'cl', shape: 'text', x: 170, y: shape === 'db' ? 190 : 176, text: centre, size: 16, bold: true },
+        ];
+  const corners: [number, number][] = [[44, 34], [296, 34], [46, 196], [294, 196]];
+  const labels: SketchNode[] = around.map((text, i) => ({ id: `a${i}`, shape: 'text', x: corners[i][0], y: corners[i][1], text, size: 15 }));
+  return {
+    w: 340,
+    h: 232,
+    alt: `${centre}: ${around.join(', ').replace(/\n/g, ' ')}`,
+    nodes: [...hub, ...labels],
+    edges: [
+      { from: 'a0', to: 'c', curve: 18 },
+      { from: 'a1', to: 'c', curve: -18 },
+      { from: 'c', to: 'a2', curve: -14 },
+      { from: 'c', to: 'a3', curve: 14 },
+    ],
+  };
+}
 
 /* ---- layout ---- */
 

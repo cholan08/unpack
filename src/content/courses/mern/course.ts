@@ -23,10 +23,12 @@ export default defineCourse({
         'Explain what blocks the first paint and what a browser has to parse',
       ],
       tone: 'net',
+      icon: 'globe',
       lessons: [
         {
           id: 'mern-map',
           title: 'The MERN Map',
+          pillar: 'start',
           minutes: 10,
           level: 'beginner',
           summary: 'Four technologies, three places code runs, and one click that ties them together.',
@@ -34,6 +36,8 @@ export default defineCourse({
         {
           id: 'url-to-page',
           title: 'What Happens When You Visit a URL',
+          pillar: 'start',
+          needs: ['mern-map'],
           minutes: 11,
           level: 'beginner',
           interactive: true,
@@ -42,6 +46,8 @@ export default defineCourse({
         {
           id: 'http',
           title: 'HTTP in Depth',
+          pillar: 'start',
+          needs: ['url-to-page'],
           minutes: 11,
           level: 'beginner',
           summary: 'The plain-text conversation under every request: methods, headers, bodies, caching, cookies — and what HTTP/2 changed.',
@@ -49,6 +55,8 @@ export default defineCourse({
         {
           id: 'rendering',
           title: 'How Browsers Render a Page',
+          pillar: 'frontend',
+          needs: ['url-to-page'],
           minutes: 11,
           level: 'intermediate',
           summary: 'How HTML and CSS become pixels, what blocks the first paint, and which changes are cheap or expensive to draw.',
@@ -67,6 +75,8 @@ export default defineCourse({
         'Rewrite callback-based code using promises and async/await',
       ],
       tone: 'warn',
+      icon: 'code',
+      pillar: 'frontend',
       lessons: [
         {
           id: 'values-references',
@@ -78,6 +88,7 @@ export default defineCourse({
         {
           id: 'closures',
           title: 'Scope & Closures',
+          needs: ['values-references'],
           minutes: 11,
           level: 'beginner',
           summary: 'Where variables are visible, how functions remember them, and the stale-closure bug hiding in your effects.',
@@ -92,6 +103,7 @@ export default defineCourse({
         {
           id: 'promises',
           title: 'Promises & async/await',
+          needs: ['event-loop'],
           minutes: 12,
           level: 'beginner',
           interactive: true,
@@ -118,10 +130,13 @@ export default defineCourse({
         'Choose between local state, lifting, and context for different data-sharing needs',
       ],
       tone: 'client',
+      icon: 'react',
+      pillar: 'frontend',
       lessons: [
         {
           id: 'components-props',
           title: 'Components & Props',
+          needs: ['modules'],
           minutes: 11,
           level: 'beginner',
           summary: 'Break the UI into small functions, pass them data, and let events travel back up — the shape of every React app.',
@@ -129,6 +144,7 @@ export default defineCourse({
         {
           id: 'react-rendering',
           title: 'State & Re-rendering',
+          needs: ['values-references', 'components-props'],
           minutes: 12,
           level: 'beginner',
           summary: 'What actually happens between calling setState and seeing the screen change — and the two mistakes everyone makes.',
@@ -136,6 +152,7 @@ export default defineCourse({
         {
           id: 'use-effect',
           title: 'useEffect & the Lifecycle',
+          needs: ['closures', 'react-rendering'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Where side effects like fetching belong in a component — and the infinite loops, stale data and races that bite when they’re in the wrong place.',
@@ -143,6 +160,7 @@ export default defineCourse({
         {
           id: 'lists-keys',
           title: 'Lists & Keys',
+          needs: ['react-rendering'],
           minutes: 10,
           level: 'beginner',
           summary: 'How React tells list items apart between renders — and the bug that appears when you let it guess.',
@@ -150,6 +168,7 @@ export default defineCourse({
         {
           id: 'context',
           title: 'Lifting State & Context',
+          needs: ['components-props'],
           minutes: 11,
           level: 'intermediate',
           summary: 'When two components need the same data, move it up. When the whole tree needs it, broadcast it — and know what that costs.',
@@ -157,6 +176,7 @@ export default defineCourse({
         {
           id: 'routing',
           title: 'Client-side Routing',
+          needs: ['url-to-page'],
           minutes: 10,
           level: 'beginner',
           summary: 'How one HTML page shows many screens: the router, links that don’t reload, URL params — and the refresh that 404s in production.',
@@ -164,6 +184,7 @@ export default defineCourse({
         {
           id: 'data-fetching',
           title: 'Fetching Data in React',
+          needs: ['promises', 'use-effect', 'http'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Loading, error, empty, success: show every state honestly — then stop fetching the same data twice with a proper cache.',
@@ -171,6 +192,7 @@ export default defineCourse({
         {
           id: 'memo',
           title: 'Performance & Memoization',
+          needs: ['react-rendering', 'rendering'],
           minutes: 12,
           level: 'intermediate',
           interactive: true,
@@ -190,10 +212,13 @@ export default defineCourse({
         'Design a REST API with consistent naming, appropriate HTTP methods, and meaningful status codes',
       ],
       tone: 'server',
+      icon: 'node',
+      pillar: 'backend',
       lessons: [
         {
           id: 'node-runtime',
           title: 'The Node Runtime',
+          needs: ['event-loop', 'modules'],
           minutes: 11,
           level: 'intermediate',
           summary: 'What Node actually is: V8, libuv and a thread pool — why one thread can juggle thousands of connections, and what still blocks it.',
@@ -201,6 +226,7 @@ export default defineCourse({
         {
           id: 'middleware',
           title: 'The Middleware Pipeline',
+          needs: ['http', 'node-runtime'],
           minutes: 11,
           level: 'beginner',
           summary: 'Every request in Express flows through a line of small functions. Learn the line, and Express makes sense.',
@@ -208,6 +234,7 @@ export default defineCourse({
         {
           id: 'rest-api',
           title: 'Designing a REST API',
+          needs: ['http', 'middleware'],
           minutes: 11,
           level: 'beginner',
           summary: 'Your API is a contract with every client you’ll ever have. Name things well, use HTTP properly, and it explains itself.',
@@ -215,6 +242,7 @@ export default defineCourse({
         {
           id: 'errors',
           title: 'Error Handling',
+          needs: ['promises', 'middleware'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Every request can fail. Decide what the user sees, what you log, and when to let the process crash.',
@@ -222,6 +250,7 @@ export default defineCourse({
         {
           id: 'validation',
           title: 'Validation',
+          needs: ['rest-api'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Never trust the request body. Validate at the edge, keep only what you asked for, and shut the door on NoSQL injection.',
@@ -229,6 +258,7 @@ export default defineCourse({
         {
           id: 'config',
           title: 'Config & Secrets',
+          needs: ['node-runtime'],
           minutes: 10,
           level: 'beginner',
           summary: 'Same code, different settings: environment variables, validated at startup — and why front-end ‘secrets’ are public.',
@@ -247,10 +277,13 @@ export default defineCourse({
         'Create the right index for a query and explain why a collection scan is slow',
       ],
       tone: 'data',
+      icon: 'mongo',
+      pillar: 'database',
       lessons: [
         {
           id: 'documents',
           title: 'Documents & Collections',
+          needs: ['mern-map'],
           minutes: 10,
           level: 'beginner',
           summary: 'How MongoDB organises data — databases, collections, documents — and what ObjectIds and BSON really are.',
@@ -258,6 +291,7 @@ export default defineCourse({
         {
           id: 'crud',
           title: 'CRUD & Queries',
+          needs: ['documents'],
           minutes: 12,
           level: 'beginner',
           summary: 'Create, read, update and delete in MongoDB: filters, operators, projections — and the empty filter that deletes everything.',
@@ -265,6 +299,7 @@ export default defineCourse({
         {
           id: 'embed-reference',
           title: 'Embed vs Reference',
+          needs: ['documents'],
           minutes: 11,
           level: 'intermediate',
           summary: 'The first big decision in every MongoDB schema: put related data inside the document, or point to it from outside?',
@@ -272,6 +307,7 @@ export default defineCourse({
         {
           id: 'indexes',
           title: 'Indexes',
+          needs: ['crud'],
           minutes: 10,
           level: 'intermediate',
           interactive: true,
@@ -280,6 +316,7 @@ export default defineCourse({
         {
           id: 'mongoose',
           title: 'Mongoose Models',
+          needs: ['crud', 'validation'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Schemas, casting, validation, hooks and lean queries: what Mongoose adds on top of the driver, and where it can’t protect you.',
@@ -287,6 +324,7 @@ export default defineCourse({
         {
           id: 'aggregation',
           title: 'The Aggregation Pipeline',
+          needs: ['crud'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Answer real questions inside the database: a pipeline of stages that filter, group, sort and join your documents.',
@@ -294,6 +332,7 @@ export default defineCourse({
         {
           id: 'transactions',
           title: 'Transactions',
+          needs: ['crud'],
           minutes: 11,
           level: 'advanced',
           summary: 'When two writes must succeed or fail together: atomic single-document updates, multi-document transactions, and the last item in stock.',
@@ -312,10 +351,13 @@ export default defineCourse({
         'Add real-time updates with WebSockets without breaking on multi-server deploys',
       ],
       tone: 'neutral',
+      icon: 'waypoints',
       lessons: [
         {
           id: 'request-journey',
           title: 'The Full Request Journey',
+          pillar: 'projects',
+          needs: ['url-to-page', 'middleware', 'crud'],
           minutes: 13,
           level: 'intermediate',
           summary: 'One click on “Add”, followed through every layer of the stack and back — with a stopwatch running.',
@@ -323,6 +365,8 @@ export default defineCourse({
         {
           id: 'cors',
           title: 'CORS',
+          pillar: 'backend',
+          needs: ['http', 'request-journey'],
           minutes: 11,
           level: 'beginner',
           summary: 'The error every MERN developer meets in week one: what it protects, why the browser enforces it, and the three ways to fix it.',
@@ -330,6 +374,8 @@ export default defineCourse({
         {
           id: 'api-from-react',
           title: 'Talking to Your API from React',
+          pillar: 'frontend',
+          needs: ['data-fetching', 'rest-api', 'cors'],
           minutes: 10,
           level: 'intermediate',
           summary: 'Stop scattering fetch calls: one small API client that knows the base URL, credentials, errors and expired sessions.',
@@ -337,6 +383,8 @@ export default defineCourse({
         {
           id: 'websockets',
           title: 'Real-time with WebSockets',
+          pillar: 'backend',
+          needs: ['http', 'event-loop'],
           minutes: 12,
           level: 'intermediate',
           summary: 'When the server needs to speak first: polling, WebSockets, rooms — and what changes when you run more than one server.',
@@ -344,6 +392,8 @@ export default defineCourse({
         {
           id: 'uploads',
           title: 'File Uploads',
+          pillar: 'backend',
+          needs: ['middleware', 'rest-api'],
           minutes: 11,
           level: 'intermediate',
           summary: 'Photos don’t belong in MongoDB: multipart uploads, object storage, presigned URLs, and checking what users really sent.',
@@ -362,10 +412,13 @@ export default defineCourse({
         'Identify XSS, CSRF, and injection attack vectors and apply the standard defenses',
       ],
       tone: 'auth',
+      icon: 'shield',
       lessons: [
         {
           id: 'authn-authz',
           title: 'Authentication vs Authorization',
+          pillar: 'backend',
+          needs: ['request-journey'],
           minutes: 10,
           level: 'beginner',
           summary: 'Who are you, and what may you do? Two different questions — and the bug where you answer only the first.',
@@ -373,6 +426,8 @@ export default defineCourse({
         {
           id: 'hashing',
           title: 'Password Hashing',
+          pillar: 'backend',
+          needs: ['authn-authz'],
           minutes: 12,
           level: 'intermediate',
           interactive: true,
@@ -381,6 +436,8 @@ export default defineCourse({
         {
           id: 'sessions-tokens',
           title: 'Sessions vs Tokens',
+          pillar: 'backend',
+          needs: ['http', 'authn-authz'],
           minutes: 12,
           level: 'intermediate',
           summary: 'Two ways to remember who’s logged in — the server keeps a note, or you carry signed proof — and what each costs you.',
@@ -388,6 +445,8 @@ export default defineCourse({
         {
           id: 'jwt-auth',
           title: 'JWT Auth End to End',
+          pillar: 'backend',
+          needs: ['sessions-tokens', 'hashing', 'middleware'],
           minutes: 13,
           level: 'intermediate',
           summary: 'Log in once, prove who you are on every request — how signed tokens work, and how they go wrong.',
@@ -395,6 +454,8 @@ export default defineCourse({
         {
           id: 'web-attacks',
           title: 'XSS, CSRF & Injection',
+          pillar: 'backend',
+          needs: ['rendering', 'cors', 'validation'],
           minutes: 13,
           level: 'intermediate',
           summary: 'Three classic attacks on web apps — script injection, forged requests, query injection — and the defaults that stop them.',
@@ -402,6 +463,8 @@ export default defineCourse({
         {
           id: 'protected-routes',
           title: 'Protecting Routes',
+          pillar: 'frontend',
+          needs: ['jwt-auth', 'routing'],
           minutes: 10,
           level: 'intermediate',
           summary: 'Login-only pages in React and login-only endpoints in Express: which one is security, which one is UX, and how they fit.',
@@ -420,10 +483,12 @@ export default defineCourse({
         'Deploy a MERN app to a cloud platform and automate future deploys on push',
       ],
       tone: 'ok',
+      icon: 'rocket',
       lessons: [
         {
           id: 'git',
           title: 'Git: Snapshots & Branches',
+          pillar: 'devops',
           minutes: 13,
           level: 'beginner',
           summary: 'Commits are snapshots, branches are just pointers — and once you see that, merging and rebasing stop being scary.',
@@ -431,6 +496,8 @@ export default defineCourse({
         {
           id: 'testing',
           title: 'The Testing Pyramid',
+          pillar: 'devops',
+          needs: ['rest-api', 'components-props'],
           minutes: 11,
           level: 'intermediate',
           summary: 'Unit, integration and end-to-end tests: what each one checks, how fast it runs, and how many of each you want.',
@@ -438,6 +505,8 @@ export default defineCourse({
         {
           id: 'build-tools',
           title: 'Build Tools',
+          pillar: 'frontend',
+          needs: ['modules'],
           minutes: 10,
           level: 'intermediate',
           summary: 'What Vite does between your source and the browser: instant dev updates, then transform, bundle, minify and hash for production.',
@@ -445,6 +514,8 @@ export default defineCourse({
         {
           id: 'deploying',
           title: 'Deploying a MERN App',
+          pillar: 'devops',
+          needs: ['config', 'build-tools'],
           minutes: 13,
           level: 'intermediate',
           summary: 'From localhost to a real URL: what runs where in production, how the pieces find each other, and how to ship again without downtime.',
@@ -452,6 +523,8 @@ export default defineCourse({
         {
           id: 'cicd',
           title: 'CI/CD Pipelines',
+          pillar: 'devops',
+          needs: ['git', 'testing', 'deploying'],
           minutes: 10,
           level: 'intermediate',
           summary: 'Let robots check every push and deploy every merge — with previews, fast pipelines and safe rollbacks.',
@@ -459,6 +532,8 @@ export default defineCourse({
         {
           id: 'containers',
           title: 'Containers',
+          pillar: 'devops',
+          needs: ['deploying', 'node-runtime'],
           minutes: 11,
           level: 'intermediate',
           summary: 'Package your API with everything it needs: images, containers, Dockerfiles, layer caching and docker compose.',
@@ -477,10 +552,13 @@ export default defineCourse({
         'Read structured logs and RED metrics to find the slow path in production',
       ],
       tone: 'danger',
+      icon: 'gauge',
       lessons: [
         {
           id: 'caching',
           title: 'Caching Layers',
+          pillar: 'database',
+          needs: ['http', 'indexes'],
           minutes: 12,
           level: 'advanced',
           interactive: true,
@@ -489,6 +567,8 @@ export default defineCourse({
         {
           id: 'pagination',
           title: 'Pagination',
+          pillar: 'database',
+          needs: ['crud', 'indexes', 'rest-api'],
           minutes: 10,
           level: 'intermediate',
           interactive: true,
@@ -497,6 +577,8 @@ export default defineCourse({
         {
           id: 'rate-limiting',
           title: 'Rate Limiting',
+          pillar: 'backend',
+          needs: ['middleware'],
           minutes: 10,
           level: 'intermediate',
           interactive: true,
@@ -505,6 +587,8 @@ export default defineCourse({
         {
           id: 'observability',
           title: 'Logging & Monitoring',
+          pillar: 'devops',
+          needs: ['errors', 'deploying'],
           minutes: 11,
           level: 'intermediate',
           summary: 'Know what your app is doing in production: structured logs, RED metrics and percentiles, traces, and alerts that matter.',
@@ -523,10 +607,13 @@ export default defineCourse({
         'Defend your design decisions: why this data model, this auth strategy, this deployment approach',
       ],
       tone: 'neutral',
+      icon: 'boxes',
+      pillar: 'projects',
       lessons: [
         {
           id: 'design-todo',
           title: 'Design a Todo App',
+          needs: ['api-from-react', 'mongoose', 'protected-routes'],
           minutes: 14,
           level: 'intermediate',
           summary: 'Put the whole course together: requirements, data model, API, backend layers, frontend structure, security and shipping.',
@@ -534,6 +621,7 @@ export default defineCourse({
         {
           id: 'design-cart',
           title: 'Design a Shopping Cart',
+          needs: ['design-todo', 'transactions', 'jwt-auth'],
           minutes: 14,
           level: 'advanced',
           summary: 'Guest carts, server-side prices, stock reservations, idempotent orders and payment webhooks — the money parts done safely.',
@@ -541,6 +629,7 @@ export default defineCourse({
         {
           id: 'design-chat',
           title: 'Design a Chat App',
+          needs: ['design-todo', 'websockets', 'pagination'],
           minutes: 14,
           level: 'advanced',
           summary: 'Rooms, real-time delivery, history with cursors, presence, unread counts — and scaling it past one server.',

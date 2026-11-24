@@ -9,7 +9,7 @@ const form = (msg?: ScreenLine): ScreenLine[] => [
   ...(msg ? [msg] : [{ t: 'item', text: 'Buy milk' } as ScreenLine]),
 ];
 
-const web = browser(130, 300, { w: 210, h: 180, url: 'todo-app.com', screen: form() });
+const web = browser(130, 300, { w: 210, h: 192, url: 'todo-app.com', screen: form() });
 const route = box(440, 160, 'POST /api/todos', { sub: 'route handler', icon: 'express', tone: 'server', w: 220 });
 const errH = box(440, 430, 'errorHandler', { sub: '(err, req, res, next)', icon: 'bug', tone: 'danger', w: 236 });
 const mongo = db(800, 160, 'MongoDB', { items: ['todos'], w: 140, h: 104 });

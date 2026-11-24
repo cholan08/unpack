@@ -1,16 +1,18 @@
 /**
  * Web Worker that safely runs learner code.
- * Receives: { code: string; tests: { label: string; run: string }[] }
- * Sends: { logs: string[]; error?: string; results: { label: string; pass: boolean; message?: string }[] }
+ * Receives: { _id: string; code: string; tests: { label: string; run: string }[] }
+ * Sends: { _id; logs: string[]; error?: string; results: { label: string; pass: boolean; message?: string }[] }
+ * Every reply echoes the request's `_id` — runner.ts ignores replies it can't match.
  */
 
 const TIMEOUT_MS = 4000;
 
-self.onmessage = (e: MessageEvent) => {
-  const { code, tests } = e.data as { code: string; tests: { label: string; run: string }[] };
+self.onmessage = async (e: MessageEvent) => {
+  const { _id, code, tests } = e.data as { _id: string; code: string; tests: { label: string; run: string }[] };
 
   const logs: string[] = [];
   const results: { label: string; pass: boolean; message?: string }[] = [];
+  const reply = (msg: { logs: string[]; error?: string; results: typeof results }) => self.postMessage({ _id, ...msg });
 
   // Capture console
   const origLog = console.log;
@@ -21,7 +23,7 @@ self.onmessage = (e: MessageEvent) => {
   let timedOut = false;
   const timer = setTimeout(() => {
     timedOut = true;
-    self.postMessage({ logs, error: '⏱ Time limit exceeded (4 seconds). Do you have an infinite loop?', results });
+    reply({ logs, error: '⏱ Time limit exceeded (4 seconds). Do you have an infinite loop?', results });
   }, TIMEOUT_MS);
 
   try {
@@ -41,20 +43,24 @@ self.onmessage = (e: MessageEvent) => {
           'console',
           `"use strict";\n${code}\n;return (${test.run});`,
         );
-        const passed = testFn({ log: () => {}, error: () => {} });
+        // Async tests return a promise. Wait for it: a pending promise is truthy, which would pass anything.
+        // If it never settles, the 4 s timer above still fires, because awaiting leaves the event loop free.
+        const passed = await testFn({ log: () => {}, error: () => {} });
+        if (timedOut) return;
         results.push({ label: test.label, pass: Boolean(passed) });
       } catch (err: unknown) {
+        if (timedOut) return;
         results.push({ label: test.label, pass: false, message: String(err) });
       }
       if (timedOut) return;
     }
 
     clearTimeout(timer);
-    self.postMessage({ logs, results });
+    reply({ logs, results });
   } catch (err: unknown) {
     clearTimeout(timer);
     if (!timedOut) {
-      self.postMessage({ logs, error: String(err), results });
+      reply({ logs, error: String(err), results });
     }
   } finally {
     console.log = origLog;

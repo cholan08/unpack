@@ -7,6 +7,12 @@ import type { IconName } from './icons';
 /** Colour role: *where* something runs or what family it belongs to. */
 export type Tone = 'client' | 'server' | 'data' | 'net' | 'auth' | 'neutral' | 'danger' | 'warn' | 'ok';
 
+/**
+ * Which of the site's main topics something belongs to: the four pillars, plus `start`
+ * (the way in) and `projects` (work that uses all four). Labels live in content/pillars.ts.
+ */
+export type PillarId = 'start' | 'frontend' | 'backend' | 'database' | 'devops' | 'projects';
+
 export type NodeState = 'idle' | 'active' | 'busy' | 'error' | 'ok' | 'dim' | 'ghost';
 
 /** Packet kind: *what* is travelling. */
@@ -296,6 +302,10 @@ export interface LessonStub {
   level?: Level;
   /** Has a “Try it” sandbox step (shown on the course map). */
   interactive?: boolean;
+  /** Main topic. Only for lessons in a part that mixes topics; otherwise the part's `pillar` covers it. */
+  pillar?: PillarId;
+  /** Ids of lessons (any part) this one builds on. Drawn as “builds on” links on the roadmap graph. */
+  needs?: string[];
 }
 
 export interface Part {
@@ -308,6 +318,10 @@ export interface Part {
   /** 3 concrete things the learner will be able to do after this part. Used on the roadmap. */
   outcomes?: string[];
   tone: Tone;
+  /** Main topic of every lesson in this part. Leave it out when lessons differ, and give each lesson its own. */
+  pillar?: PillarId;
+  /** Drawn in the part's hub on the roadmap graph. */
+  icon?: IconName;
   lessons: LessonStub[];
 }
 

@@ -1,5 +1,5 @@
 /* ================= Skillpack ================= */
-.sk-page { padding-bottom: 64px; }
+.sk-page { padding-bottom: 32px; }
 
 /* per-track accent */
 .sk-client { --sk: var(--client); }
@@ -9,7 +9,7 @@
 .sk-auth { --sk: var(--auth); }
 
 /* ---------- hero ---------- */
-.sk-hero { padding-top: 52px; padding-bottom: 12px; }
+.sk-hero { padding-top: 44px; padding-bottom: 8px; }
 .sk-kicker {
   font: 500 12.5px var(--font-mono);
   letter-spacing: 0.32em;
@@ -17,9 +17,10 @@
   color: var(--muted);
 }
 .sk-title {
-  font-size: clamp(52px, 9vw, 112px);
+  font-size: clamp(44px, 6.4vw, 84px);
   font-weight: 800;
   line-height: 0.92;
+  letter-spacing: -0.045em;
   margin: 12px 0 14px;
   text-transform: uppercase;
 }
@@ -53,7 +54,8 @@
 }
 
 /* ---------- track ---------- */
-.sk-track { padding-top: 64px; scroll-margin-top: 60px; }
+.sk-track { padding-top: 56px; scroll-margin-top: 24px; }
+@media (max-width: 1079px) { .sk-track { scroll-margin-top: calc(var(--top-h) + 12px); } }
 .sk-track-head {
   position: relative;
   display: flex;
@@ -76,9 +78,10 @@
 }
 .sk-track-title {
   margin: 0;
-  font-size: clamp(44px, 8vw, 92px);
+  font-size: clamp(34px, 5vw, 64px);
   font-weight: 800;
   line-height: 0.95;
+  letter-spacing: -0.04em;
   text-transform: uppercase;
   white-space: pre;
 }

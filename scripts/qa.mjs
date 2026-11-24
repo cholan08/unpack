@@ -190,7 +190,44 @@ for (const course of courses) {
   }
 }
 
+// Roadmap graph: its layout is computed from course.ts and changes shape with the screen
+// (4, 3 or 2 parts per row). No label may sit on another label, bubble, hub or gate.
+let roadmaps = 0;
+if (!onlyLessons) {
+  await page.emulateMedia({ reducedMotion: 'reduce' }); // skip the intro fly-in
+  for (const course of courses)
+    for (const [width, height] of [[1440, 900], [1000, 1050], [420, 900]]) {
+      await page.setViewportSize({ width, height });
+      await page.goto(`${base}/${course}/roadmap`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(300);
+      roadmaps++;
+      const found = await page.evaluate(() => {
+        const boxes = [];
+        for (const g of document.querySelectorAll('.rm-node')) {
+          for (const el of g.querySelectorAll('.rm-shape, .rm-label, .rm-hub-title, .rm-hub-sub, .rm-gate-label')) {
+            const r = el.getBoundingClientRect();
+            if (r.width && r.height) boxes.push({ id: g.dataset.n, kind: el.classList[0], r });
+          }
+        }
+        const out = [];
+        for (let i = 0; i < boxes.length; i++)
+          for (let j = i + 1; j < boxes.length; j++) {
+            const [a, b] = [boxes[i], boxes[j]];
+            if (a.id === b.id) continue;
+            const w = Math.min(a.r.right, b.r.right) - Math.max(a.r.left, b.r.left);
+            const h = Math.min(a.r.bottom, b.r.bottom) - Math.max(a.r.top, b.r.top);
+            if (w > 1 && h > 1) out.push(`${a.id} ${a.kind} × ${b.id} ${b.kind}`);
+          }
+        return out;
+      });
+      if (found.length) {
+        issues += found.length;
+        console.log(`✗ ${course}/roadmap at ${width}×${height}\n    ` + found.join('\n    '));
+      }
+    }
+}
+
 if (errors.size) console.log('\nConsole:\n    ' + [...errors].join('\n    '));
-console.log(`\n${issues || errors.size ? '✗' : '✓'} ${steps} steps checked (+${sandboxStates} sandbox states) · ${issues} layout issues · ${errors.size} console messages`);
+console.log(`\n${issues || errors.size ? '✗' : '✓'} ${steps} steps checked (+${sandboxStates} sandbox states, ${roadmaps} roadmap layouts) · ${issues} layout issues · ${errors.size} console messages`);
 await browser.close();
 process.exit(issues || errors.size ? 1 : 0);

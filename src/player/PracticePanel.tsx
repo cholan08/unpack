@@ -49,9 +49,11 @@ function LazyEditor({
 interface PracticePanelProps {
   step: TrySpec;
   stepKey: string | number;
+  /** Called after every run (e.g. a gate's coding challenge records whether it was solved). */
+  onResult?: (allPassed: boolean, sawSolution: boolean) => void;
 }
 
-export function PracticePanel({ step, stepKey }: PracticePanelProps) {
+export function PracticePanel({ step, stepKey, onResult }: PracticePanelProps) {
   const [code, setCode] = useState(step.starter);
   const [running, setRunning] = useState(false);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -74,10 +76,11 @@ export function PracticePanel({ step, stepKey }: PracticePanelProps) {
       const { runCode } = await RunnerPromise;
       const r = await runCode(code, step.tests);
       setResult(r);
+      onResult?.(r.results.length > 0 && r.results.every((t) => t.pass), solutionShown);
     } finally {
       setRunning(false);
     }
-  }, [code, step.tests]);
+  }, [code, step.tests, onResult, solutionShown]);
 
   const reset = () => {
     setCode(step.starter);

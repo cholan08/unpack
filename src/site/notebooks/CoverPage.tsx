@@ -1,4 +1,5 @@
 import { Link } from 'react-router';
+import { writtenPages } from '@/content/notebooks/registry';
 import type { Notebook } from '@/content/notebooks/types';
 import { SketchView, Doodle, Wobble } from './SketchView';
 
@@ -36,6 +37,7 @@ function LaptopDoodle() {
 export function CoverPage({ book, linkFor }: { book: Notebook; linkFor: (pageId: string) => string }) {
   const c = book.cover;
   const topics = book.pages.slice(1);
+  const progress = writtenPages(book);
   return (
     <div className="hw-cover">
       {c.art?.topLeft && (
@@ -54,7 +56,7 @@ export function CoverPage({ book, linkFor }: { book: Notebook; linkFor: (pageId:
         </div>
       )}
 
-      <h1 className="hw-big" aria-label={c.big}>
+      <h1 className="hw-big" aria-label={c.big} style={{ ['--len' as string]: Math.max(4, c.big.length) }}>
         {[...c.big].map((ch, i) => (
           <span key={i} aria-hidden style={{ ['--r' as string]: `${TILT[i % TILT.length]}deg` }}>
             {ch}
@@ -75,6 +77,13 @@ export function CoverPage({ book, linkFor }: { book: Notebook; linkFor: (pageId:
           <b>{book.pages.length} Pages</b>
           <span className="hw-spark hw-spark--r" aria-hidden />
         </div>
+        {progress.status !== 'complete' && (
+          <p className="hw-cv-status">
+            {progress.status === 'outline'
+              ? '✎ Outline ready: notes coming page by page'
+              : `✎ ${progress.written} of ${progress.total} pages written so far`}
+          </p>
+        )}
       </div>
       {c.side && (
         <div className="hw-cv hw-cv-side">

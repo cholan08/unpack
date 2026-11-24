@@ -342,6 +342,58 @@ export function PageFoot({ book, page, quote }: { book: Notebook; page: Notebook
   );
 }
 
+/* ---------------- template page (outline only) ---------------- */
+
+function DraftSection({ n, title }: { n: number; title: string }) {
+  return (
+    <section className="hw-sec hw-sec--draft">
+      <h3 className="hw-sec-h">
+        <span className="hw-sec-n">{n}.</span> <Ink text={title} />
+      </h3>
+      <div className="hw-draft-lines" aria-hidden>
+        <span />
+        <span />
+        <span />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * A page whose notes aren't written yet, drawn from its outline: the same header, the planned
+ * sections in their boxes, and ruled space under each, like a page set up to be filled in.
+ */
+export function OutlinePage({ book, page }: { book: Notebook; page: NotebookPage }) {
+  const items = page.outline ?? [];
+  const half = Math.ceil(items.length / 2);
+  return (
+    <>
+      <PageHead book={book} page={page} />
+      <aside className="hw-draft-note">
+        <b>✎ Outline page</b> — the handwritten notes for this page are on the way.{' '}
+        {items.length ? `It will cover ${items.length} sections:` : 'Its sections haven’t been planned yet.'}
+      </aside>
+      {items.length > 0 && (
+        <div className="hw-rows">
+          <div className="hw-row">
+            <div className="hw-col">
+              {items.slice(0, half).map((t, i) => (
+                <DraftSection key={i} n={i + 1} title={t} />
+              ))}
+            </div>
+            <div className="hw-col">
+              {items.slice(half).map((t, i) => (
+                <DraftSection key={i} n={half + i + 1} title={t} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      <PageFoot book={book} page={page} />
+    </>
+  );
+}
+
 export function HandPage({ book, page, content }: { book: Notebook; page: NotebookPage; content: PageContent }) {
   let n = 1;
   return (

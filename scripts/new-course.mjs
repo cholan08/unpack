@@ -30,6 +30,7 @@ export default defineCourse({
       title: 'Basics',
       blurb: 'What this part covers.',
       tone: 'net',
+      pillar: 'frontend', // main topic: frontend | backend | database | devops (or start | projects)
       lessons: [{ id: 'first-lesson', title: 'First Lesson' }],
     },
   ],

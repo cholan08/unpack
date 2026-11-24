@@ -339,11 +339,12 @@
 
 .hw-big {
   grid-area: big; margin: 4px 0 0; display: flex; justify-content: center; gap: 0.02em;
-  font: 700 clamp(84px, 19cqi, 200px) / 0.95 var(--hw-font); letter-spacing: 0;
+  /* shrink long titles ("SYSTEM DESIGN") so they always fit on one line */
+  font: 700 min(200px, 19cqi, calc(150cqi / var(--len, 4))) / 0.95 var(--hw-font); letter-spacing: 0;
   filter: drop-shadow(5px 6px 0 var(--hw-big-shadow));
 }
 .hw-big span {
-  display: inline-block; transform: rotate(var(--r, 0deg));
+  display: inline-block; transform: rotate(var(--r, 0deg)); white-space: pre;
   color: transparent; -webkit-text-stroke: 3px var(--hw-big-edge);
   background: repeating-linear-gradient(-58deg, var(--hw-big-a) 0 3px, var(--hw-big-b) 3px 6.5px);
   -webkit-background-clip: text; background-clip: text;
@@ -411,3 +412,20 @@
 @media (prefers-reduced-motion: reduce) {
   .hw-skel span { animation: none; }
 }
+
+/* ================================================================
+   Template pages: a page with an outline but no notes yet
+   ================================================================ */
+.hw-draft-note {
+  width: fit-content; max-width: min(100%, 640px); margin: 0 auto 14px; padding: 6px 16px; text-align: center;
+  font-size: 1.02em; line-height: 1.4; color: #5c4600;
+  background: #fff3a8; border: 1.5px solid #d9bf3a; border-radius: 4px 7px 5px 6px;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.1); transform: rotate(-0.6deg);
+}
+:root[data-theme='dark'] .hw-draft-note { background: #4a4220; color: #ffe98a; border-color: #8a7a2a; }
+.hw-sec--draft .hw-sec-h { margin-bottom: 4px; }
+.hw-draft-lines { display: grid; gap: 0; padding: 2px 0 4px; }
+.hw-draft-lines span { height: 26px; border-bottom: 1.6px dashed color-mix(in srgb, var(--hw-ink) 22%, transparent); }
+.hw-draft-lines span:nth-child(2) { width: 88%; }
+.hw-draft-lines span:nth-child(3) { width: 64%; }
+.hw-cv-status { margin: -4px 0 0; font-size: 1.02em; color: var(--hw-ink); opacity: 0.8; transform: rotate(-1deg); text-align: center; }

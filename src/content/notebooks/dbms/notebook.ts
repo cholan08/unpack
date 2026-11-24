@@ -13,6 +13,8 @@ export default defineNotebook({
   name: 'Database Management System',
   tagline: 'The whole DBMS syllabus on 15 handwritten pages, from ER diagrams and keys to SQL joins, normalization, transactions and recovery.',
   color: 'blue',
+  pillar: 'database',
+  order: 10,
   cover: {
     big: 'DBMS',
     full: 'Database Management System',

@@ -4,7 +4,7 @@
  *   courses/<course-id>/lessons/<id>.ts  — one lesson's content (loaded on demand, its own chunk)
  * The lesson's file name is its id. A lesson listed in a part without a file shows as "Coming soon".
  */
-import type { Course, CourseDef, Lesson, LessonContent, LessonMeta, LessonStub, Part } from '@/engine/types';
+import type { Course, CourseDef, Lesson, LessonContent, LessonMeta, LessonStub, Part, PillarId } from '@/engine/types';
 
 const courseMods = import.meta.glob<{ default: CourseDef }>('./courses/*/course.ts', { eager: true });
 // Not eager: each lesson becomes a separate chunk, fetched the first time someone needs it.
@@ -29,6 +29,16 @@ function build(): Course[] {
     const stubs = new Map<string, LessonStub>(def.parts.flatMap((p) => p.lessons.map((l) => [l.id, l] as const)));
     const lessons: Record<string, LessonMeta> = {};
 
+    // Every lesson (written or planned) belongs to exactly one pillar: its part's, or its own.
+    if (import.meta.env.DEV)
+      for (const part of def.parts)
+        for (const stub of part.lessons) {
+          if (part.pillar && stub.pillar)
+            console.warn(`[content] "${def.id}/${stub.id}" sets pillar, but its part "${part.id}" already sets one for all its lessons — keep only one`);
+          else if (!part.pillar && !stub.pillar)
+            console.warn(`[content] "${def.id}/${stub.id}" has no pillar — set one on the lesson, or on part "${part.id}" if all its lessons share it`);
+        }
+
     for (const key of loaders.keys()) {
       const [courseId, lessonId] = key.split('/');
       if (courseId !== dir) continue;
@@ -42,6 +52,10 @@ function build(): Course[] {
       lessons[lessonId] = { id: lessonId, title: stub.title, summary: stub.summary ?? '', minutes: stub.minutes ?? 0, level: stub.level ?? 'beginner', interactive: stub.interactive };
     }
     if (import.meta.env.DEV && def.hero && !lessons[def.hero.lesson]) console.warn(`[content] hero lesson "${def.hero.lesson}" of "${def.id}" isn't written`);
+    if (import.meta.env.DEV)
+      for (const stub of stubs.values())
+        for (const need of stub.needs ?? [])
+          if (!stubs.has(need)) console.warn(`[content] "${def.id}/${stub.id}" needs "${need}", which isn't a lesson in course.ts`);
     return { ...def, lessons };
   });
 }
@@ -98,11 +112,18 @@ export interface LessonEntry {
   meta?: LessonMeta;
   /** Position across the whole course, 1-based. */
   n: number;
+  /** Main topic (see content/pillars.ts). Undefined only if course.ts forgot it — dev warns. */
+  pillar?: PillarId;
 }
+
+/** A lesson's main topic: its own, or its part's. */
+export const pillarOf = (part: Part, stub: LessonStub): PillarId | undefined => stub.pillar ?? part.pillar;
 
 export function lessonEntries(course: Course): LessonEntry[] {
   let n = 0;
-  return course.parts.flatMap((part) => part.lessons.map((stub) => ({ part, stub, meta: course.lessons[stub.id], n: ++n })));
+  return course.parts.flatMap((part) =>
+    part.lessons.map((stub) => ({ part, stub, meta: course.lessons[stub.id], n: ++n, pillar: pillarOf(part, stub) })),
+  );
 }
 
 export function findEntry(course: Course, lessonId: string) {

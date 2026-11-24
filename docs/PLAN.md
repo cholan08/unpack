@@ -32,13 +32,38 @@ Our visual identity is our own (see §4). We do not copy their palette, isometri
 ## 3. Information architecture
 
 ```
-/                         Home: hero (live diagram), course catalog, "continue where you left off"
+/                         Home: new learners get the pitch (live diagram, how a lesson works, the four topics);
+                          returning learners get a hub (continue — drawn at the step they left — progress by topic, what's due)
 /:course                  Course map: parts → lessons, progress, time
 /:course/:lesson?s=N      Lesson player (step N, shareable)
 /:course/glossary         All terms for the course
 ```
 
 Hierarchy: **Course → Part (numbered, colour) → Lesson → Step**.
+
+### App shell
+
+Every page except the lesson player sits in one shell (`src/site/AppShell.tsx`, a layout route in `App.tsx`; pages render only their own `<main>`):
+
+- **Wide screens (≥1080px): a sidebar**, always visible. From the top: search · the *one thing to do next* (Continue / Up next / "New here?") · Home, Start Here · **Topics** (Frontend, Backend, Database, DevOps, Projects — each with a progress ring and done/total) · **Your path** (Roadmap, Dashboard, Review with a due badge, My notes) · **Library** (Course map, Glossary, Techpack, Skill Pack, Notebooks, Common errors).
+- **Narrow screens: a top bar** (menu, logo, search, theme); the same sidebar slides in as a drawer.
+- The lesson player stays full screen: it is where attention belongs.
+- Shared progress views (topic stats, "continue" target) live in `src/site/learner.ts`; small shared pieces (logo, progress ring, page header) in `src/site/ui.tsx`.
+
+### Main topics (pillars)
+
+Everything on the site belongs to one of four main topics: **Frontend · Backend · Database · DevOps**. Two more labels cover the way in (**Start Here**) and the way out (**Projects**, which use all four). Each topic uses the role colour the diagrams already use: Frontend `client` blue, Backend `server` orange, Database `data` green, DevOps `net` violet.
+
+This is a **label, not a reshape**. Parts, lessons, URLs, gates and saved progress stay as they are. Each lesson gets a `pillar` (set once on the part when every lesson in it shares one). Topic pages are a second view that groups everything by that label. Learners still follow a path that moves between topics (see the Roadmap), because you can't finish Frontend before you have an API to call.
+
+| Topic | Lessons | From parts |
+|---|---|---|
+| Start Here | 3 | 01 (MERN Map, Visit a URL, HTTP) |
+| Frontend | 17 | 02 JavaScript, 03 React, + Browser Rendering, Talking to Your API, Protecting Routes, Build Tools |
+| Backend | 15 | 04 Node & Express, + CORS, WebSockets, Uploads, Auth & Security (5), Rate Limiting |
+| Database | 9 | 05 MongoDB, + Caching, Pagination |
+| DevOps | 6 | Git, Testing, Deploying, CI/CD, Containers, Observability |
+| Projects | 4 | Full Request Journey, 10 Build It (3) |
 
 ### Lesson anatomy
 
@@ -67,7 +92,11 @@ Keyboard: `←/→` step · `Space` play/pause · `Home/End` · `?` shortcuts.
 
 ## 4. Visual language
 
-**Fonts:** Bricolage Grotesque (display), Inter (UI/body), JetBrains Mono (code, labels).
+**Design direction — "Studio":** a calm, neutral canvas so the diagrams carry the colour. Colour is meaning (role colours), never decoration; chrome recedes. One look across every page, light and dark.
+
+**Fonts:** Bricolage Grotesque (headings), Inter (UI/body), JetBrains Mono (code, numbers, labels). Handwriting (Caveat, Kalam) appears only where it *is* the content: Notebooks and the Handnote notepad.
+
+**Tokens and primitives:** `src/styles/tokens.css` (colours, radii, shadows, layout sizes — the engine reads the same names) and `src/styles/base.css` (buttons, pills, badges, fields, cards, progress bars, segmented controls, page header, stats). Feature CSS keeps its own class prefix (CSS is global).
 
 **Role colours — where it runs** (same in every lesson, tuned for light and dark):
 
@@ -191,6 +220,25 @@ Each phase ships something usable end to end.
 - Per-step OG images for sharing; PWA/offline
 - Optional MERN backend for accounts and synced progress (dogfooding the course itself)
 - More courses: System Design, Git, DSA, DevOps
+
+### Phase P — Main topics (Frontend · Backend · Database · DevOps)
+Label everything; reshape nothing (see §3, Main topics).
+- ✅ **P1 — Labels**: `src/content/pillars.ts` (topics, colours, blurbs), `pillar` on parts or lessons in `course.ts`, all 54 lessons labelled, `pillarOf()` + `LessonEntry.pillar` in the registry, a dev warning (so QA fails) for a missing or doubled label, scaffolding scripts updated
+- ✅ **P2 — Topic pages and header**: `/frontend`, `/backend`, `/database`, `/devops` and `/projects` (`TopicPage.tsx`) list their lessons under the original part names. A part split across topics shows only this topic's lessons and links to where the rest are; its Gate link shows only when the whole part is in this topic. The Projects page also links the Capstone. A four-topic switcher with per-topic progress sits at the top. The header has 9 tabs instead of 13: Start Here · Frontend · Backend · Database · DevOps · Projects | Roadmap · Library · Me. The four topics are coloured binder tabs, and a tab stays highlighted on every page it gathers. `/library` (`LibraryPage.tsx`) holds the course map, glossary, Techpack, Skill Pack, notebooks and common errors. "Me" goes to the Dashboard, which now links Review and Handnotes. *(The tabs were replaced by the sidebar in Phase R.)*
+- **P3 — Label the rest**: notebooks (DBMS → Database), Techpack sheets, Skill Pack tracks, glossary terms, common errors and capstone milestones, all shown as tabs on each topic page
+- **P4 — Progress by topic**: ✅ Dashboard with one progress ring per topic (also in the sidebar and on Home) · Roadmap as a four-lane swimlane · Start page suggesting where to begin
+- Open question: DSA and System Design don't fit the four topics. Decide whether they become separate courses beside them.
+- DevOps is the thinnest topic (6 lessons), so it's the natural place for new lessons: shell, domains and DNS, reverse proxies, cloud hosting.
+
+### Phase R — Redesign: "Studio" UI/UX · ✅ shipped
+The whole site was re-skinned and re-navigated for the learner, without moving content, URLs or saved progress.
+- ✅ New design system (tokens + primitives); the global "notebook" re-skin (graph paper, handwritten headings and buttons) is gone — handwriting stays only in Notebooks and Handnote
+- ✅ App shell: left sidebar with Continue card, topic progress rings and a review-due badge; top bar + drawer on narrow screens (replaces the 9 right-edge index tabs from P2)
+- ✅ Home hub for returning learners (continue at the exact step, drawn live; progress by topic; reviews/gates); pitch for new ones
+- ✅ Topic pages and course map as a syllabus (sticky part header + lesson rows with state: number / progress ring / tick)
+- ✅ Lesson player: step segments now show beat colours (they were all grey), Next sits on the right, calmer type
+- ✅ Dashboard rebuilt (stats, next step, by topic, gates as a list); Gate intro shows what it covers; the gate's coding task now renders (it was a blank page); Start Here has a 3-step indicator and real checkboxes; Glossary has A–Z
+- ✅ Roadmap drawn clean (true circles, dot grid, Inter labels on the same metrics — the overlap QA still passes); `SKETCHY` in `roadmap/shapes.ts` brings the hand-drawn look back
 
 ## 9. Quality bar
 

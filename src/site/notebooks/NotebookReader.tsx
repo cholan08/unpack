@@ -7,10 +7,9 @@ import { COVER_ID, getNotebook, usePageContent, warmNotebook } from '@/content/n
 import type { Notebook, NotebookPage } from '@/content/notebooks/types';
 import { markPageSeen, useBookProgress } from '@/lib/notebookProgress';
 import { usePrefersReducedMotion } from '@/lib/media';
-import { SiteFooter, SiteHeader } from '../SiteHeader';
 import { NotFound } from '../NotFound';
 import { CoverPage } from './CoverPage';
-import { HandPage, PageFoot, PageHead } from './HandPage';
+import { HandPage, OutlinePage, PageFoot, PageHead } from './HandPage';
 import './hand.css';
 import './notebooks.css';
 
@@ -31,13 +30,14 @@ function PageBody({ book, page }: { book: Notebook; page: NotebookPage }) {
   const isCover = page.id === COVER_ID;
   const state = usePageContent(book.id, page.id, !isCover && page.written);
   if (isCover) return <CoverPage book={book} linkFor={(id) => pageHref(book, id)} />;
-  if (!page.written || state.status === 'error')
+  if (!page.written) return <OutlinePage book={book} page={page} />;
+  if (state.status === 'error')
     return (
       <>
         <PageHead book={book} page={page} />
         <div className="hw-unwritten">
           <NotebookPen size={34} strokeWidth={1.6} />
-          <p>{page.written ? 'This page didn’t load. Check your connection and flip back to it.' : 'This page is still being written.'}</p>
+          <p>This page didn’t load. Check your connection and flip back to it.</p>
         </div>
         <PageFoot book={book} page={page} />
       </>
@@ -143,7 +143,6 @@ export function NotebookReader() {
 
   return (
     <>
-      <SiteHeader />
       <main className="nb-read hw">
         <div className="nb-read-in">
           <Toc book={book} page={page} />
@@ -234,7 +233,6 @@ export function NotebookReader() {
           </div>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

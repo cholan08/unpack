@@ -23,7 +23,7 @@ const zs = zone(500, 320, 290, 540, 'Server', { tone: 'server', icon: 'server' }
 const zd = zone(830, 320, 300, 540, 'Database', { tone: 'data', icon: 'db', sub: 'MongoDB' });
 
 const you = actor(170, 135, 'You');
-const web = browser(170, Y, { url: 'localhost:5173', screen: todos, w: 240, h: 214 });
+const web = browser(170, Y, { url: 'localhost:5173', screen: todos, w: 240, h: 224 });
 const srv = box(500, Y, 'Server', { icon: 'server', tone: 'server', sub: 'a computer you control', w: 232 });
 const mongo = db(830, Y, 'MongoDB', { items: ['todos', 'users'], w: 160, h: 112 });
 const todoDoc = doc(830, 500, 'todos', [

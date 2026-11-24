@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, Download, Pin, PinOff, Plus, Search, Trash2 } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { COURSES } from '@/content/registry';
 import {
   NOTE_COLORS,
@@ -109,11 +108,10 @@ export function HandnotePage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="hn-page wrap">
         <header className="hn-head">
-          <span className="eyebrow">Your notebook</span>
-          <h1 className="display page-title">Handnote</h1>
+          <span className="eyebrow">You · Handnote</span>
+          <h1 className="page-title">My notes</h1>
           <p className="hn-lede">
             Write each idea in your own words — that’s where it sticks. Notes save as you type and stay in this browser.
           </p>
@@ -253,7 +251,6 @@ export function HandnotePage() {
           </section>
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

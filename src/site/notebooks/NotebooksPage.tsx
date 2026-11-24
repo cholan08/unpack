@@ -5,7 +5,6 @@ import './fonts';
 import { COVER_ID, NOTEBOOKS } from '@/content/notebooks/registry';
 import type { Notebook } from '@/content/notebooks/types';
 import { useBookProgress } from '@/lib/notebookProgress';
-import { SiteFooter, SiteHeader } from '../SiteHeader';
 import { pageHref } from './NotebookReader';
 import './hand.css';
 import './notebooks.css';
@@ -72,11 +71,10 @@ export function NotebooksPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="nb-shelf-page hw">
         <section className="wrap nb-hero">
           <span className="eyebrow">Handwritten study notes</span>
-          <h1 className="display page-title">Notebooks</h1>
+          <h1 className="page-title">Notebooks</h1>
           <p className="nb-lede">
             Exam-ready notes, written out by hand: boxed headings, ruled tables, diagrams, and the points examiners ask about. One
             notebook per subject. Open one and flip through it with{' '}
@@ -95,7 +93,6 @@ export function NotebooksPage() {
           ))}
         </section>
       </main>
-      <SiteFooter />
     </>
   );
 }

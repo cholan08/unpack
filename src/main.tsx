@@ -7,7 +7,6 @@ import '@fontsource-variable/caveat';
 import './styles/tokens.css';
 import './styles/base.css';
 import './site/site.css';
-import './styles/notebook.css';
 import { App } from './App';
 
 // After a redeploy, an open tab may ask for a lesson chunk that no longer exists (file names

@@ -1,7 +1,11 @@
 /* ------------------------------------------------------------------
-   Design tokens. Light is the default; dark applies via [data-theme=dark].
-   index.html resolves the theme (saved choice, else OS) before first paint.
-   Role colours: client · server · data · net · auth · neutral
+   Design tokens — "Studio".
+   A calm, neutral canvas so the diagrams carry the colour. Colour is
+   meaning: role colours say *where code runs*, and the four main topics
+   reuse them (Frontend = client, Backend = server, Database = data,
+   DevOps = net). Light is the default; dark applies via [data-theme=dark]
+   (index.html resolves it before first paint).
+   The engine (src/engine/stage.css) reads these names — keep them.
    ------------------------------------------------------------------ */
 :root {
   color-scheme: light;
@@ -9,54 +13,59 @@
   --font-display: 'Bricolage Grotesque Variable', 'Inter Variable', system-ui, sans-serif;
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* handwriting: only inside Notebooks and Handnotes, where it is the content */
+  --font-hand: 'Caveat Variable', 'Bricolage Grotesque Variable', cursive;
 
-  --bg: #f5f4ef;
-  --bg-2: #eeece5;
+  /* neutrals */
+  --bg: #f6f6f3;
+  --bg-2: #efeeea;
   --surface: #ffffff;
-  --surface-2: #faf9f6;
-  --surface-3: #f2f0ea;
-  --line: #e3e0d7;
-  --line-soft: #ecebe4;
-  --line-strong: #cbc6b8;
-  --ink: #15171c;
-  --ink-2: #353942;
-  --muted: #646a74;
-  --muted-2: #959aa3;
-  --dot: rgba(21, 23, 28, 0.1);
-  --stage-bg: #fbfaf7;
+  --surface-2: #fafaf8;
+  --surface-3: #f2f1ee;
+  --line: #e4e2dc;
+  --line-soft: #eeede9;
+  --line-strong: #cfccc4;
+  --ink: #15171b;
+  --ink-2: #383c44;
+  --muted: #5f6570;
+  --muted-2: #8b9099;
+  --dot: rgba(21, 23, 27, 0.09);
+  --stage-bg: #fbfbf9;
   --focus: #2563eb;
+  --scrim: rgba(12, 14, 18, 0.42);
 
+  /* role colours — where it runs */
   --client: #2563eb;
-  --client-soft: #e6eefd;
-  --client-line: #b8cbf6;
-  --server: #d16a0b;
-  --server-soft: #fdefdf;
-  --server-line: #f1c79b;
+  --client-soft: #e8effd;
+  --client-line: #bccdf5;
+  --server: #c9610a;
+  --server-soft: #fcefe1;
+  --server-line: #f0c89f;
   --data: #13803b;
-  --data-soft: #e1f3e6;
-  --data-line: #a8d9b6;
+  --data-soft: #e3f3e7;
+  --data-line: #abd9b8;
   --net: #6c47db;
-  --net-soft: #eee8fd;
-  --net-line: #ccbef6;
+  --net-soft: #efe9fd;
+  --net-line: #cfc1f6;
   --auth: #cc2f68;
-  --auth-soft: #fce6ee;
-  --auth-line: #f2b4ca;
-  --neutral: #55606c;
-  --neutral-soft: #eef0f2;
-  --neutral-line: #d2d7dd;
-  --danger: #d92626;
-  --danger-soft: #fde6e6;
-  --danger-line: #f4b0b0;
-  --warn: #b86e00;
-  --warn-soft: #fcf0d6;
-  --warn-line: #ecd096;
+  --auth-soft: #fce8ef;
+  --auth-line: #f2b6cb;
+  --neutral: #56606b;
+  --neutral-soft: #eff1f3;
+  --neutral-line: #d3d8de;
+  --danger: #d42a2a;
+  --danger-soft: #fdeaea;
+  --danger-line: #f3b5b5;
+  --warn: #a86400;
+  --warn-soft: #fdf2db;
+  --warn-line: #ebd09a;
   --ok: #13803b;
-  --ok-soft: #e1f3e6;
-  --ok-line: #a8d9b6;
+  --ok-soft: #e3f3e7;
+  --ok-line: #abd9b8;
   /* interactive "Try it" steps */
   --try: #0d9488;
-  --try-soft: #dcf3f0;
-  --try-line: #9fd8d1;
+  --try-soft: #ddf3f0;
+  --try-line: #a1d8d1;
 
   /* packets: what is travelling */
   --pk-req: #2563eb;
@@ -87,63 +96,75 @@
   --syn-prop: #0b7285;
   --syn-punc: #6b7280;
 
+  /* shape */
+  --radius-xs: 6px;
   --radius-sm: 8px;
   --radius: 12px;
-  --radius-lg: 18px;
-  --shadow-1: 0 1px 0 rgba(21, 23, 28, 0.04), 0 1px 2px rgba(21, 23, 28, 0.06);
-  --shadow-2: 0 1px 0 rgba(21, 23, 28, 0.04), 0 4px 14px -6px rgba(21, 23, 28, 0.14);
-  --shadow-3: 0 2px 0 rgba(21, 23, 28, 0.03), 0 18px 40px -18px rgba(21, 23, 28, 0.28);
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --shadow-1: 0 1px 0 rgba(21, 23, 27, 0.03), 0 1px 2px rgba(21, 23, 27, 0.05);
+  --shadow-2: 0 1px 0 rgba(21, 23, 27, 0.03), 0 4px 14px -6px rgba(21, 23, 27, 0.13);
+  --shadow-3: 0 2px 0 rgba(21, 23, 27, 0.02), 0 18px 40px -18px rgba(21, 23, 27, 0.26);
+  --shadow-pop: 0 12px 32px -8px rgba(21, 23, 27, 0.22), 0 0 0 1px rgba(21, 23, 27, 0.05);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* layout */
+  --side-w: 264px;
+  --top-h: 56px;
+  --page-max: 1120px;
+  --page-pad: 40px;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0c0e12;
-  --bg-2: #111419;
-  --surface: #161a21;
-  --surface-2: #1a1f27;
-  --surface-3: #20262f;
-  --line: #262c36;
-  --line-soft: #1e232b;
-  --line-strong: #3a4250;
-  --ink: #eef1f5;
-  --ink-2: #c8ced8;
-  --muted: #8d95a3;
-  --muted-2: #636b79;
-  --dot: rgba(255, 255, 255, 0.075);
-  --stage-bg: #0f1217;
+  --bg: #0b0d11;
+  --bg-2: #0f1116;
+  --surface: #14171d;
+  --surface-2: #171b21;
+  --surface-3: #1d2129;
+  --line: #262b34;
+  --line-soft: #1d2129;
+  --line-strong: #363d49;
+  --ink: #eef0f4;
+  --ink-2: #c6cbd4;
+  --muted: #8d95a2;
+  --muted-2: #656d7b;
+  --dot: rgba(255, 255, 255, 0.07);
+  --stage-bg: #0e1015;
   --focus: #79a8ff;
+  --scrim: rgba(0, 0, 0, 0.6);
 
-  --client: #79a8ff;
-  --client-soft: rgba(121, 168, 255, 0.13);
-  --client-line: rgba(121, 168, 255, 0.4);
+  --client: #7aa8ff;
+  --client-soft: rgba(122, 168, 255, 0.13);
+  --client-line: rgba(122, 168, 255, 0.38);
   --server: #ffa451;
   --server-soft: rgba(255, 164, 81, 0.13);
-  --server-line: rgba(255, 164, 81, 0.4);
+  --server-line: rgba(255, 164, 81, 0.38);
   --data: #4ade80;
-  --data-soft: rgba(74, 222, 128, 0.12);
-  --data-line: rgba(74, 222, 128, 0.38);
-  --net: #b197fc;
-  --net-soft: rgba(177, 151, 252, 0.14);
-  --net-line: rgba(177, 151, 252, 0.4);
+  --data-soft: rgba(74, 222, 128, 0.11);
+  --data-line: rgba(74, 222, 128, 0.36);
+  --net: #b39afc;
+  --net-soft: rgba(179, 154, 252, 0.14);
+  --net-line: rgba(179, 154, 252, 0.38);
   --auth: #ff7eab;
   --auth-soft: rgba(255, 126, 171, 0.13);
-  --auth-line: rgba(255, 126, 171, 0.4);
+  --auth-line: rgba(255, 126, 171, 0.38);
   --neutral: #9ba6b5;
   --neutral-soft: rgba(155, 166, 181, 0.12);
-  --neutral-line: rgba(155, 166, 181, 0.32);
+  --neutral-line: rgba(155, 166, 181, 0.3);
   --danger: #ff6b6b;
   --danger-soft: rgba(255, 107, 107, 0.13);
-  --danger-line: rgba(255, 107, 107, 0.42);
+  --danger-line: rgba(255, 107, 107, 0.4);
   --warn: #fcc451;
   --warn-soft: rgba(252, 196, 81, 0.12);
-  --warn-line: rgba(252, 196, 81, 0.38);
+  --warn-line: rgba(252, 196, 81, 0.36);
   --ok: #4ade80;
-  --ok-soft: rgba(74, 222, 128, 0.12);
-  --ok-line: rgba(74, 222, 128, 0.38);
+  --ok-soft: rgba(74, 222, 128, 0.11);
+  --ok-line: rgba(74, 222, 128, 0.36);
   --try: #2dd4bf;
   --try-soft: rgba(45, 212, 191, 0.12);
-  --try-line: rgba(45, 212, 191, 0.4);
+  --try-line: rgba(45, 212, 191, 0.38);
 
   --pk-req: #6ea8ff;
   --pk-res: #4ade80;
@@ -162,9 +183,14 @@
   --syn-prop: #6fd6e8;
   --syn-punc: #8d95a3;
 
-  --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-2: 0 1px 0 rgba(0, 0, 0, 0.3), 0 6px 16px -6px rgba(0, 0, 0, 0.6);
-  --shadow-3: 0 2px 0 rgba(0, 0, 0, 0.3), 0 22px 44px -18px rgba(0, 0, 0, 0.8);
+  --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 1px 0 rgba(0, 0, 0, 0.25), 0 6px 16px -6px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 2px 0 rgba(0, 0, 0, 0.25), 0 22px 44px -18px rgba(0, 0, 0, 0.75);
+  --shadow-pop: 0 14px 36px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+@media (max-width: 720px) {
+  :root { --page-pad: 18px; }
 }
 
 /* Tone helpers: any element with data-tone gets --tone / --tone-soft / --tone-line */

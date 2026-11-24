@@ -42,6 +42,7 @@ import {
   Fingerprint,
   Signpost,
   Ban,
+  Rocket,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -89,6 +90,7 @@ export const ICONS = {
   fingerprint: Fingerprint,
   signpost: Signpost,
   ban: Ban,
+  rocket: Rocket,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

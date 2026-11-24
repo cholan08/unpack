@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Check, RotateCcw, Brain } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { recordReview, addReviewCard } from '@/lib/progress';
 import './review.css';
 
@@ -74,11 +73,10 @@ export function ReviewPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="review-page wrap">
         <div className="review-head">
           <span className="eyebrow">Retention & Recall</span>
-          <h1 className="display">5-Minute Spaced Review</h1>
+          <h1 className="page-title">5-Minute Spaced Review</h1>
           <p className="muted review-lede">
             Spaced repetition locks concepts into long-term memory. Review cards resurface after 1, 3, 7, and 21 days based on your answers.
           </p>
@@ -144,7 +142,6 @@ export function ReviewPage() {
           </div>
         )}
       </main>
-      <SiteFooter />
     </>
   );
 }

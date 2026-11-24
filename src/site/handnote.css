@@ -1,5 +1,13 @@
 /* ================= Handnote ================= */
-.hn-page { padding-top: 48px; padding-bottom: 72px; }
+.hn-page {
+  /* the notepad and sticky notes are drawn by hand; everything around them is the site's clean UI */
+  --wobble: 14px 18px 12px 16px / 16px 12px 18px 14px;
+  --wobble-sm: 8px 11px 9px 12px / 11px 8px 12px 9px;
+  --margin-ink: rgba(220, 70, 70, 0.55);
+  --paper: var(--bg);
+  padding-top: 40px; padding-bottom: 32px;
+}
+.hn-head { display: flex; flex-direction: column; gap: 10px; }
 
 /* sticky-note palette (paper + edge), light then dark */
 .hn-yellow { --hn: #fff3a8; --hn-edge: #d9bf3a; --hn-ink: #3d3000; }
@@ -14,8 +22,8 @@
 [data-theme='dark'] .hn-purple { --hn: #33295a; --hn-edge: #6d5aae; --hn-ink: #e4dbff; }
 
 /* ---------- head ---------- */
-.hn-lede { max-width: 620px; font-size: 1.08rem; color: var(--ink-2); margin: 14px 0 0; }
-.hn-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.hn-lede { max-width: 620px; font-size: 16.5px; line-height: 1.6; color: var(--ink-2); margin: 0; }
+.hn-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .hn-actions .btn { display: inline-flex; align-items: center; gap: 8px; }
 .hn-actions .btn:disabled { opacity: 0.45; pointer-events: none; }
 
@@ -95,25 +103,25 @@
 
 /* ---------- board ---------- */
 .hn-board-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
-.hn-board-top h2 { margin: 0; display: flex; align-items: center; gap: 10px; }
+.hn-board-top h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 21px; }
 .hn-count {
-  display: inline-grid; place-items: center; min-width: 32px; height: 28px; padding: 0 8px;
-  border: 2px solid var(--pen, var(--ink)); border-radius: var(--wobble-sm);
-  font: 700 1.2rem/1 var(--font-hand); background: var(--surface);
+  display: inline-grid; place-items: center; min-width: 26px; height: 22px; padding: 0 7px;
+  border-radius: 999px; background: var(--surface-3); color: var(--muted);
+  font: 650 12px/1 var(--font-mono);
 }
 .hn-search {
-  display: flex; align-items: center; gap: 7px; padding: 5px 10px;
-  border: 1.5px solid var(--line-strong); border-radius: var(--wobble-sm);
+  display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 10px;
+  border: 1px solid var(--line-strong); border-radius: 9px;
   background: var(--surface); color: var(--muted);
 }
-.hn-search:focus-within { border-color: var(--pen, var(--ink)); color: var(--ink); }
+.hn-search:focus-within { border-color: var(--focus); color: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 18%, transparent); }
 .hn-search input { width: 160px; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14px; }
 
 .hn-empty {
   padding: 40px 24px; text-align: center;
-  border: 2.5px dashed var(--line-strong); border-radius: var(--wobble);
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-lg);
 }
-.hn-empty p { margin: 0; font: 600 1.6rem/1.2 var(--font-hand); }
+.hn-empty p { margin: 0; font: 650 16px/1.3 var(--font-sans); color: var(--ink); }
 .hn-empty p.muted { margin-top: 6px; font: 400 0.95rem var(--font-sans); }
 
 .hn-grid { list-style: none; margin: 0; padding: 8px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px 18px; }

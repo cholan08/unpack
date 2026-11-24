@@ -23,7 +23,7 @@ const zn = zone(385, 300, 160, 548, 'Network', { tone: 'net', icon: 'globe' });
 const zs = zone(625, 300, 270, 548, 'Express server', { tone: 'server', icon: 'server' });
 const zd = zone(880, 300, 210, 548, 'MongoDB', { tone: 'data', icon: 'mongo' });
 
-const page = browser(150, 205, { w: 226, h: 212, url: 'todo-app.com', screen: before });
+const page = browser(150, 205, { w: 226, h: 222, url: 'todo-app.com', screen: before });
 const react = box(150, 440, 'React', { sub: 'TodoList state', icon: 'react', tone: 'client', w: 210 });
 const net = box(385, 260, 'Internet', { sub: '~40 ms', icon: 'globe', tone: 'net', w: 136 });
 const mw = box(625, 150, 'Middleware', { sub: 'json · auth · validate', icon: 'filter', tone: 'server', w: 236 });

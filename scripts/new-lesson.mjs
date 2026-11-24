@@ -13,7 +13,7 @@ const courseFile = `src/content/courses/${course}/course.ts`;
 const file = `src/content/courses/${course}/lessons/${id}.ts`;
 if (!existsSync(courseFile)) throw new Error(`No course at ${courseFile} — run npm run new:course first.`);
 if (existsSync(file)) throw new Error(`${file} already exists.`);
-if (!readFileSync(courseFile, 'utf8').includes(`id: '${id}'`)) console.warn(`⚠ Add { id: '${id}', title: '…' } to a part in ${courseFile}.`);
+if (!readFileSync(courseFile, 'utf8').includes(`id: '${id}'`)) console.warn(`⚠ Add { id: '${id}', title: '…' } to a part in ${courseFile} (plus pillar: '…' if that part has none).`);
 
 writeFileSync(
   file,

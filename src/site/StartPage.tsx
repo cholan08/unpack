@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, Check, AlertTriangle, Info } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { COURSES } from '@/content/registry';
 import { usePlacement, savePlacementResult } from '@/lib/progress';
 import './start.css';
@@ -232,12 +231,22 @@ export function StartPage() {
 
   return (
     <>
-      <SiteHeader />
-      <main className="start wrap">
+      <main className="start wrap wrap--narrow">
+        <ol className="start-steps" aria-label="Three steps">
+          {(['prereq', 'quiz', 'result'] as const).map((ph, i) => {
+            const at = ['prereq', 'quiz', 'result'].indexOf(phase);
+            return (
+              <li key={ph} data-state={i < at ? 'done' : i === at ? 'current' : undefined} aria-current={i === at ? 'step' : undefined}>
+                <span className="start-step-n">{i < at ? <Check size={12} strokeWidth={3} /> : i + 1}</span>
+                {['Check the basics', 'Placement quiz', 'Your starting point'][i]}
+              </li>
+            );
+          })}
+        </ol>
         {phase === 'prereq' && (
           <section className="start-section">
             <span className="eyebrow">Before you begin</span>
-            <h1 className="display">Start Here</h1>
+            <h1 className="page-title">Start Here</h1>
             <p className="start-lede">
               This course assumes a small handful of things. Check each one — it takes about 5 minutes.
               If you're missing something, the hints point you to the fastest fix.
@@ -251,7 +260,7 @@ export function StartPage() {
                     onChange={() => togglePrereq(p.id)}
                     aria-label={p.title}
                   />
-                  <span className="prereq-check">{prereqs[p.id] && <Check size={18} strokeWidth={3} />}</span>
+                  <span className="prereq-check">{prereqs[p.id] && <Check size={15} strokeWidth={3} />}</span>
                   <div className="prereq-body">
                     <strong>{p.title}</strong>
                     <p className="prereq-q">{p.check}</p>
@@ -286,7 +295,7 @@ export function StartPage() {
         {phase === 'quiz' && currentQ && (
           <section className="start-section">
             <span className="eyebrow">Placement quiz · {qi + 1} of {PLACEMENT_QUESTIONS.length}</span>
-            <h1 className="display">Where should you start?</h1>
+            <h1 className="page-title">Where should you start?</h1>
             <p className="start-lede">
               This short quiz places you in the right part of the course. No grade, no judgment — honest answers give you the best starting point.
             </p>
@@ -341,7 +350,7 @@ export function StartPage() {
         {phase === 'result' && result && course && (
           <section className="start-section">
             <span className="eyebrow">Your placement</span>
-            <h1 className="display">
+            <h1 className="page-title">
               {result.startPart === 0
                 ? 'Start from the beginning'
                 : result.startPart >= 8
@@ -390,7 +399,6 @@ export function StartPage() {
           </section>
         )}
       </main>
-      <SiteFooter />
     </>
   );
 }

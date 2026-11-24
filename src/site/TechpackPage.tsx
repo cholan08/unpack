@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, Check, Copy, GitBranch, Lock, Search } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { SkillIcon } from './skillpack/icons';
 import { TECH_SHEETS, type TechEntry, type TechSheet } from './techpack/data';
 import { CodeLines } from '@/lib/highlight';
 import { COURSES } from '@/content/registry';
 import './techpack.css';
+import { PageHead } from './ui';
 
 const course = COURSES[0];
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -84,15 +84,13 @@ export function TechpackPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="tp-page">
         <section className="tp-hero wrap">
-          <span className="eyebrow">Cheat sheets</span>
-          <h1 className="display page-title">Techpack</h1>
-          <p className="tp-lede">
-            The snippets you reach for every day, one sheet per technology: {TECH_SHEETS.length} sheets, {total} snippets.
-            Copy one, or follow its link to the lesson that explains why it works.
-          </p>
+          <PageHead
+            eyebrow="Library · Cheat sheets"
+            title="Techpack"
+            lede={`The snippets you reach for every day, one sheet per technology: ${TECH_SHEETS.length} sheets, ${total} snippets. Copy one, or follow its link to the lesson that explains why it works.`}
+          />
 
           <div className="tp-bar">
             <nav className="tp-jump" aria-label="Techpack sheets">
@@ -150,7 +148,6 @@ export function TechpackPage() {
           </section>
         ))}
       </main>
-      <SiteFooter />
     </>
   );
 }

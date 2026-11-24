@@ -5,6 +5,14 @@ import type { Course, Lesson } from '@/engine/types';
 import { LessonPlayer } from '@/player/LessonPlayer';
 import { LessonShell } from './LessonShell';
 import { NotFound } from './NotFound';
+import { AppFrame } from './AppShell';
+
+/** A wrong lesson URL still gets the site's navigation. */
+const Missing = () => (
+  <AppFrame>
+    <NotFound />
+  </AppFrame>
+);
 
 /** Loads a lesson's content on demand (cached after the first time). */
 function useLesson(course: Course | undefined, lessonId: string | undefined) {
@@ -40,11 +48,11 @@ export function LessonPage() {
   const course = getCourse(courseId);
   const { lesson, failed } = useLesson(course, lessonId);
 
-  if (!course) return <NotFound />;
+  if (!course) return <Missing />;
   if (!lessonId || !course.lessons[lessonId]) {
     // Known but unwritten lessons go back to the course map instead of a dead end.
     const listed = course.parts.some((p) => p.lessons.some((l) => l.id === lessonId));
-    return listed ? <Navigate to={`/${course.id}`} replace /> : <NotFound />;
+    return listed ? <Navigate to={`/${course.id}`} replace /> : <Missing />;
   }
   if (failed) return <LessonShell error />;
   if (!lesson) return <LessonShell />;

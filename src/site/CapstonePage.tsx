@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router';
 import { ArrowLeft, ArrowRight, Check, Copy, Layers, Terminal } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { CAPSTONE_MILESTONES } from '@/content/courses/mern/capstone';
 import { TutorPanel } from '@/player/TutorPanel';
 import './capstone.css';
@@ -51,12 +50,11 @@ export function CapstonePage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="capstone wrap">
         {/* Header */}
         <div className="capstone-head">
           <span className="eyebrow">Capstone project</span>
-          <h1 className="display">Build TaskFlow</h1>
+          <h1 className="page-title">Build TaskFlow</h1>
           <p className="muted capstone-lede">
             Build a complete real-time collaborative task board from an empty folder across 10 milestones, putting every piece of the course together.
           </p>
@@ -180,7 +178,6 @@ export function CapstonePage() {
           </div>
         </article>
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -24,11 +24,13 @@ export function runCode(
 
     const handler = (e: MessageEvent) => {
       if (e.data?._id !== id) return;
+      clearTimeout(fallbackTimer);
       w.removeEventListener('message', handler);
-      resolve(e.data as RunResult);
+      const { _id, ...result } = e.data;
+      resolve(result as RunResult);
     };
 
-    // Fallback timeout in case the worker is unresponsive
+    // Fallback timeout: a synchronous infinite loop blocks the worker's own timer, so kill it from here
     const fallbackTimer = setTimeout(() => {
       w.removeEventListener('message', handler);
       // Kill and recreate the worker
@@ -41,12 +43,7 @@ export function runCode(
       });
     }, 5500);
 
-    w.addEventListener('message', (e: MessageEvent) => {
-      if (e.data?._id !== id) return;
-      clearTimeout(fallbackTimer);
-      handler(e);
-    });
-
+    w.addEventListener('message', handler);
     w.postMessage({ _id: id, code, tests });
   });
 }

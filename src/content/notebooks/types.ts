@@ -7,6 +7,8 @@
  * Text fields marked `Ink` accept light markup:
  *   __underlined__   **bold ink**   ==highlighter==   `code`   x_{sub}   x^{sup}
  */
+import type { PillarId } from '@/engine/types';
+
 export type Ink = string;
 
 /** Pen/highlighter colours. Each maps to a soft fill in hand.css (works in both themes). */
@@ -166,6 +168,11 @@ export interface PageStub {
   /** Also the file name in pages/ and the URL segment. */
   id: string;
   title: string;
+  /**
+   * The sections this page will cover. Until pages/<id>.ts exists, the reader draws the page
+   * as a template: these headings in boxes, with ruled space under each.
+   */
+  outline?: string[];
 }
 
 export interface NotebookDef {
@@ -177,6 +184,10 @@ export interface NotebookDef {
   tagline: string;
   /** Cover colour on the shelf. */
   color: Exclude<Tone, 'plain'>;
+  /** Main topic it belongs to (a label only; see src/content/pillars.ts). */
+  pillar: PillarId;
+  /** Reading order inside its topic on the shelf (lower first). Default 50. */
+  order?: number;
   cover: Cover;
   pages: PageStub[];
 }

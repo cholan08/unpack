@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, Search, BookOpen } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { COMMON_ERRORS } from '@/content/courses/mern/commonErrors';
 import './commonErrors.css';
 
@@ -21,11 +20,10 @@ export function CommonErrorsPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="errors-page wrap">
         <div className="errors-head">
           <span className="eyebrow">Troubleshooting glossary</span>
-          <h1 className="display">Common MERN Errors</h1>
+          <h1 className="page-title">Common MERN Errors</h1>
           <p className="muted errors-lede">
             Every error message tells a story. Look up the error you are seeing to understand what really happened under the hood and jump straight to the lesson that explains it.
           </p>
@@ -79,7 +77,6 @@ export function CommonErrorsPage() {
           )}
         </div>
       </main>
-      <SiteFooter />
     </>
   );
 }

@@ -1,132 +1,107 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router';
-import { ArrowRight, Check, Clock, Lock, MapPin } from 'lucide-react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
-import { COURSES } from '@/content/registry';
-import { usePlacement, useProgress, useGates } from '@/lib/progress';
+import { useEffect, useMemo } from 'react';
+import { useParams, useSearchParams } from 'react-router';
+import { List, Map as MapIcon } from 'lucide-react';
+import type { Course } from '@/engine/types';
+import { getCourse } from '@/content/registry';
+import { useGates, usePlacement, useProgress } from '@/lib/progress';
+import { NotFound } from './NotFound';
+import { RoadmapMap } from './roadmap/RoadmapMap';
+import { RoadmapList } from './roadmap/RoadmapList';
+import { computeStatus, fmtMinutes } from './roadmap/status';
+import { wobblyCircle } from './roadmap/shapes';
 import './roadmap.css';
 
 export function RoadmapPage() {
-  const course = COURSES[0];
+  const { courseId } = useParams();
+  const course = getCourse(courseId);
+  if (!course) return <NotFound />;
+  return <Roadmap key={course.id} course={course} />;
+}
+
+function Roadmap({ course }: { course: Course }) {
   const progress = useProgress();
   const placement = usePlacement();
   const gates = useGates();
+  const [params, setParams] = useSearchParams();
+  const view = params.get('view') === 'list' ? 'list' : 'map';
+  const focus = params.get('focus');
+  const status = useMemo(() => computeStatus(course, progress, gates, placement), [course, progress, gates, placement]);
+  const t = status.totals;
 
   useEffect(() => {
-    document.title = `Roadmap · ${course?.short ?? ''} — Unpacked`;
+    document.title = `Roadmap · ${course.short} — Unpacked`;
   }, [course]);
 
-  if (!course) return null;
-
-  // Compute per-part progress
-  const partStatus = course.parts.map((part) => {
-    const lessons = part.lessons;
-    const done = lessons.filter((l) => progress.lessons[`${course.id}/${l.id}`]?.done).length;
-    const started = lessons.some((l) => {
-      const p = progress.lessons[`${course.id}/${l.id}`];
-      return p && !p.done;
+  const setFocus = (id: string | null) =>
+    setParams(
+      (prev) => {
+        const p = new URLSearchParams(prev);
+        if (id) p.set('focus', id);
+        else p.delete('focus');
+        return p;
+      },
+      { replace: true },
+    );
+  const setView = (v: 'map' | 'list', focusId?: string) =>
+    setParams((prev) => {
+      const p = new URLSearchParams(prev);
+      if (v === 'list') p.set('view', 'list');
+      else p.delete('view');
+      if (focusId) p.set('focus', focusId);
+      return p;
     });
-    const gateState = gates[`${course.id}/${part.id}`];
-    return { done, started, total: lessons.length, gateState };
-  });
-
-  // Find the "you are here" part
-  const currentPartIdx = (() => {
-    for (let i = course.parts.length - 1; i >= 0; i--) {
-      const s = partStatus[i];
-      if (s.done === s.total && s.total > 0) return Math.min(i + 1, course.parts.length - 1);
-      if (s.started || s.done > 0) return i;
-    }
-    return placement?.startPart ?? 0;
-  })();
 
   return (
     <>
-      <SiteHeader />
-      <main className="roadmap wrap">
-        <div className="roadmap-head">
-          <span className="eyebrow">Course roadmap</span>
-          <h1 className="display">{course.title}</h1>
-          <p className="muted roadmap-lede">{course.tagline}</p>
-        </div>
-
-        <div className="roadmap-track">
-          {course.parts.map((part, i) => {
-            const s = partStatus[i];
-            const isHere = i === currentPartIdx;
-            const isDone = s.done === s.total && s.total > 0;
-            const isSkippable = placement && i < (placement.startPart ?? 0);
-            const gateState = s.gateState;
-
-            return (
-              <div
-                key={part.id}
-                className="roadmap-part"
-                data-tone={part.tone}
-                data-here={isHere || undefined}
-                data-done={isDone || undefined}
-                data-skip={isSkippable || undefined}
-              >
-                <div className="roadmap-part-connector" aria-hidden>
-                  {isDone ? <Check size={18} /> : isHere ? <MapPin size={18} /> : <span className="roadmap-num mono">{part.num}</span>}
-                </div>
-                <div className="roadmap-part-card">
-                  <div className="roadmap-part-head">
-                    <span className="roadmap-part-num eyebrow">Part {part.num}</span>
-                    {isHere && <span className="roadmap-here-badge">You are here</span>}
-                    {isSkippable && <span className="roadmap-skip-badge">Skippable</span>}
-                    {isDone && <span className="roadmap-done-badge"><Check size={12} /> Done</span>}
-                  </div>
-                  <h2 className="roadmap-part-title">{part.title}</h2>
-                  <p className="roadmap-part-blurb muted">{part.blurb}</p>
-
-                  {/* Why / outcomes from the extended Part type */}
-                  {(part as any).why && (
-                    <div className="roadmap-why">
-                      <span className="eyebrow">Why this matters</span>
-                      <p>{(part as any).why}</p>
-                    </div>
-                  )}
-                  {(part as any).outcomes && (
-                    <div className="roadmap-outcomes">
-                      <span className="eyebrow">You will be able to</span>
-                      <ul>
-                        {((part as any).outcomes as string[]).map((o, j) => (
-                          <li key={j}><Check size={12} /> {o}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="roadmap-part-meta">
-                    <span className="pill">
-                      <Clock size={12} />
-                      {part.lessons.reduce((acc, l) => acc + (l.minutes ?? 0), 0)} min
-                    </span>
-                    <span className="pill">{s.done}/{s.total} lessons</span>
-                    {gateState && (
-                      <span className="pill" data-tone={gateState.passed ? 'ok' : gateState.skipped ? 'warn' : 'neutral'}>
-                        {gateState.passed ? <><Check size={12} /> Gate passed</> : gateState.skipped ? 'Gate skipped' : <><Lock size={12} /> Gate</>}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="roadmap-part-actions">
-                    <Link
-                      to={`/${course.id}/${part.lessons[0]?.id ?? ''}`}
-                      className="btn btn--sm"
-                      data-primary={isHere || undefined}
-                    >
-                      {isDone ? 'Review' : s.started ? 'Continue' : 'Start'} Part {part.num} <ArrowRight size={14} />
-                    </Link>
-                  </div>
-                </div>
+      <main className="rm" data-view={view}>
+        <header className="rm-top">
+          <div className="rm-title">
+            <span className="eyebrow">Course roadmap</span>
+            <h1 className="display">{course.title}</h1>
+            <p className="rm-lede">{course.tagline}</p>
+          </div>
+          <div className="rm-stats" aria-label="Your progress">
+            <svg className="rm-donut" viewBox="-40 -40 80 80" aria-hidden>
+              <path className="rm-donut-track" d={wobblyCircle(31, 7, 0.03, 10)} />
+              <circle className="rm-donut-arc" r="31" pathLength={100} strokeDasharray={`${Math.max(t.pct ? 2 : 0, t.pct * 100)} 100`} transform="rotate(-90)" />
+              <text y="8">{Math.round(t.pct * 100)}%</text>
+            </svg>
+            <dl>
+              <div>
+                <dt>lessons done</dt>
+                <dd>
+                  {t.done}
+                  <small>/{t.total}</small>
+                </dd>
               </div>
-            );
-          })}
-        </div>
+              <div>
+                <dt>gates passed</dt>
+                <dd>
+                  {t.gatesPassed}
+                  <small>/{t.gates}</small>
+                </dd>
+              </div>
+              <div>
+                <dt>still to go</dt>
+                <dd>{fmtMinutes(t.minutesLeft)}</dd>
+              </div>
+            </dl>
+          </div>
+          <div className="rm-views" role="tablist" aria-label="Roadmap view">
+            <button type="button" role="tab" aria-selected={view === 'map'} onClick={() => setView('map')}>
+              <MapIcon size={16} /> Map
+            </button>
+            <button type="button" role="tab" aria-selected={view === 'list'} onClick={() => setView('list')}>
+              <List size={16} /> List
+            </button>
+          </div>
+        </header>
+        {view === 'map' ? (
+          <RoadmapMap course={course} status={status} placementStart={placement?.startPart ?? 0} selected={focus} onSelect={setFocus} />
+        ) : (
+          <RoadmapList course={course} status={status} onShowOnMap={(id) => setView('map', id)} />
+        )}
       </main>
-      <SiteFooter />
     </>
   );
 }

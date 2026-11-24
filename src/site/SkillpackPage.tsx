@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { SiteFooter, SiteHeader } from './SiteHeader';
 import { SKILL_TRACKS } from './skillpack/data';
 import { SkillIcon } from './skillpack/icons';
 import './skillpack.css';
@@ -16,7 +15,6 @@ export function SkillpackPage() {
 
   return (
     <>
-      <SiteHeader />
       <main className="sk-page">
         <section className="sk-hero wrap">
           <span className="sk-kicker">Full stack developer</span>
@@ -76,7 +74,6 @@ export function SkillpackPage() {
           </section>
         ))}
       </main>
-      <SiteFooter />
     </>
   );
 }

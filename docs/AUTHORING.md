@@ -22,6 +22,9 @@ The registry discovers both automatically. A lesson listed in a part without a f
    { id: 'closures', title: 'Scope & Closures', minutes: 10, level: 'beginner',
      summary: 'One sentence that promises the payoff.' },
    ```
+   Every lesson also belongs to one **main topic** (`pillar`): `frontend`, `backend`, `database` or `devops`, or `start` (the way in) / `projects` (work that uses all four). The list lives in `src/content/pillars.ts`. If every lesson in the part shares a topic, the part sets `pillar` once. If the part mixes topics, each lesson sets its own. Pick the topic by where the lesson's main idea runs, the same rule as the diagram colours. In development the console warns (and QA fails) when a lesson has no topic, or has one on both the lesson and its part.
+
+   Add `needs: ['event-loop', 'http']` with the ids of the lessons (from any part) this one directly builds on. The roadmap graph draws them as "builds on" threads: hovering a lesson lights up everything it needs (blue) and what it unlocks (teal). List only direct prerequisites. The graph follows the chain itself. In development the console warns when an id in `needs` isn't a lesson.
 2. Create `lessons/closures.ts` (same name as the id) exporting `defineLesson({ goals, steps, … })`.
 3. Sketch the story first: **setup → problem → solution → technique(s) → tradeoff → recap**, 7–12 steps, one idea per step.
 4. Lay out one scene, then derive every step from it with `patch()` (see below).
@@ -184,8 +187,8 @@ const sandbox = defineSandbox({
 
 > Shortcut: `npm run new:course -- <id> "Title"` creates the folder and a starter `course.ts`.
 
-1. `src/content/courses/<id>/course.ts`, exporting `defineCourse({ id, title, short, tagline, description, tone, parts, glossary, hero? })` — `hero: { lesson, steps }` picks the scenes the home page cycles through.
-2. Add lessons as above. The home page catalog and the header pick it up automatically.
+1. `src/content/courses/<id>/course.ts`, exporting `defineCourse({ id, title, short, tagline, description, tone, parts, glossary, hero? })` — `hero: { lesson, steps }` picks the scenes the home page cycles through. Give each part an `icon` (a name from `src/engine/icons.ts`) for its hub on the roadmap graph, and `why` / `outcomes` for the roadmap's part panel. The graph lays itself out from `course.ts`; `npm run qa` checks its labels at three screen sizes.
+2. Add lessons as above. The home page catalog, the sidebar and the topic pages pick it up automatically.
 3. Remove it from the "Coming later" list in `src/site/HomePage.tsx`.
 
 ## Add a handwritten notebook

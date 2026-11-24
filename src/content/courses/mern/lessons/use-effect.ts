@@ -10,7 +10,7 @@ const wrong: ScreenLine[] = [sel('Ben'), { t: 'item', text: 'Buy milk', flash: t
 
 const zc = zone(300, 300, 580, 560, 'Browser', { tone: 'client', icon: 'browser' });
 const zs = zone(830, 300, 260, 560, 'Server', { tone: 'server', icon: 'server' });
-const comp = box(430, 140, 'TodoList', { sub: 'props: userId = 1', icon: 'component', tone: 'client', w: 230 });
+const comp = box(430, 140, 'TodoList', { sub: 'props: userId = 1', icon: 'component', tone: 'client', w: 270 });
 const page = browser(150, 330, { w: 230, h: 200, url: 'todo-app.com', screen: loading });
 const timeline = stack(445, 392, 'Timeline', [], { w: 250, h: 292, from: 'top', mono: true, icon: 'clock', tone: 'client', empty: 'nothing yet' });
 const api = box(830, 140, 'Express API', { sub: 'GET /api/todos', icon: 'express', tone: 'server', w: 220 });

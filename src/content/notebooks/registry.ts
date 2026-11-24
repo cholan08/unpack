@@ -5,6 +5,7 @@
  * A page listed in notebook.ts without a file shows as "still being written".
  */
 import { useEffect, useState } from 'react';
+import { PILLARS } from '@/content/pillars';
 import type { Notebook, NotebookDef, NotebookPage, PageContent } from './types';
 
 const bookMods = import.meta.glob<{ default: NotebookDef }>('./*/notebook.ts', { eager: true });
@@ -37,12 +38,22 @@ function build(): Notebook[] {
       ];
       return { ...def, pages };
     })
-    .sort((a, b) => a.title.localeCompare(b.title));
+    .sort((a, b) => topicRank(a) - topicRank(b) || (a.order ?? 50) - (b.order ?? 50) || a.title.localeCompare(b.title));
 }
+
+const topicRank = (b: NotebookDef) => PILLARS.findIndex((p) => p.id === b.pillar);
 
 export const NOTEBOOKS: Notebook[] = build();
 
 export const getNotebook = (id: string | undefined) => NOTEBOOKS.find((b) => b.id === id);
+
+/** How far the writing has got: content pages written out of content pages listed (the cover doesn't count). */
+export function writtenPages(book: Notebook) {
+  const content = book.pages.filter((p) => p.id !== COVER_ID);
+  const written = content.filter((p) => p.written).length;
+  const status = written === 0 ? 'outline' : written === content.length ? 'complete' : 'progress';
+  return { written, total: content.length, status } as const;
+}
 
 /* ---------------- loading page content ---------------- */
 
