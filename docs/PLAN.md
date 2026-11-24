@@ -45,14 +45,16 @@ Hierarchy: **Course → Part (numbered, colour) → Lesson → Step**.
 
 Every page except the lesson player sits in one shell (`src/site/AppShell.tsx`, a layout route in `App.tsx`; pages render only their own `<main>`):
 
-- **Wide screens (≥1080px): a sidebar**, always visible. From the top: search · the *one thing to do next* (Continue / Up next / "New here?") · Home, Start Here · **Topics** (Frontend, Backend, Database, DevOps, Projects — each with a progress ring and done/total) · **Your path** (Roadmap, Dashboard, Review with a due badge, My notes) · **Library** (Course map, Glossary, Techpack, Skill Pack, Notebooks, Common errors).
+- **Wide screens (≥1080px): a sidebar**, always visible. From the top: search · the *one thing to do next* (Continue / Up next / "New here?") · Home, Start Here · **Topics** (Frontend, Backend, Database, DevOps, AI/ML, Projects — each with a progress ring and done/total, or “soon” while a topic has no lessons) · **Your path** (Roadmap, Dashboard, Review with a due badge, My notes) · **Library** (Course map, Glossary, Techpack, Skill Pack, Notebooks, Common errors).
 - **Narrow screens: a top bar** (menu, logo, search, theme); the same sidebar slides in as a drawer.
 - The lesson player stays full screen: it is where attention belongs.
 - Shared progress views (topic stats, "continue" target) live in `src/site/learner.ts`; small shared pieces (logo, progress ring, page header) in `src/site/ui.tsx`.
 
 ### Main topics (pillars)
 
-Everything on the site belongs to one of four main topics: **Frontend · Backend · Database · DevOps**. Two more labels cover the way in (**Start Here**) and the way out (**Projects**, which use all four). Each topic uses the role colour the diagrams already use: Frontend `client` blue, Backend `server` orange, Database `data` green, DevOps `net` violet.
+Everything on the site belongs to one of five main topics: **Frontend · Backend · Database · DevOps · AI/ML**. Two more labels cover the way in (**Start Here**) and the way out (**Projects**, which use the stack end to end). Each topic uses the role colour the diagrams already use: Frontend `client` blue, Backend `server` orange, Database `data` green, DevOps `net` violet, AI/ML `ai` fuchsia (a new role colour for models, inference and embeddings).
+
+**AI/ML** (`aiml`, page `/aiml`, added 2026-11-24) has no lessons yet: its page, sidebar entry and home card say “Coming soon”. To fill it, give lessons (or a whole part) `pillar: 'aiml'` in `course.ts`; everything else picks them up. A new topic is one entry in `src/content/pillars.ts`, one id in `PillarId`, and an icon in `PILLAR_ICON` (`AppShell.tsx`).
 
 This is a **label, not a reshape**. Parts, lessons, URLs, gates and saved progress stay as they are. Each lesson gets a `pillar` (set once on the part when every lesson in it shares one). Topic pages are a second view that groups everything by that label. Learners still follow a path that moves between topics (see the Roadmap), because you can't finish Frontend before you have an API to call.
 
@@ -63,6 +65,7 @@ This is a **label, not a reshape**. Parts, lessons, URLs, gates and saved progre
 | Backend | 15 | 04 Node & Express, + CORS, WebSockets, Uploads, Auth & Security (5), Rate Limiting |
 | Database | 9 | 05 MongoDB, + Caching, Pagination |
 | DevOps | 6 | Git, Testing, Deploying, CI/CD, Containers, Observability |
+| AI/ML | 0 | — (coming soon) |
 | Projects | 4 | Full Request Journey, 10 Build It (3) |
 
 ### Lesson anatomy
@@ -239,6 +242,8 @@ The whole site was re-skinned and re-navigated for the learner, without moving c
 - ✅ Lesson player: step segments now show beat colours (they were all grey), Next sits on the right, calmer type
 - ✅ Dashboard rebuilt (stats, next step, by topic, gates as a list); Gate intro shows what it covers; the gate's coding task now renders (it was a blank page); Start Here has a 3-step indicator and real checkboxes; Glossary has A–Z
 - ✅ Roadmap drawn clean (true circles, dot grid, Inter labels on the same metrics — the overlap QA still passes); `SKETCHY` in `roadmap/shapes.ts` brings the hand-drawn look back
+- ✅ Motion: active highlights *glide* between items instead of blinking — sidebar, topic switcher, Roadmap Map/List, and the lesson step bar's "you are here" marker. One primitive, `<Glide id>` in `src/site/ui.tsx` (motion `layoutId` + one spring, `GLIDE`); put it inside whichever item is active. Icons answer hover with a small spring, the theme icon spins sun ↔ moon, progress rings draw themselves in, pages rise in. All of it is instant under “reduce motion”
+- ✅ Dashboard "By topic" as bins: one square per lesson, filling from the bottom as far as you got (done = full); each square opens its lesson
 
 ## 9. Quality bar
 

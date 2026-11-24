@@ -1,5 +1,7 @@
 # Authoring lessons and courses
 
+> **Paths:** the front end lives in `client/`, so every `src/…` path below means `client/src/…`. Run the `npm run …` commands from the repo root.
+
 Everything a learner sees is **data**. You never touch the engine to add content.
 
 ```
@@ -22,7 +24,7 @@ The registry discovers both automatically. A lesson listed in a part without a f
    { id: 'closures', title: 'Scope & Closures', minutes: 10, level: 'beginner',
      summary: 'One sentence that promises the payoff.' },
    ```
-   Every lesson also belongs to one **main topic** (`pillar`): `frontend`, `backend`, `database` or `devops`, or `start` (the way in) / `projects` (work that uses all four). The list lives in `src/content/pillars.ts`. If every lesson in the part shares a topic, the part sets `pillar` once. If the part mixes topics, each lesson sets its own. Pick the topic by where the lesson's main idea runs, the same rule as the diagram colours. In development the console warns (and QA fails) when a lesson has no topic, or has one on both the lesson and its part.
+   Every lesson also belongs to one **main topic** (`pillar`): `frontend`, `backend`, `database`, `devops` or `aiml`, or `start` (the way in) / `projects` (work across the whole stack). The list lives in `src/content/pillars.ts`. If every lesson in the part shares a topic, the part sets `pillar` once. If the part mixes topics, each lesson sets its own. Pick the topic by where the lesson's main idea runs, the same rule as the diagram colours. In development the console warns (and QA fails) when a lesson has no topic, or has one on both the lesson and its part.
 
    Add `needs: ['event-loop', 'http']` with the ids of the lessons (from any part) this one directly builds on. The roadmap graph draws them as "builds on" threads: hovering a lesson lights up everything it needs (blue) and what it unlocks (teal). List only direct prerequisites. The graph follows the chain itself. In development the console warns when an id in `needs` isn't a lesson.
 2. Create `lessons/closures.ts` (same name as the id) exporting `defineLesson({ goals, steps, … })`.
@@ -193,9 +195,9 @@ const sandbox = defineSandbox({
 
 ## Add a handwritten notebook
 
-Notebooks (`/notebooks`) are exam-style study notes drawn as handwriting on ruled paper, one notebook per subject (DBMS first). They are pure data: the renderer draws the paper, ink, boxes, tables and diagrams.
+Notebooks (`/notebooks`) are exam-style study notes drawn as handwriting on ruled paper, one notebook per subject. They are pure data: the renderer draws the paper, ink, boxes, tables and diagrams. A notebook starts as a **template** (a cover plus an outline of every page) and gets its notes one page at a time.
 
-> Shortcut: `npm run new:notebook -- os "OS" "Operating Systems"` creates the folder, a starter `notebook.ts` and one page.
+> Shortcut: `npm run new:notebook -- graphql "GraphQL" "GraphQL APIs" backend` creates the folder and a template `notebook.ts`. The last argument is the topic.
 
 ```
 src/content/notebooks/<book-id>/
@@ -203,9 +205,11 @@ src/content/notebooks/<book-id>/
   pages/<page-id>.ts   one page each (loaded on demand)
 ```
 
-1. `notebook.ts` exports `defineNotebook({ id, title, name, tagline, color, cover, pages })`. `id` must match the folder. Page 1 is always the cover; it lists the pages as Key Topics and counts them automatically.
-2. Each entry in `pages` needs `pages/<id>.ts`. A missing file shows "still being written", and a file that isn't listed triggers a dev warning.
-3. The shelf and the reader pick the notebook up automatically, with no routes or menu to edit.
+1. `notebook.ts` exports `defineNotebook({ id, title, name, tagline, color, pillar, order?, cover, pages })`. `id` must match the folder. `pillar` is the main topic it is filed under on the shelf (the same ids as lessons, from `src/content/pillars.ts`), and `order` sets its place within that topic. Page 1 is always the cover; it lists the pages as Key Topics and counts them automatically.
+2. List the pages with `pg(id, title, ...outline)`: the outline is the sections the page will cover. End with `revision(...differences)`, the standard "Quick Revision & Interview Questions" page.
+3. **Template first, notes later.** A page with no `pages/<id>.ts` file is drawn from its outline: the same header, the planned sections in their boxes and ruled space under each, with an "Outline page" note. Write `pages/<id>.ts` to replace it with real notes. The shelf shows each notebook as *Outline*, *n/m written* or *Complete*. A file that isn't listed triggers a dev warning.
+4. **Cover art comes from words.** `iconArt(doodle, label)` (top left), `flowArt([4 steps])` (top right), `codeArt([lines], title)` (left) and `hubArt(centre, [4 labels], shape)` (middle) generate the doodles. Doodles: `db` `pc` `server` `laptop` `user` `cloud`. Keep flow steps under ~16 characters, code lines under ~24 and hub labels under ~12 per line (`'Business\nlogic'`). The big cover title shrinks to fit, so `'SYSTEM DESIGN'` is fine.
+5. The shelf and the reader pick the notebook up automatically, with no routes or menu to edit.
 
 **A page** is a list of rows. Each row is either two columns of sections or one full-width section. Sections number themselves in reading order (left column, then right).
 

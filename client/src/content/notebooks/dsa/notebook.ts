@@ -1,0 +1,40 @@
+import { codeArt, defineNotebook, flowArt, hubArt, iconArt, pg, revision } from '../dsl';
+
+export default defineNotebook({
+  id: 'dsa',
+  title: 'DSA',
+  name: 'Data Structures & Algorithms',
+  tagline: 'Big-O, the core data structures and the problem-solving patterns that coding interviews keep asking about.',
+  color: 'purple',
+  pillar: 'start',
+  order: 20,
+  cover: {
+    big: 'DSA',
+    full: 'Data Structures & Algorithms',
+    cloud: ['Store it', 'smartly,', 'solve it', 'fast'],
+    art: {
+      topLeft: iconArt('laptop', 'DSA'),
+      topRight: flowArt(['Problem', 'Pattern', 'Code', 'Big-O check']),
+      left: codeArt(['for (i = 0; i < n; i++)', '  sum += a[i];', '// O(n) time, O(1) space'], 'Loop'),
+      centre: hubArt('Algorithm', ['Input', 'Data\nstructure', 'Output', 'Time &\nspace'], 'box'),
+    },
+    side: { title: 'Big-O', items: ['O(1)', 'O(log n)', 'O(n)', 'O(n log n)'] },
+    why: { title: 'Why DSA ?', items: ['Crack coding interviews', 'Write faster code', 'Think in patterns', 'Pick the right structure'] },
+    footer: 'Think first, code second!',
+  },
+  pages: [
+    pg('complexity', 'Time & Space Complexity', 'Big-O, Big-Θ, Big-Ω', 'Counting operations', 'Common complexities ranked', 'Space complexity and the recursion stack'),
+    pg('arrays-strings', 'Arrays & Strings', 'Indexing and memory layout', 'Two pointers', 'Sliding window', 'Prefix sums'),
+    pg('hashing', 'Hashing', 'Hash maps and hash sets', 'Collisions', 'Frequency counting', 'The two-sum pattern'),
+    pg('linked-lists', 'Linked Lists', 'Singly vs doubly linked', 'Insert and delete', 'Fast and slow pointers', 'Reversing a list'),
+    pg('stacks-queues', 'Stacks & Queues', 'LIFO vs FIFO', 'Monotonic stack', 'Deque', 'Balanced brackets'),
+    pg('recursion', 'Recursion & Backtracking', 'Base case and recursive case', 'The call stack', 'Subsets and permutations', 'N-Queens idea'),
+    pg('sorting-searching', 'Sorting & Searching', 'Bubble, insertion, merge, quick sort', 'Stable vs unstable sorts', 'Binary search', 'Binary search on the answer'),
+    pg('trees', 'Trees & BST', 'Tree terminology', 'DFS: pre-, in-, post-order', 'BFS level order', 'BST insert, search, delete'),
+    pg('heaps', 'Heaps & Priority Queues', 'Min-heap and max-heap', 'Heapify', 'Top-K problems', 'Heap sort'),
+    pg('graphs', 'Graphs', 'Adjacency list vs matrix', 'BFS and DFS', 'Topological sort', 'Dijkstra’s shortest path'),
+    pg('dp', 'Dynamic Programming', 'Overlapping subproblems', 'Memoization vs tabulation', 'Knapsack, LIS, LCS', 'Spotting a DP problem'),
+    pg('greedy', 'Greedy Algorithms', 'The greedy-choice property', 'Interval scheduling', 'When greedy fails', 'Greedy vs DP'),
+    revision('Array vs linked list', 'Stack vs queue', 'BFS vs DFS', 'DP vs greedy'),
+  ],
+});

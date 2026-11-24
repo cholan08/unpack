@@ -1,0 +1,40 @@
+import { codeArt, defineNotebook, flowArt, hubArt, iconArt, pg, revision } from '../dsl';
+
+export default defineNotebook({
+  id: 'javascript',
+  title: 'JavaScript',
+  name: 'JavaScript (ES6+)',
+  tagline: 'The language of the web: types, functions, closures, objects, the DOM, async code and the event loop.',
+  color: 'yellow',
+  pillar: 'frontend',
+  order: 30,
+  cover: {
+    big: 'JS',
+    full: 'JavaScript',
+    cloud: ['Make the', 'page think', 'and', 'react'],
+    art: {
+      topLeft: iconArt('laptop', 'JS', 'yellow'),
+      topRight: flowArt(['Call stack', 'Web APIs', 'Task queue', 'Event loop'], 'yellow'),
+      left: codeArt(['const add = (a, b) =>', '  a + b;', 'add(2, 3); // 5'], 'Function'),
+      centre: hubArt('JavaScript', ['Variables', 'Functions', 'Objects', 'Async'], 'box', 'yellow'),
+    },
+    side: { title: 'Types', items: ['string', 'number', 'boolean', 'object'] },
+    why: { title: 'Why JavaScript ?', items: ['Runs in every browser', 'Front and back end (Node)', 'Huge ecosystem (npm)', 'The most-used language'] },
+    footer: 'Everything is an object… almost!',
+  },
+  pages: [
+    pg('introduction', 'Introduction to JavaScript', 'Where JS runs: browser and Node', 'Adding JS to a page', 'The console and DevTools', 'ECMAScript versions'),
+    pg('basics', 'Variables, Types & Operators', 'var vs let vs const', 'Primitive vs reference types', 'Type coercion, == vs ===', 'Truthy and falsy'),
+    pg('control-flow', 'Control Flow & Loops', 'if / else, switch, ternary', 'for, while, do…while', 'for…of vs for…in', 'break and continue'),
+    pg('functions', 'Functions', 'Declarations vs expressions', 'Arrow functions', 'Default and rest parameters', 'Higher-order functions and callbacks'),
+    pg('scope-closures', 'Scope, Hoisting & Closures', 'Global, function and block scope', 'Hoisting and the TDZ', 'Closures with examples', 'IIFEs and modules'),
+    pg('objects-arrays', 'Objects & Arrays', 'Creating and copying objects', 'Destructuring and spread', 'map, filter, reduce', 'Shallow vs deep copy'),
+    pg('this-prototypes', 'this, Prototypes & Classes', 'The rules for this', 'call, apply, bind', 'The prototype chain', 'ES6 classes and inheritance'),
+    pg('dom-events', 'DOM & Events', 'Selecting and changing elements', 'addEventListener', 'Bubbling, capturing, delegation', 'preventDefault'),
+    pg('async', 'Async JavaScript', 'Callbacks → promises → async/await', 'Promise.all, allSettled, race', 'Error handling with try / catch', 'The fetch API'),
+    pg('event-loop', 'The Event Loop', 'Call stack and Web APIs', 'Microtasks vs macrotasks', 'setTimeout(0) explained', 'Blocking the main thread'),
+    pg('modern-js', 'Modules & Modern JS', 'import / export', 'Optional chaining and nullish coalescing', 'Map, Set, WeakMap', 'Iterators and generators'),
+    pg('errors-debugging', 'Errors & Debugging', 'Error types', 'try / catch / finally', 'Breakpoints in DevTools', 'Common bugs'),
+    revision('var vs let vs const', '== vs ===', 'null vs undefined'),
+  ],
+});
