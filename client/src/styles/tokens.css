@@ -7,7 +7,10 @@
    (index.html resolves it before first paint).
    The engine (src/engine/stage.css) reads these names — keep them.
    ------------------------------------------------------------------ */
-:root {
+/* `.paper` = objects on the stage. They are always printed on paper, so inside them
+   the light palette applies in both themes (see "Stage objects" below). */
+:root,
+.paper {
   color-scheme: light;
 
   --font-display: 'Bricolage Grotesque Variable', 'Inter Variable', system-ui, sans-serif;
@@ -194,6 +197,41 @@
   --shadow-2: 0 1px 0 rgba(0, 0, 0, 0.25), 0 6px 16px -6px rgba(0, 0, 0, 0.55);
   --shadow-3: 0 2px 0 rgba(0, 0, 0, 0.25), 0 22px 44px -18px rgba(0, 0, 0, 0.75);
   --shadow-pop: 0 14px 36px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* ------------------------------------------------------------------
+   Stage objects — "paper blocks on a desk".
+   Every object on a diagram is a paper block: a light face, an ink
+   outline and an extruded side hatched in its role colour. The desk
+   (canvas) follows the theme; the paper does not. Links, packets and
+   zone platforms sit on the desk and use the theme's own colours.
+   ------------------------------------------------------------------ */
+:root {
+  --paper: #ffffff;
+  --paper-2: #f3f1ec;
+  --paper-3: #e9e6df;
+  --paper-ink: #17171a;
+  --paper-line: #d9d5cc;
+  /* the desk */
+  --desk: #e9e6df;
+  --desk-grid: rgba(23, 23, 26, 0.075);
+  --slab: #f4f2ed;
+  --slab-edge: #dcd8cf;
+  --wire: #3b3b41;
+  --wire-strong: #17171a;
+}
+:root[data-theme='dark'] {
+  --paper: #ece8e0;
+  --paper-2: #dfdacf;
+  --paper-3: #d3cdc1;
+  --paper-ink: #141416;
+  --paper-line: #c7c0b3;
+  --desk: #18181a;
+  --desk-grid: rgba(255, 255, 255, 0.05);
+  --slab: #222225;
+  --slab-edge: #141416;
+  --wire: #a9a49a;
+  --wire-strong: #ece8e0;
 }
 
 @media (max-width: 720px) {

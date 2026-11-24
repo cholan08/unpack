@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowDownRight, ArrowUpRight, Check as CheckIcon, Copy, Lightbulb, Sparkles, TriangleAlert, OctagonX, HelpCircle } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Check as CheckIcon, Copy, Eye, Lightbulb, Sparkles, TriangleAlert, OctagonX, HelpCircle } from 'lucide-react';
 import { CodeLines } from '@/lib/highlight';
 import type { Callout as CalloutT, Check as CheckT, CodeSpec, Lesson, MetricValue, PacketKind } from '@/engine/types';
 import { Rich } from './RichText';
@@ -11,13 +11,14 @@ const CALLOUT = {
   warn: { icon: TriangleAlert, label: 'Watch out', tone: 'warn' },
   tip: { icon: Sparkles, label: 'Tip', tone: 'client' },
   mistake: { icon: OctagonX, label: 'Common mistake', tone: 'danger' },
+  picture: { icon: Eye, label: 'Picture it', tone: 'server' },
 } as const;
 
 export function Callout({ c }: { c: CalloutT }) {
   const m = CALLOUT[c.kind];
   const I = m.icon;
   return (
-    <aside className="callout" data-tone={m.tone}>
+    <aside className="callout" data-tone={m.tone} data-kind={c.kind}>
       <I size={17} strokeWidth={2.2} aria-hidden />
       <div>
         <span className="callout-label">{m.label}</span>

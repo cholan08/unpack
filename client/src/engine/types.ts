@@ -175,7 +175,8 @@ export interface CodeSpec {
 }
 
 export interface Callout {
-  kind: 'insight' | 'warn' | 'tip' | 'mistake';
+  /** `picture`: an everyday analogy to remember the step by ("a treasure hunt: each clue says where the next one is"). */
+  kind: 'insight' | 'warn' | 'tip' | 'mistake' | 'picture';
   text: string;
 }
 

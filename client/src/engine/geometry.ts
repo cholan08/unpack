@@ -52,6 +52,94 @@ export function rectOf(n: NodeSpec): Rect {
   return { x: n.x, y: n.y, w: s.w, h: s.h };
 }
 
+/**
+ * Objects are paper blocks: a face plus sides extruded down and to the right by (dx, dy).
+ * The sides are drawn under the links (nodes/Depth.tsx), so arrows still land on the face.
+ */
+export interface Depth {
+  dx: number;
+  dy: number;
+}
+const NO_DEPTH: Depth = { dx: 0, dy: 0 };
+export function depthOf(n: NodeSpec): Depth {
+  switch (n.kind) {
+    case 'box':
+    case 'browser':
+    case 'stack':
+    case 'queue':
+    case 'code':
+    case 'doc':
+      return { dx: 7, dy: 9 };
+    case 'chip':
+      return { dx: 4, dy: 5 };
+    case 'dot':
+      return { dx: 3, dy: 4 };
+    case 'actor':
+      return { dx: 4, dy: 6 };
+    case 'zone':
+      return { dx: 10, dy: 13 };
+    default:
+      return NO_DEPTH;
+  }
+}
+
+/** Corner radius of block faces (CSS reads it as --obj-r, so faces and sides agree). */
+export const BLOCK_R = 8;
+export const ZONE_R = 18;
+/** Diameter of an actor's avatar coin. */
+export const COIN = 52;
+
+/**
+ * The sides of a rounded w × h face (local coords, face at 0,0) extruded by (dx, dy):
+ * `outline` is the visible side region (its inner edge follows the face's own outline,
+ * so nothing sits under a see-through face), `right` the right-hand side for shading,
+ * `crease` the edge where the two sides meet.
+ */
+export function extrusion(w: number, h: number, r: number, dx: number, dy: number) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = dy / len;
+  const ny = -dx / len;
+  const f = (x: number, y: number) => `${x.toFixed(2)},${y.toFixed(2)}`;
+  const k = r * Math.SQRT1_2;
+  // where the silhouette leaves the face: tangent points on the top-right and bottom-left corners
+  const trx = w - r + r * nx, tr_y = r + r * ny;
+  const blx = r - r * nx, bly = h - r - r * ny;
+  const brx = w - r + k, bry = h - r + k;
+  const arc = (x: number, y: number) => `A${r},${r} 0 0 1 ${f(x, y)}`;
+  const back = (x: number, y: number) => `A${r},${r} 0 0 0 ${f(x, y)}`; // along the face, anticlockwise
+  const outline = [
+    `M${f(trx, tr_y)}`,
+    `L${f(trx + dx, tr_y + dy)}`,
+    arc(w + dx, r + dy),
+    `L${f(w + dx, h - r + dy)}`,
+    arc(w - r + dx, h + dy),
+    `L${f(r + dx, h + dy)}`,
+    arc(blx + dx, bly + dy),
+    `L${f(blx, bly)}`,
+    back(r, h),
+    `L${f(w - r, h)}`,
+    back(w, h - r),
+    `L${f(w, r)}`,
+    back(trx, tr_y),
+    'Z',
+  ].join(' ');
+  const right = [
+    `M${f(trx, tr_y)}`,
+    `L${f(trx + dx, tr_y + dy)}`,
+    arc(w + dx, r + dy),
+    `L${f(w + dx, h - r + dy)}`,
+    arc(brx + dx, bry + dy),
+    `L${f(brx, bry)}`,
+    back(w, h - r),
+    `L${f(w, r)}`,
+    back(trx, tr_y),
+    'Z',
+  ].join(' ');
+  const crease = `M${f(brx, bry)} L${f(brx + dx, bry + dy)}`;
+  return { outline, right, crease };
+}
+
 /** Where the ray from the centre of `r` towards `p` leaves the rectangle. */
 function edgePoint(r: Rect, toward: Pt, pad = 4): Pt {
   const dx = toward.x - r.x;
@@ -213,9 +301,10 @@ export function frameOf(scenes: { nodes: Record<string, NodeSpec>; links?: LinkS
       rects.set(id, r);
       const above = n.kind === 'dot' && n.caption === 'above';
       const extraTop = above ? 42 : n.badge ? 14 : 0;
-      const extraBottom = n.kind === 'browser' && n.label ? 30 : n.kind === 'dot' && !above ? 42 : n.meter !== undefined ? 16 : 0;
+      const d = depthOf(n);
+      const extraBottom = d.dy + (n.kind === 'browser' && n.label ? 30 : n.kind === 'dot' && !above ? 42 : n.meter !== undefined ? 16 : 0);
       x0 = Math.min(x0, r.x - r.w / 2);
-      x1 = Math.max(x1, r.x + r.w / 2);
+      x1 = Math.max(x1, r.x + r.w / 2 + d.dx);
       y0 = Math.min(y0, r.y - r.h / 2 - extraTop);
       y1 = Math.max(y1, r.y + r.h / 2 + extraBottom);
     }

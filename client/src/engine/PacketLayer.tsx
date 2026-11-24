@@ -82,7 +82,7 @@ function sample(tl: Timeline, tau: number): Sample | null {
       const len = polyLength(s.pts);
       const d = (t / s.dur) * len;
       const p = pointAt(s.pts, d);
-      const tail = [pointAt(s.pts, d - 9), pointAt(s.pts, d - 18)];
+      const tail = [pointAt(s.pts, d - 10), pointAt(s.pts, d - 20)];
       return { p, tail, kind: s.kind, label: s.label };
     }
     t -= s.dur;
@@ -97,8 +97,8 @@ function makePacket(): SVGGElement {
   const g = document.createElementNS(SVGNS, 'g');
   g.setAttribute('class', 'pk');
   g.innerHTML =
-    '<circle class="pk-tail pk-tail-2" r="3"></circle><circle class="pk-tail pk-tail-1" r="4.5"></circle>' +
-    '<circle class="pk-dot" r="6.5"></circle>' +
+    '<circle class="pk-tail pk-tail-2" r="3.5"></circle><circle class="pk-tail pk-tail-1" r="5"></circle>' +
+    '<circle class="pk-dot" r="7.5"></circle>' +
     '<g class="pk-burst"><circle r="10"></circle><path d="M-5,-5 L5,5 M5,-5 L-5,5"></path></g>' +
     '<g class="pk-label"><rect rx="5" ry="5" height="18"></rect><text dy="12.5"></text></g>';
   return g;

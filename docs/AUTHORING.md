@@ -54,7 +54,7 @@ export default defineLesson({
   beat: 'problem',                         // setup | problem | solution | technique | tradeoff | insight | try | recap
   title: 'Three servers, one address',
   body: ['Paragraph with **bold**, `code`, [[glossary-key]] and {server:coloured text}.'],
-  callout: { kind: 'warn', text: '…' },    // insight | warn | tip | mistake
+  callout: { kind: 'warn', text: '…' },    // insight | warn | tip | mistake | picture (an everyday analogy to remember it by)
   code: { file: 'server.js', lang: 'js', code: `…`, hl: [3, 4], err: [7] },
   changes: ['+ added', '~ changed', '- removed'],
   metrics: { p95: 1800 },                  // numbers show ↑/↓ vs the previous step; 'yes'/'no' are coloured

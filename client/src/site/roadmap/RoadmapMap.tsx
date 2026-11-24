@@ -60,7 +60,7 @@ function edgeD(e: GEdge, sim: Sim, g: Graph): string {
 }
 
 /** Which trail segments you've walked, and the one you're on now. */
-function spineStates(g: Graph, st: MapStatus): Map<string, 'done' | 'next'> {
+export function spineStates(g: Graph, st: MapStatus): Map<string, 'done' | 'next'> {
   const out = new Map<string, 'done' | 'next'>();
   const hasShortcut = g.edges.some((e) => e.kind === 'shortcut');
   let marked = false;
@@ -894,7 +894,7 @@ export function RoadmapMap({ course, status, placementStart, selected, onSelect 
 
 /* ---------------- pieces ---------------- */
 
-function TipBody({ n, status, graph }: { n: GNode; status: MapStatus; graph: Graph }) {
+export function TipBody({ n, status, graph }: { n: GNode; status: MapStatus; graph: Graph }) {
   if (n.kind === 'lesson') {
     const s = status.lessons[n.stub.id];
     const needs = graph.needs.get(n.id)?.length ?? 0;
@@ -944,7 +944,7 @@ function TipBody({ n, status, graph }: { n: GNode; status: MapStatus; graph: Gra
   return <strong>{n.kind === 'start' ? 'Start here' : 'Capstone — the finish line'}</strong>;
 }
 
-function MapSearch({ graph, inputRef, onPick }: { graph: Graph; inputRef: RefObject<HTMLInputElement>; onPick: (id: string) => void }) {
+export function MapSearch({ graph, inputRef, onPick }: { graph: Graph; inputRef: RefObject<HTMLInputElement>; onPick: (id: string) => void }) {
   const [q, setQ] = useState('');
   const [active, setActive] = useState(0);
   const results = useMemo(() => {

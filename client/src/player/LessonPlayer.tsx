@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ArrowLeft, ArrowRight, Check, ChevronLeft, Clock, Gauge, Keyboard, Pause, Play, RotateCcw, Search, Target, X } from 'lucide-react';
 import { Stage } from '@/engine/Stage';
@@ -163,7 +163,8 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
             </span>
             <span className="pbar-lesson">{lesson.title}</span>
           </div>
-          <Segments lesson={lesson} s={s} go={go} />
+          {/* wide screens show the labelled timeline under the stage instead */}
+          {!wide && <Segments lesson={lesson} s={s} go={go} />}
           <div className="pbar-tools">
             <button className="btn btn--ghost btn--icon" onClick={openSearch} aria-label="Search" title="Search (/ or ⌘K)">
               <Search size={17} />
@@ -252,6 +253,7 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
               {!wide && <span className="pan-hint">Swipe the diagram to pan</span>}
             </div>
             {step && <Metrics lesson={lesson} values={sbResult?.metrics ?? step.metrics} prev={prevMetrics} />}
+            {wide && <Timeline lesson={lesson} s={s} go={go} smooth={!reduced} />}
           </section>
         </div>
 
@@ -322,6 +324,55 @@ function Segments({ lesson, s, go }: { lesson: Lesson; s: number; go: (n: number
         </li>
       ))}
     </ol>
+  );
+}
+
+/**
+ * "In this lesson": every step as a numbered stop with its short label, coloured by story
+ * beat, so the learner always sees the arc (problem → solution → trade-off) and where they are.
+ */
+function Timeline({ lesson, s, go, smooth }: { lesson: Lesson; s: number; go: (n: number) => void; smooth: boolean }) {
+  const list = useRef<HTMLOListElement>(null);
+  const total = lesson.steps.length;
+  // keep the current stop in the middle of the strip
+  useEffect(() => {
+    const ol = list.current;
+    const cur = ol?.querySelector<HTMLElement>('[aria-current="step"]')?.parentElement;
+    if (!ol || !cur) return;
+    ol.scrollTo({ left: cur.offsetLeft - ol.clientWidth / 2 + cur.offsetWidth / 2, behavior: smooth ? 'smooth' : 'auto' });
+  }, [s, smooth]);
+  return (
+    <nav className="tl" aria-label="Steps in this lesson">
+      <div className="tl-head">
+        <span className="tl-title">In this lesson</span>
+        <span className="tl-keys">
+          <kbd>←</kbd>
+          <kbd>→</kbd> to step
+        </span>
+        <span className="tl-count">{s === 0 ? `${total} steps` : `Step ${s} of ${total}`}</span>
+      </div>
+      <ol className="tl-steps" ref={list} style={{ '--tl-n': total } as CSSProperties}>
+        {lesson.steps.map((st, i) => {
+          const n = i + 1;
+          const state = n < s ? 'done' : n === s ? 'current' : undefined;
+          return (
+            <li key={i} data-state={state} data-beat={st.beat}>
+              <button
+                className="tl-step"
+                data-beat={st.beat}
+                data-state={state}
+                onClick={() => go(n)}
+                aria-current={n === s ? 'step' : undefined}
+                aria-label={`Step ${n}: ${st.short}`}
+              >
+                <span className="tl-dot">{state === 'done' ? <Check size={13} strokeWidth={3} /> : n}</span>
+                <span className="tl-label">{st.short}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
 

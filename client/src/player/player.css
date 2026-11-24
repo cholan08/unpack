@@ -192,6 +192,23 @@
 .callout > svg { flex: none; margin-top: 2px; color: var(--tone); }
 .callout-label { display: block; font: 700 11px/1 var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tone); margin-bottom: 5px; }
 
+/* "Picture it": an everyday analogy, drawn as a paper card from the desk —
+   ink outline, a hatched edge and a coral depth, like the blocks on the stage */
+.callout[data-kind='picture'] {
+  --pic: #c9610a;
+  padding-left: 26px;
+  border: 2px solid var(--paper-ink);
+  background:
+    linear-gradient(var(--paper-ink), var(--paper-ink)) 9px 0 / 2px 100% no-repeat,
+    repeating-linear-gradient(-45deg, var(--pic) 0 1.8px, #f6d9bd 1.8px 5.6px) 0 0 / 9px 100% no-repeat,
+    var(--paper);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--pic) 75%, #000);
+  color: var(--paper-ink);
+}
+.callout[data-kind='picture'] > svg,
+.callout[data-kind='picture'] .callout-label { color: var(--pic); }
+.callout[data-kind='picture'] p { font-size: 15px; font-weight: 500; }
+
 /* code */
 .codeblock {
   margin: 0;
@@ -326,9 +343,11 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  background-color: var(--stage-bg);
-  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.3px);
-  background-size: 22px 22px;
+  /* the desk: an isometric grid, like drafting paper */
+  background-color: var(--desk);
+  background-image:
+    repeating-linear-gradient(30deg, var(--desk-grid) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(150deg, var(--desk-grid) 0 1px, transparent 1px 28px);
 }
 .pstage-top {
   display: flex;
@@ -344,7 +363,7 @@
 
 .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.legend i { width: 9px; height: 9px; border-radius: 50%; background: var(--pk-req); box-shadow: 0 0 0 2px var(--stage-bg), 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent); }
+.legend i { width: 9px; height: 9px; border-radius: 50%; background: var(--pk-req); box-shadow: 0 0 0 2px var(--desk), 0 0 0 3px color-mix(in srgb, currentColor 18%, transparent); }
 .legend li[data-kind='res'] i { background: var(--pk-res); }
 .legend li[data-kind='data'] i { background: var(--pk-data); }
 .legend li[data-kind='err'] i { background: var(--pk-err); }
@@ -379,6 +398,100 @@
 .metric-delta { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 5px; background: var(--surface-3); color: var(--muted); }
 .metric-delta[data-good='true'] { background: var(--ok-soft); color: var(--ok); }
 .metric-delta[data-good='false'] { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------- "In this lesson": the labelled step timeline under the stage ---------- */
+.tl {
+  flex: none;
+  margin: 0 16px 14px;
+  padding: 10px 6px 8px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-1);
+  z-index: 5;
+}
+.tl-head { display: flex; align-items: center; gap: 12px; padding: 0 12px 4px; }
+.tl-title { font: 750 11px/1 var(--font-sans); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.tl-keys { margin-left: auto; display: flex; align-items: center; gap: 3px; font-size: 11.5px; color: var(--muted-2); }
+.tl-keys kbd { font-size: 10px; padding: 0 4px; min-width: 0; }
+.tl-count { font: 600 12px var(--font-mono); color: var(--ink-2); }
+.tl-steps {
+  list-style: none;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  padding: 6px 0 2px;
+  mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+}
+.tl-steps::-webkit-scrollbar { display: none; }
+.tl-steps li {
+  position: relative;
+  flex: 1 0 max(112px, calc(100% / var(--tl-n)));
+  min-width: 0;
+  scroll-snap-align: center;
+}
+/* the rail between stops: filled up to where you are */
+.tl-steps li + li::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: calc(-50% + 17px);
+  right: calc(50% + 17px);
+  height: 2px;
+  border-radius: 1px;
+  background: var(--line-strong);
+}
+.tl-steps li:is([data-state='done'], [data-state='current'])::before { background: color-mix(in srgb, var(--beat) 70%, var(--line-strong)); }
+.tl-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 0 6px 4px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+}
+.tl-dot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  background: var(--surface);
+  font: 700 12px/1 var(--font-mono);
+  color: var(--muted);
+  transition: background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s var(--ease-out);
+}
+.tl-step:hover .tl-dot { border-color: var(--beat); color: var(--beat); transform: translateY(-2px); }
+.tl-step[data-state='done'] .tl-dot { border-color: var(--beat); background: color-mix(in srgb, var(--beat) 16%, var(--surface)); color: var(--beat); }
+/* you are here: a solid key in the beat's colour */
+.tl-step[data-state='current'] .tl-dot {
+  border-color: var(--beat);
+  background: var(--beat);
+  color: var(--surface);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--beat) 55%, #000), 0 0 0 5px color-mix(in srgb, var(--beat) 22%, transparent);
+  transform: translateY(-2px);
+}
+.tl-label {
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s;
+}
+.tl-step:hover .tl-label { color: var(--ink-2); }
+.tl-step[data-state='current'] .tl-label { color: var(--ink); font-weight: 650; }
+.tl-step:focus-visible { outline: none; }
+.tl-step:focus-visible .tl-dot { outline: 2px solid var(--focus); outline-offset: 3px; }
 
 /* ---------- step nav ---------- */
 .pnav {

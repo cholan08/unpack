@@ -101,6 +101,15 @@ Keyboard: `←/→` step · `Space` play/pause · `Home/End` · `?` shortcuts.
 
 **Tokens and primitives:** `src/styles/tokens.css` (colours, radii, shadows, layout sizes — the engine reads the same names) and `src/styles/base.css` (buttons, pills, badges, fields, cards, progress bars, segmented controls, page header, stats). Feature CSS keeps its own class prefix (CSS is global).
 
+**Stage objects — "paper blocks on a desk"** (Phase V). Diagrams should look like physical things you could pick up, because concrete objects are easier to remember than wireframes:
+- Every object (box, browser, stack/queue, code, doc, chip, dot, actor, db) is a **paper block**: a light face with a 2px ink outline, in both themes (`.paper` in `tokens.css` gives objects the light palette).
+- Each block has **sides extruded down-right**, hatched in its role colour, with a darker right side and an ink crease (`nodes/Depth.tsx`, sizes in `depthOf()` in `geometry.ts`). The sides sit in their own layer *under* the links, so arrows land on faces. A db is a paper cylinder with a hatched rim; an actor is a coin.
+- Zones are **raised platforms** with hatched sides and a solid name plate (CLIENT, SERVER…).
+- The **desk** (`--desk`, `--desk-grid`) is an isometric grid; links are ink wires (`--wire`) with an origin ring and a solid head; packets glow.
+- States are physical: *active* rises off the desk with a halo, *busy* bobs, *error* turns red and shakes, *ghost* is a dashed outline with no paper.
+- Under the stage, **"In this lesson"** lists every step as a numbered stop with its `short` label, coloured by beat, so the story arc is always in view (wide screens; phones keep the segment bar).
+- A `picture` callout ("Picture it") gives an everyday analogy to remember a step by.
+
 **Role colours — where it runs** (same in every lesson, tuned for light and dark):
 
 | Role | Use |
@@ -244,6 +253,13 @@ The whole site was re-skinned and re-navigated for the learner, without moving c
 - ✅ Roadmap drawn clean (true circles, dot grid, Inter labels on the same metrics — the overlap QA still passes); `SKETCHY` in `roadmap/shapes.ts` brings the hand-drawn look back
 - ✅ Motion: active highlights *glide* between items instead of blinking — sidebar, topic switcher, Roadmap Map/List, and the lesson step bar's "you are here" marker. One primitive, `<Glide id>` in `src/site/ui.tsx` (motion `layoutId` + one spring, `GLIDE`); put it inside whichever item is active. Icons answer hover with a small spring, the theme icon spins sun ↔ moon, progress rings draw themselves in, pages rise in. All of it is instant under “reduce motion”
 - ✅ Dashboard "By topic" as bins: one square per lesson, filling from the bottom as far as you got (done = full); each square opens its lesson
+
+### Phase V — Visual impact: "paper blocks on a desk" · 🚧 in progress
+The concepts were all there but the diagrams read as wireframes (dark cards on a dark canvas, thin grey lines). Goal: a learner who has seen a diagram once can picture it again.
+- ✅ V1 — Engine-wide look, so all 54 lessons change with no content edits: paper blocks with extruded hatched sides, platforms for zones, isometric desk, ink wires, bigger packets, physical states (see §4, Stage objects)
+- ✅ V2 — "In this lesson" timeline under the stage (labelled, beat-coloured, auto-centred); replaces the top segment bar on wide screens
+- ✅ V3 — `picture` callout kind ("Picture it")
+- Next: write one "Picture it" analogy per lesson; home/continue-card stage backgrounds on the desk grid; per-lesson emblem on the cover; optional isometric hero mode for data-structure courses (DSA)
 
 ## 9. Quality bar
 

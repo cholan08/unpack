@@ -179,7 +179,7 @@ for (const course of courses) {
   if (onlyLessons) lessons = onlyLessons.split(',');
   for (const id of lessons) {
     await page.goto(`${base}/${course}/${id}?s=1`, { waitUntil: 'networkidle' });
-    const n = await page.locator('.seg').count();
+    const n = await page.locator('.seg, .tl-step').count();
     for (let s = 1; s <= n; s++) {
       if (s > 1) await page.keyboard.press('ArrowRight');
       steps++;

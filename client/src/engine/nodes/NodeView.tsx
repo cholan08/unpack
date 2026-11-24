@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { forwardRef, memo } from 'react';
+import { forwardRef, memo, useId, type CSSProperties } from 'react';
 import { CodeLines } from '@/lib/highlight';
+import { BLOCK_R, ZONE_R, depthOf } from '../geometry';
+import { Extrusion } from './Depth';
 import { ICONS } from '../icons';
 import type { Placed } from '../useSceneTween';
 import type { DocNode, Field, Item, NodeSpec, ScreenLine, Tone } from '../types';
@@ -94,18 +96,32 @@ function Browser({ n }: { n: Extract<NodeSpec, { kind: 'browser' }> }) {
   );
 }
 
+/** Height of the hatched rim at the bottom of a database cylinder. */
+const DB_RIM = 9;
+
 function Db({ n, w, h }: { n: Extract<NodeSpec, { kind: 'db' }>; w: number; h: number }) {
-  const ry = Math.min(15, h * 0.14);
-  const body = `M1,${ry} A${w / 2 - 1},${ry} 0 0 1 ${w - 1},${ry} V${h - ry} A${w / 2 - 1},${ry} 0 0 1 1,${h - ry} Z`;
-  const lid = `M1,${ry} A${w / 2 - 1},${ry} 0 0 0 ${w - 1},${ry}`;
+  // one hatch pattern per node, so it can take this node's role colour
+  const hatch = `db-hatch-${useId().replace(/[^a-zA-Z0-9-]/g, '')}`;
+  const ry = Math.min(14, h * 0.13);
+  const rx = w / 2 - 1;
+  const yb = h - ry - 1; // centre of the bottom ellipse
+  const yr = yb - DB_RIM; // top of the rim
+  const body = `M1,${ry} A${rx},${ry} 0 0 1 ${w - 1},${ry} V${yb} A${rx},${ry} 0 0 1 1,${yb} Z`;
+  const rim = `M1,${yr} A${rx},${ry} 0 0 0 ${w - 1},${yr} V${yb} A${rx},${ry} 0 0 1 1,${yb} Z`;
   return (
     <div className="db">
       <svg className="db-shape" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden>
+        <defs>
+          <pattern id={hatch} width="5.5" height="5.5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect className="db-hatch-bg" width="5.5" height="5.5" />
+            <rect className="db-hatch-line" width="1.7" height="5.5" />
+          </pattern>
+        </defs>
         <path className="db-body" d={body} />
-        <path className="db-lid" d={lid} />
-        <ellipse className="db-top" cx={w / 2} cy={ry} rx={w / 2 - 1} ry={ry} />
+        <path className="db-rim" d={rim} fill={`url(#${hatch})`} />
+        <ellipse className="db-top" cx={w / 2} cy={ry} rx={rx} ry={ry} />
       </svg>
-      <div className="db-content" style={{ paddingTop: ry * 2 + 2 }}>
+      <div className="db-content" style={{ paddingTop: ry * 2 + 4, paddingBottom: DB_RIM + ry }}>
         <span className="db-title">
           <Icon name={n.icon ?? 'db'} size={15} />
           {n.label}
@@ -124,8 +140,10 @@ function Db({ n, w, h }: { n: Extract<NodeSpec, { kind: 'db' }>; w: number; h: n
 function Actor({ n }: { n: NodeSpec }) {
   return (
     <div className="actor">
-      <span className="actor-avatar">
-        <Icon name={n.icon ?? 'user'} size={24} />
+      <span className="actor-coin">
+        <span className="actor-avatar">
+          <Icon name={n.icon ?? 'user'} size={22} />
+        </span>
       </span>
       {n.label && <span className="node-label">{n.label}</span>}
       {n.sub && <span className="node-sub">{n.sub}</span>}
@@ -224,15 +242,22 @@ function Chip({ n }: { n: NodeSpec }) {
   );
 }
 
-function Zone({ n }: { n: NodeSpec }) {
+/** A raised platform: the sides go before the face (a sibling, so they paint under it). */
+function Zone({ n, w, h }: { n: NodeSpec; w: number; h: number }) {
+  const { dx, dy } = depthOf(n);
   return (
-    <div className="zone">
-      <span className="zone-label">
-        <Icon name={n.icon} size={13} />
-        {n.label}
+    <>
+      <span className="zone-sides">
+        <Extrusion w={w} h={h} r={ZONE_R} dx={dx} dy={dy} gap={7.5} />
       </span>
-      {n.sub && <span className="zone-sub">{n.sub}</span>}
-    </div>
+      <div className="zone">
+        <span className="zone-label">
+          <Icon name={n.icon} size={13} />
+          <span>{n.label}</span>
+        </span>
+        {n.sub && <span className="zone-sub">{n.sub}</span>}
+      </div>
+    </>
   );
 }
 
@@ -263,7 +288,7 @@ function Content({ n, w, h }: { n: NodeSpec; w: number; h: number }) {
         </div>
       );
     case 'zone':
-      return <Zone n={n} />;
+      return <Zone n={n} w={w} h={h} />;
     case 'note':
       return <div className="note" style={{ textAlign: n.align ?? 'center' }}>{n.text}</div>;
   }
@@ -271,26 +296,41 @@ function Content({ n, w, h }: { n: NodeSpec; w: number; h: number }) {
 
 const meterLevel = (m: number) => (m >= 0.85 ? 'hot' : m >= 0.6 ? 'warm' : 'ok');
 
+/**
+ * Objects are paper blocks (light palette in both themes). Their extruded sides are drawn in
+ * a separate layer under the links (Depth.tsx). Zones and notes sit on the desk itself;
+ * ghosts are outlines of things not built yet.
+ */
+const ON_DESK = new Set<NodeSpec['kind']>(['zone', 'note']);
+
 export const NodeView = memo(function NodeView({ p }: { p: Placed }) {
   const { spec: n, rect } = p;
   const tone = n.tone ?? DEFAULT_TONE[n.kind] ?? 'neutral';
   const ringed = n.kind !== 'zone' && n.kind !== 'note';
   const caption = n.kind === 'browser' && n.label;
+  const state = n.state ?? 'idle';
+  const paper = !ON_DESK.has(n.kind) && state !== 'ghost';
+  const { dx, dy } = depthOf(n);
   return (
     <div
-      className={`node node--${n.kind}`}
+      className={`node node--${n.kind}${paper ? ' paper' : ''}`}
       data-node={p.id}
       data-tone={tone}
-      data-state={n.state ?? 'idle'}
-      style={{
-        left: rect.x - rect.w / 2,
-        top: rect.y - rect.h / 2,
-        width: rect.w,
-        height: rect.h,
-        opacity: p.opacity,
-        transform: p.scale === 1 ? undefined : `scale(${p.scale})`,
-        zIndex: n.kind === 'zone' ? 0 : 2 + (n.z ?? 0),
-      }}
+      data-state={state}
+      style={
+        {
+          left: rect.x - rect.w / 2,
+          top: rect.y - rect.h / 2,
+          width: rect.w,
+          height: rect.h,
+          opacity: p.opacity,
+          transform: p.scale === 1 ? undefined : `scale(${p.scale})`,
+          zIndex: n.kind === 'zone' ? 0 : 2 + (n.z ?? 0),
+          '--dx': `${dx}px`,
+          '--dy': `${dy}px`,
+          '--obj-r': `${n.kind === 'zone' ? ZONE_R : BLOCK_R}px`,
+        } as CSSProperties
+      }
     >
       {ringed && <span className="node-ring" />}
       <Content n={n} w={rect.w} h={rect.h} />

@@ -1,16 +1,24 @@
 import { useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router';
-import { List, Map as MapIcon } from 'lucide-react';
+import { List, Route, Waypoints } from 'lucide-react';
 import type { Course } from '@/engine/types';
 import { getCourse } from '@/content/registry';
 import { useGates, usePlacement, useProgress } from '@/lib/progress';
 import { NotFound } from './NotFound';
 import { RoadmapMap } from './roadmap/RoadmapMap';
+import { RoadmapGraph } from './roadmap/RoadmapGraph';
 import { RoadmapList } from './roadmap/RoadmapList';
 import { computeStatus, fmtMinutes } from './roadmap/status';
 import { wobblyCircle } from './roadmap/shapes';
 import { Glide } from './ui';
 import './roadmap.css';
+
+type View = 'graph' | 'trail' | 'list';
+const VIEWS: { id: View; label: string; Icon: typeof List; title: string }[] = [
+  { id: 'graph', label: 'Graph', Icon: Waypoints, title: 'Every lesson and how they connect' },
+  { id: 'trail', label: 'Trail', Icon: Route, title: 'The parts in order, as a trail' },
+  { id: 'list', label: 'List', Icon: List, title: 'The same journey as an outline' },
+];
 
 export function RoadmapPage() {
   const { courseId } = useParams();
@@ -24,7 +32,9 @@ function Roadmap({ course }: { course: Course }) {
   const placement = usePlacement();
   const gates = useGates();
   const [params, setParams] = useSearchParams();
-  const view = params.get('view') === 'list' ? 'list' : 'map';
+  const v = params.get('view');
+  // Graph is the default; ?view=map is the old name for the trail
+  const view: View = v === 'list' ? 'list' : v === 'trail' || v === 'map' ? 'trail' : 'graph';
   const focus = params.get('focus');
   const status = useMemo(() => computeStatus(course, progress, gates, placement), [course, progress, gates, placement]);
   const t = status.totals;
@@ -43,11 +53,11 @@ function Roadmap({ course }: { course: Course }) {
       },
       { replace: true },
     );
-  const setView = (v: 'map' | 'list', focusId?: string) =>
+  const setView = (v: View, focusId?: string) =>
     setParams((prev) => {
       const p = new URLSearchParams(prev);
-      if (v === 'list') p.set('view', 'list');
-      else p.delete('view');
+      if (v === 'graph') p.delete('view');
+      else p.set('view', v);
       if (focusId) p.set('focus', focusId);
       return p;
     });
@@ -89,20 +99,20 @@ function Roadmap({ course }: { course: Course }) {
             </dl>
           </div>
           <div className="rm-views" role="tablist" aria-label="Roadmap view">
-            <button type="button" role="tab" aria-selected={view === 'map'} onClick={() => setView('map')}>
-              {view === 'map' && <Glide id="rm-view" className="rm-views-glide" />}
-              <MapIcon size={16} /> Map
-            </button>
-            <button type="button" role="tab" aria-selected={view === 'list'} onClick={() => setView('list')}>
-              {view === 'list' && <Glide id="rm-view" className="rm-views-glide" />}
-              <List size={16} /> List
-            </button>
+            {VIEWS.map(({ id, label, Icon, title }) => (
+              <button key={id} type="button" role="tab" aria-selected={view === id} onClick={() => setView(id)} title={title}>
+                {view === id && <Glide id="rm-view" className="rm-views-glide" />}
+                <Icon size={16} /> {label}
+              </button>
+            ))}
           </div>
         </header>
-        {view === 'map' ? (
+        {view === 'graph' ? (
+          <RoadmapGraph course={course} status={status} selected={focus} onSelect={setFocus} />
+        ) : view === 'trail' ? (
           <RoadmapMap course={course} status={status} placementStart={placement?.startPart ?? 0} selected={focus} onSelect={setFocus} />
         ) : (
-          <RoadmapList course={course} status={status} onShowOnMap={(id) => setView('map', id)} />
+          <RoadmapList course={course} status={status} onShowOnMap={(id) => setView('graph', id)} />
         )}
       </main>
     </>
