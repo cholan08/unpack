@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft, ArrowRight, Check, Copy, Layers, Terminal } from 'lucide-react';
 import { CAPSTONE_MILESTONES } from '@/content/courses/mern/capstone';
 import { TutorPanel } from '@/player/TutorPanel';
+import { useMentorPage } from '@/lib/mentor';
 import './capstone.css';
 
 const CHECKLIST_KEY = 'unpacked:capstone:checks';
@@ -32,6 +33,7 @@ export function CapstonePage() {
   }, []);
 
   const milestone = CAPSTONE_MILESTONES.find((m) => m.id === currentId) || CAPSTONE_MILESTONES[0];
+  useMentorPage({ kind: 'capstone', title: 'TaskFlow Capstone', stepTitle: `Milestone ${milestone.num}: ${milestone.title}`, stepBody: milestone.goal });
   const nextMilestone = CAPSTONE_MILESTONES.find((m) => m.num === milestone.num + 1);
   const prevMilestone = CAPSTONE_MILESTONES.find((m) => m.num === milestone.num - 1);
 

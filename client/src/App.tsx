@@ -10,6 +10,7 @@ import { CapstonePage } from '@/site/CapstonePage';
 import { CommonErrorsPage } from '@/site/CommonErrorsPage';
 import { ReviewPage } from '@/site/ReviewPage';
 import { SkillpackPage } from '@/site/SkillpackPage';
+import { SkillToolPage } from '@/site/SkillToolPage';
 import { TechpackPage } from '@/site/TechpackPage';
 import { HandnotePage } from '@/site/HandnotePage';
 import { NotebooksPage } from '@/site/notebooks/NotebooksPage';
@@ -22,12 +23,34 @@ import { LessonShell } from '@/site/LessonShell';
 import { LessonPageLazy } from '@/site/prefetch';
 import { SearchProvider } from '@/site/Search';
 import { NotFound } from '@/site/NotFound';
+import { MentorDock } from '@/site/MentorDock';
+import { Hotkeys } from '@/site/Hotkeys';
+import { Toaster } from '@/site/Toaster';
+import { installSpotlight } from '@/lib/spotlight';
 
+installSpotlight();
+
+/**
+ * A new page starts at the top. A link with a #anchor (a Techpack sheet, a glossary term…) lands
+ * on that element instead, waiting a few frames for it if the page renders it a moment later.
+ */
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    if (!hash) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    let tries = 0;
+    let raf = 0;
+    const seek = () => {
+      const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+      if (el) el.scrollIntoView({ block: 'start' });
+      else if (tries++ < 40) raf = requestAnimationFrame(seek);
+    };
+    seek();
+    return () => cancelAnimationFrame(raf);
+  }, [pathname, hash]);
   return null;
 }
 
@@ -46,6 +69,7 @@ export function App() {
             <Route path="/capstone/:milestoneId" element={<CapstonePage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/skillpack" element={<SkillpackPage />} />
+            <Route path="/skillpack/:toolId" element={<SkillToolPage />} />
             <Route path="/techpack" element={<TechpackPage />} />
             <Route path="/handnote" element={<HandnotePage />} />
             <Route path="/notebooks" element={<NotebooksPage />} />
@@ -73,6 +97,11 @@ export function App() {
             }
           />
         </Routes>
+        {/* the AI mentor follows the learner across every page, lesson player included */}
+        <MentorDock />
+        {/* "G then …" page shortcuts and the "?" sheet, everywhere */}
+        <Hotkeys />
+        <Toaster />
       </SearchProvider>
     </BrowserRouter>
   );

@@ -146,7 +146,7 @@ export function TutorPanel({
             {!settings.tutorKey && (
               <div className="tutor-key-hint">
                 <Key size={13} />
-                <span>Add an API key in <a href="/me">Dashboard settings</a> to unlock real LLM answers. Demo responses are active.</span>
+                <span>Add an API key in <a href="/me">Dashboard settings</a> to enable the tutor.</span>
               </div>
             )}
 

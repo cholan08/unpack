@@ -4,7 +4,7 @@
  *  - a returning learner gets a hub: the lesson to continue — drawn at the step they left —
  *    progress by topic, and what is due (reviews, gates).
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight, BookOpen, Clock, Code2, Flame, MousePointerClick, Orbit, Repeat, RotateCcw, Route, Trophy } from 'lucide-react';
 import { Stage } from '@/engine/Stage';
@@ -55,6 +55,39 @@ function useHeroScenes(): Scene[] {
     () => (lesson && course?.hero ? course.hero.steps.filter((n) => lesson.steps[n - 1]).map((n) => stepScene(lesson.steps[n - 1])) : []),
     [lesson, course],
   );
+}
+
+/** A number that counts up from zero the first time it is drawn (instantly under "reduce motion"). */
+function CountUp({ to, decimals = 0, ms = 1100 }: { to: number; decimals?: number; ms?: number }) {
+  const reduced = usePrefersReducedMotion();
+  const [v, setV] = useState(reduced ? to : 0);
+  const started = useRef(false);
+  useEffect(() => {
+    if (reduced || started.current) return setV(to);
+    started.current = true;
+    let raf = 0;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - t0) / ms);
+      setV(to * (1 - Math.pow(1 - p, 3))); // ease out
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      started.current = false;
+    };
+  }, [to, ms, reduced]);
+  return <>{v.toFixed(decimals)}</>;
+}
+
+/** "Good evening": the hub greets you for the time of day. */
+function greeting(d = new Date()) {
+  const h = d.getHours();
+  if (h < 5 || h >= 23) return 'Late-night session';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
 }
 
 /* ---------------- new learner: the pitch ---------------- */
@@ -111,11 +144,21 @@ function Hero() {
             <dl className="hm-hero-facts">
               <div>
                 <dt>lessons</dt>
-                <dd>{stats.ready}</dd>
+                <dd>
+                  <CountUp to={stats.ready} />
+                </dd>
               </div>
               <div>
                 <dt>of diagrams</dt>
-                <dd>{fmtHours(stats.minutes)}</dd>
+                <dd>
+                  {stats.minutes < 60 ? (
+                    fmtHours(stats.minutes)
+                  ) : (
+                    <>
+                      <CountUp to={Math.round(stats.minutes / 6) / 10} decimals={1} /> h
+                    </>
+                  )}
+                </dd>
               </div>
               <div>
                 <dt>to sign up</dt>
@@ -153,7 +196,7 @@ function HowItWorks() {
       </div>
       <ol className="hm-how">
         {HOW.map(({ icon: I, title, text }, n) => (
-          <li key={title} className="card">
+          <li key={title} className="card spot">
             <span className="hm-how-n mono">{n + 1}</span>
             <span className="hm-how-icon">
               <I size={19} />
@@ -178,7 +221,7 @@ function Welcome({ t }: { t: ContinueTarget }) {
     <section className="wrap hm-welcome">
       <header className="hm-welcome-head">
         <div>
-          <span className="eyebrow">Welcome back</span>
+          <span className="eyebrow">{greeting()}</span>
           <h1 className="page-title">{t.kind === 'resume' ? 'Pick up where you left off' : 'Ready for the next one?'}</h1>
         </div>
         <ul className="hm-chips" aria-label="At a glance">
@@ -246,6 +289,9 @@ function ContinueHero({ t }: { t: ContinueTarget }) {
                 Step {step} of {total}
               </strong>
               {lesson && <span> · {lesson.steps[step - 1]?.short}</span>}
+              <span className="hm-cont-left">
+                <Clock size={13} /> about {Math.max(1, Math.round((meta.minutes * (total - step + 1)) / total))} min to finish
+              </span>
             </>
           ) : (
             <>
@@ -286,14 +332,14 @@ function PracticeRow() {
         <p>Short reviews and part gates turn “I watched it” into “I know it”.</p>
       </div>
       <div className="hm-practice">
-        <Link to="/review" className="card hm-prac" data-tone={due.length ? 'auth' : 'neutral'}>
+        <Link to="/review" className="card hm-prac spot" data-tone={due.length ? 'auth' : 'neutral'}>
           <span className="hm-prac-icon">
             <Repeat size={18} />
           </span>
           <strong>{due.length ? `${due.length} ${due.length === 1 ? 'card' : 'cards'} due` : scheduled ? 'All caught up' : 'Review cards'}</strong>
           <span>{due.length ? 'A two-minute review keeps it fresh.' : scheduled ? `${scheduled} scheduled — come back when they're due.` : 'Cards appear as you finish lessons.'}</span>
         </Link>
-        <Link to="/me" className="card hm-prac" data-tone="ok">
+        <Link to="/me" className="card hm-prac spot" data-tone="ok">
           <span className="hm-prac-icon">
             <Trophy size={18} />
           </span>
@@ -302,7 +348,7 @@ function PracticeRow() {
           </strong>
           <span>Each part ends with a gate: questions and a small coding task.</span>
         </Link>
-        <Link to={`/${course.id}/roadmap`} className="card hm-prac" data-tone="net">
+        <Link to={`/${course.id}/roadmap`} className="card hm-prac spot" data-tone="net">
           <span className="hm-prac-icon">
             <Route size={18} />
           </span>
@@ -322,7 +368,7 @@ function TopicCard({ p, n }: { p: Pillar; n: number }) {
   const Icon = PILLAR_ICON[p.id];
   const next = s.next;
   return (
-    <Link to={`/${p.id}`} className="hm-topic" data-tone={p.tone}>
+    <Link to={`/${p.id}`} className="hm-topic spot" data-tone={p.tone}>
       <span className="hm-topic-top">
         <Ring pct={s.pct} size={42} stroke={3}>
           <Icon size={18} strokeWidth={2.2} />
@@ -373,7 +419,7 @@ function Topics() {
           <TopicCard key={p.id} p={p} n={i + 1} />
         ))}
       </div>
-      <Link to="/projects" className="hm-projects" data-tone={projects.tone}>
+      <Link to="/projects" className="hm-projects spot" data-tone={projects.tone}>
         <Ring pct={ps.pct} size={42} stroke={3}>
           {(() => {
             const I = PILLAR_ICON.projects;
@@ -431,7 +477,7 @@ function CourseCard({ course }: { course: Course }) {
   const progress = useProgress();
   const c = courseDone(course, progress);
   return (
-    <Link to={`/${course.id}`} className="course-card" data-tone={course.tone}>
+    <Link to={`/${course.id}`} className="course-card spot" data-tone={course.tone}>
       <span className="course-card-parts" aria-hidden>
         {course.parts.map((p) => (
           <i key={p.id} data-tone={p.tone} />

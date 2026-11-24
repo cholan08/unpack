@@ -139,3 +139,90 @@
   .sk-tile { padding: 10px 12px; gap: 10px; }
   .sk-tile-name { font-size: 13px; }
 }
+
+/* ---------- tool tiles link to their topic page ---------- */
+.sk-grid > li { display: flex; }
+a.sk-tile { width: 100%; color: inherit; transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s var(--ease); }
+a.sk-tile:hover { transform: translateY(-1px); }
+a.sk-tile:active { transform: none; }
+a.sk-tile:focus-visible {
+  outline: none;
+  border-color: var(--sk, var(--client));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sk, var(--client)) 28%, transparent);
+}
+.sk-tile-go {
+  flex: none;
+  margin-left: auto;
+  color: var(--muted-2);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s, transform 0.15s var(--ease), color 0.15s;
+}
+.sk-tile:hover .sk-tile-go,
+.sk-tile:focus-visible .sk-tile-go { opacity: 1; transform: none; color: var(--sk); }
+@media (hover: none) { .sk-tile-go { opacity: 1; transform: none; } }
+
+/* ---------- tool page: /skillpack/:toolId ---------- */
+.skt-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 5px 12px 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font: 600 12.5px var(--font-mono);
+  color: var(--muted);
+  transition: color 0.15s, border-color 0.15s;
+}
+.skt-back:hover { color: var(--ink); border-color: var(--sk); }
+.skt-hero { display: flex; align-items: center; gap: 20px; }
+.skt-logo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border: 1px solid color-mix(in srgb, var(--sk) 35%, var(--line));
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--sk) 8%, transparent), var(--shadow-1);
+  color: var(--ink);
+}
+.skt-hero-text { min-width: 0; }
+.skt-hero .sk-kicker { color: var(--sk); letter-spacing: 0.2em; }
+.skt-title { margin: 8px 0 0; font-size: clamp(36px, 6vw, 76px); overflow-wrap: anywhere; }
+.skt-hero + .sk-lede { margin-top: 18px; }
+
+.sk-group-head h2 { margin: 0; font: 650 19px var(--font-sans); letter-spacing: -0.01em; color: var(--ink); }
+.skt-section { padding-top: 26px; scroll-margin-top: 16px; }
+@media (max-width: 1079px) { .skt-section { scroll-margin-top: calc(var(--top-h) + 8px); } }
+.skt-topic { min-height: 60px; }
+.skt-topic .sk-tile-name { font-size: 13.5px; line-height: 1.3; overflow-wrap: anywhere; }
+.skt-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sk) 10%, var(--surface));
+  color: var(--sk);
+}
+
+.skt-pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; }
+.skt-step { width: auto; min-width: 0; flex: 0 1 300px; color: var(--muted); }
+.skt-step--next { margin-left: auto; text-align: right; justify-content: flex-end; }
+.skt-step--next .sk-tile-text { align-items: flex-end; }
+.skt-step .sk-tile-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.skt-step:hover { border-color: color-mix(in srgb, var(--sk) 55%, var(--line)); color: var(--sk); }
+
+@media (max-width: 600px) {
+  .skt-hero { gap: 14px; }
+  .skt-logo { width: 64px; height: 64px; border-radius: 18px; }
+  .skt-logo svg { width: 36px; height: 36px; }
+  .skt-ico { width: 30px; height: 30px; border-radius: 8px; }
+  .skt-topic .sk-tile-name { font-size: 12.5px; }
+  .skt-step .sk-tile-ico { display: none; }
+}

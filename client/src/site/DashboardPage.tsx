@@ -312,8 +312,8 @@ export function DashboardPage() {
                 Provide your own API key to enable the Socratic AI tutor. Your key is stored strictly in your browser (localStorage) and is never logged or saved on our servers.
               </p>
               <label className="dash-input-group">
-                <span>Anthropic / Model API Key</span>
-                <input type="password" value={keyInput} onChange={(e) => setKeyInput(e.target.value)} placeholder="sk-ant-..." className="dash-text-input" />
+                <span>xAI (Grok) or Anthropic (Claude) API key</span>
+                <input type="password" value={keyInput} onChange={(e) => setKeyInput(e.target.value)} placeholder="xai-... or sk-ant-..." className="dash-text-input" />
               </label>
               <label className="dash-checkbox-label">
                 <input type="checkbox" checked={!!settings.noAiMode} onChange={(e) => setNoAiMode(e.target.checked)} />

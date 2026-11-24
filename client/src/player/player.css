@@ -110,6 +110,11 @@
 .narr-step,
 .cover { padding: 30px 32px 36px; animation: narr-in 0.45s var(--ease) both; }
 @keyframes narr-in { from { opacity: 0; transform: translateY(8px); } }
+/* a step slides in from the side you came from: forward from the right, back from the left */
+.narr-step[data-dir='fwd'] { animation-name: narr-in-fwd; }
+.narr-step[data-dir='back'] { animation-name: narr-in-back; }
+@keyframes narr-in-fwd { from { opacity: 0; transform: translateX(16px); } }
+@keyframes narr-in-back { from { opacity: 0; transform: translateX(-16px); } }
 
 .narr-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .beat-tag {
@@ -127,6 +132,7 @@
 }
 .narr-count { font: 600 12px var(--font-mono); color: var(--ink-2); }
 .narr-count span { color: var(--muted-2); font-weight: 500; }
+.narr-left { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font: 500 12px var(--font-sans); color: var(--muted); white-space: nowrap; }
 .narr-title { font-size: clamp(24px, 2vw, 30px); line-height: 1.12; margin-bottom: 14px; text-wrap: balance; }
 .narr-body { display: flex; flex-direction: column; gap: 12px; font-size: 16px; line-height: 1.68; color: var(--ink-2); }
 .narr-body strong { color: var(--ink); font-weight: 650; }
@@ -287,8 +293,25 @@
 
 /* finish */
 .finish { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; padding-top: 22px; border-top: 1px solid var(--line); }
-.finish-badge { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--ok); color: var(--surface); animation: pop 0.4s var(--ease) both; }
+.finish-badge {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok);
+  color: var(--surface);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 45%, transparent);
+  animation: pop 0.4s var(--ease) both, finish-ring 1.3s 0.35s var(--ease-out) 2;
+}
+@keyframes finish-ring { to { box-shadow: 0 0 0 14px transparent; } }
 .finish p { font-size: 13.5px; }
+.finish-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.finish-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); }
+.finish-stat { display: inline-flex; align-items: center; gap: 6px; }
+.finish-stat b { color: var(--ink); font-weight: 650; }
+.finish-stat .ui-ring { color: var(--ok); }
+.finish-flame { color: var(--server); }
 .finish-next {
   grid-column: 1 / -1;
   position: relative;
@@ -512,11 +535,9 @@
 .pnav .btn--primary .pnav-label { max-width: 240px; white-space: nowrap; }
 .player:not([data-cover]) .pnav-mid { display: none; }
 
-/* ---------- shortcuts (modal frame is in site.css) ---------- */
-.shortcuts { margin: 0; display: flex; flex-direction: column; }
-.shortcuts > div { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--line-soft); }
-.shortcuts dt { display: flex; gap: 4px; }
-.shortcuts dd { margin: 0; font-size: 14px; color: var(--ink-2); }
+/* ---------- shortcuts: the sheet is shared with the whole site (site.css, .keysheet) ---------- */
+/* no keyboard on a touch screen, so no keyboard button either */
+@media (hover: none) and (pointer: coarse) { .pbar-keys { display: none; } }
 
 /* ---------- small screens: stage on top, narrative scrolls below ---------- */
 @media (max-width: 959px) {

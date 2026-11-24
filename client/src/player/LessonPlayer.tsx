@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, Clock, Gauge, Keyboard, Pause, Play, RotateCcw, Search, Target, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, Clock, Flame, Gauge, Keyboard, Pause, Play, RotateCcw, Search, Target } from 'lucide-react';
 import { Stage } from '@/engine/Stage';
 import { frameOf } from '@/engine/geometry';
 import { defaultValues, stepScene, stepScenes } from '@/engine/sandbox';
@@ -10,12 +10,17 @@ import { PracticePanel } from './PracticePanel';
 import { TutorPanel } from './TutorPanel';
 import type { Course, Lesson, Step } from '@/engine/types';
 import { findEntry, nextReady, prefetchLesson } from '@/content/registry';
-import { lessonKey, recordStep, useProgress } from '@/lib/progress';
+import { lessonKey, recordStep, useDash, useProgress } from '@/lib/progress';
 import { usePrefersReducedMotion, useMediaQuery } from '@/lib/media';
+import { useMentorPage } from '@/lib/mentor';
+import { confetti } from '@/lib/confetti';
 import { ThemeToggle } from '@/site/ThemeToggle';
 import { useSearch } from '@/site/Search';
+import { ShortcutSheet } from '@/site/Hotkeys';
+import { MentorButton } from '@/site/MentorDock';
+import { courseDone } from '@/site/learner';
 import { GlossaryProvider, Rich } from './RichText';
-import { Glide } from '@/site/ui';
+import { Glide, Ring } from '@/site/ui';
 import { Callout, Changes, Check as CheckBlock, CodeBlock, Legend, Metrics } from './parts';
 import './player.css';
 
@@ -54,7 +59,36 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
 
   const step = s > 0 ? lesson.steps[s - 1] : null;
   const sceneStep = lesson.steps[Math.max(0, s - 1)];
+  useMentorPage({
+    kind: 'lesson',
+    title: lesson.title,
+    stepTitle: step ? `${s}/${total} ${step.title}` : 'Cover',
+    stepBody: step?.body.join(' '),
+    code: step?.code?.code,
+  });
   const prevStep = s > 1 ? lesson.steps[s - 2] : undefined;
+
+  // Which way the learner moved, so the new step slides in from the side it came from.
+  // Updated only when the step changes, so other re-renders never replay the animation.
+  const moved = useRef({ s, dir: 'fwd' as 'fwd' | 'back' });
+  if (moved.current.s !== s) moved.current = { s, dir: s > moved.current.s ? 'fwd' : 'back' };
+  const dir = moved.current.dir;
+  // Rough time to the end, from the lesson's length and how far in the learner is.
+  const minutesLeft = s > 0 ? Math.max(1, Math.round((lesson.minutes * (total - s + 1)) / total)) : lesson.minutes;
+
+  // The first time a lesson is finished, a burst of confetti from the "Next lesson" button.
+  // (Set inside the frame callback, so React's double-run of effects in dev can't swallow it.)
+  const doneBefore = useRef(!!saved?.done);
+  const nextRef = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (s !== total || doneBefore.current) return;
+    const id = requestAnimationFrame(() => {
+      doneBefore.current = true;
+      const r = nextRef.current?.getBoundingClientRect();
+      confetti(r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: window.innerWidth / 2, y: window.innerHeight * 0.7 });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [s, total]);
 
   // Sandbox steps: the learner's values per step (kept when moving between steps).
   const [sbValues, setSbValues] = useState<Record<number, Values>>({});
@@ -166,10 +200,12 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
           {/* wide screens show the labelled timeline under the stage instead */}
           {!wide && <Segments lesson={lesson} s={s} go={go} />}
           <div className="pbar-tools">
-            <button className="btn btn--ghost btn--icon" onClick={openSearch} aria-label="Search" title="Search (/ or ⌘K)">
+            {/* wide screens: the mentor lives here, not floating over the step timeline */}
+            {wide && <MentorButton />}
+            <button className="btn btn--ghost btn--icon" onClick={openSearch} aria-label="Search or jump to" title="Search or jump to (/)">
               <Search size={17} />
             </button>
-            <button className="btn btn--ghost btn--icon" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts" title="Shortcuts (?)">
+            <button className="btn btn--ghost btn--icon pbar-keys" onClick={() => setHelp(true)} aria-label="Keyboard shortcuts" title="Shortcuts (?)">
               <Keyboard size={17} />
             </button>
             <ThemeToggle />
@@ -179,12 +215,17 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
         <div className="pmain">
           <section className="narr" ref={narrRef} aria-live="polite">
             {step ? (
-              <article className="narr-step" key={s} data-beat={step.beat}>
+              <article className="narr-step" key={s} data-beat={step.beat} data-dir={dir}>
                 <div className="narr-meta">
                   <span className="beat-tag">{BEAT_LABEL[step.beat]}</span>
                   <span className="narr-count">
                     Step {s} <span>of {total}</span>
                   </span>
+                  {!finished && (
+                    <span className="narr-left" title="Rough time to the end of the lesson">
+                      <Clock size={12} aria-hidden /> ~{minutesLeft} min left
+                    </span>
+                  )}
                 </div>
                 <h1 className="narr-title display">{step.title}</h1>
                 <div className="narr-body">
@@ -276,12 +317,12 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
             </button>
           ) : finished ? (
             next ? (
-              <Link className="btn btn--primary" to={`/${course.id}/${next.stub.id}`}>
+              <Link className="btn btn--primary" to={`/${course.id}/${next.stub.id}`} ref={nextRef}>
                 <span className="pnav-label">Next lesson</span>
                 <ArrowRight size={16} />
               </Link>
             ) : (
-              <Link className="btn btn--primary" to={`/${course.id}`}>
+              <Link className="btn btn--primary" to={`/${course.id}`} ref={nextRef}>
                 <span>Course map</span>
                 <ArrowRight size={16} />
               </Link>
@@ -296,7 +337,7 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
           )}
         </nav>
 
-        {help && <Shortcuts close={() => setHelp(false)} />}
+        {help && <ShortcutSheet lesson close={() => setHelp(false)} />}
       </div>
     </GlossaryProvider>
   );
@@ -450,14 +491,32 @@ function Cover({
 }
 
 function Finish({ course, next }: { course: Course; next?: ReturnType<typeof nextReady> }) {
+  const progress = useProgress();
+  const dash = useDash();
+  const c = courseDone(course, progress);
   return (
     <div className="finish">
       <div className="finish-badge">
         <Check size={18} strokeWidth={2.6} />
       </div>
-      <div>
+      <div className="finish-text">
         <strong>Lesson complete</strong>
-        <p className="muted">Your progress is saved in this browser.</p>
+        <p className="finish-stats">
+          <span className="finish-stat" data-tone="ok">
+            <Ring pct={c.pct} size={16} stroke={2.6} />
+            <span>
+              <b>{c.done}</b> of {c.ready} lessons
+            </span>
+          </span>
+          {dash.streakDays > 0 && (
+            <span className="finish-stat">
+              <Flame size={14} className="finish-flame" aria-hidden />
+              <span>
+                <b>{dash.streakDays}</b>-day streak
+              </span>
+            </span>
+          )}
+        </p>
       </div>
       {next ? (
         <Link className="finish-next" to={`/${course.id}/${next.stub.id}`}>
@@ -477,37 +536,3 @@ function Finish({ course, next }: { course: Course; next?: ReturnType<typeof nex
   );
 }
 
-function Shortcuts({ close }: { close: () => void }) {
-  const rows = useMemo(
-    () => [
-      [['→'], 'Next step'],
-      [['←'], 'Previous step'],
-      [['Space'], 'Play / pause traffic'],
-      [['Home', 'End'], 'First / last step'],
-      [['/'], 'Search lessons and terms'],
-      [['?'], 'Show this panel'],
-      [['Esc'], 'Back to the course'],
-    ] as const,
-    [],
-  );
-  return (
-    <div className="modal-wrap" onClick={close}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-head">
-          <strong>Keyboard shortcuts</strong>
-          <button className="btn btn--ghost btn--icon" onClick={close} aria-label="Close" autoFocus>
-            <X size={16} />
-          </button>
-        </div>
-        <dl className="shortcuts">
-          {rows.map(([keys, what]) => (
-            <div key={what}>
-              <dt>{keys.map((k) => <kbd key={k}>{k}</kbd>)}</dt>
-              <dd>{what}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </div>
-  );
-}

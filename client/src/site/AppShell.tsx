@@ -12,47 +12,36 @@ import {
   AlertTriangle,
   ArrowRight,
   BookA,
-  BrainCircuit,
   Code2,
   Compass,
-  Hammer,
   House,
   Layers,
   LayoutDashboard,
   Map as MapIcon,
   Menu,
-  Monitor,
   NotebookPen,
   Repeat,
-  Rocket,
   Route,
   Search,
-  Server,
-  Database,
   StickyNote,
   X,
   type LucideIcon,
 } from 'lucide-react';
 import { COURSES } from '@/content/registry';
 import { MAIN_PILLARS, getPillar } from '@/content/pillars';
-import type { PillarId, Tone } from '@/engine/types';
+import type { Tone } from '@/engine/types';
 import { useDueReviews, useProgress } from '@/lib/progress';
 import { useMediaQuery } from '@/lib/media';
 import { useSearch } from './Search';
 import { ThemeToggle } from './ThemeToggle';
 import { continueTarget, statsFor } from './learner';
 import { prefetchLessonPage } from './prefetch';
+import { PILLAR_ICON } from './pillarIcons';
 import { Glide, Logo, Ring } from './ui';
+import { goHint, MOD_KEY } from './Hotkeys';
 
-export const PILLAR_ICON: Record<PillarId, LucideIcon> = {
-  start: Compass,
-  frontend: Monitor,
-  backend: Server,
-  database: Database,
-  devops: Rocket,
-  aiml: BrainCircuit,
-  projects: Hammer,
-};
+// kept here too: pages import the topic icons from the shell
+export { PILLAR_ICON };
 
 const under = (path: string, ...roots: string[]) => roots.some((r) => path === r || path.startsWith(`${r}/`));
 
@@ -80,6 +69,8 @@ function Item({
   badge?: number;
   title?: string;
 }) {
+  // "G then D" style shortcut, shown on hover where the item has no meta of its own
+  const hint = goHint(to);
   return (
     <Link to={to} className="side-item" data-tone={tone} aria-current={active ? 'page' : undefined} title={title}>
       {/* one highlight for the whole sidebar: it glides from the old page's item to the new one */}
@@ -100,6 +91,11 @@ function Item({
         </span>
       ) : meta !== undefined ? (
         <span className="side-meta">{meta}</span>
+      ) : hint ? (
+        <span className="side-keys" aria-hidden>
+          <kbd>G</kbd>
+          <kbd>{hint.toUpperCase()}</kbd>
+        </span>
       ) : null}
     </Link>
   );
@@ -188,10 +184,10 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
         )}
       </div>
 
-      <button className="side-search" onClick={openSearch}>
+      <button className="side-search" onClick={() => openSearch()} aria-keyshortcuts="/ Control+K Meta+K">
         <Search size={15} />
-        <span>Search lessons & terms</span>
-        <kbd>/</kbd>
+        <span>Search or jump to…</span>
+        <kbd>{MOD_KEY === '⌘' ? '⌘K' : '/'}</kbd>
       </button>
 
       <ContinueCard />
@@ -282,7 +278,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
           </button>
           <Logo />
           <div className="topbar-tools">
-            <button className="btn btn--ghost btn--icon" onClick={openSearch} aria-label="Search lessons and terms">
+            <button className="btn btn--ghost btn--icon" onClick={() => openSearch()} aria-label="Search or jump to">
               <Search size={18} />
             </button>
             <ThemeToggle />
@@ -298,7 +294,7 @@ export function AppFrame({ children }: { children: ReactNode }) {
           <div className="wrap app-foot-in">
             <span>Unpacked — full-stack development, one animated diagram at a time.</span>
             <span>
-              Press <kbd>/</kbd> to search · <kbd>?</kbd> in a lesson for shortcuts
+              Press <kbd>/</kbd> to search or jump anywhere · <kbd>?</kbd> for shortcuts
             </span>
           </div>
         </footer>

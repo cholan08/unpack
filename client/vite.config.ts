@@ -4,7 +4,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [react()],
-  server: { port: 5280, strictPort: true },
+  // /api/tutor is served by `npm run dev:server`; set TUTOR_API if it runs on another port
+  server: { port: 5280, strictPort: true, proxy: { '/api': process.env.TUTOR_API ?? 'http://localhost:3001' } },
   preview: { port: 5281, strictPort: true },
   build: {
     rollupOptions: {

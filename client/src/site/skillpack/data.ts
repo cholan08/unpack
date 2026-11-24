@@ -1,7 +1,8 @@
-/* Skillpack — the full-stack tool map. Display-only for now: tiles are not
-   linked to any content yet. `icon` keys live in ./icons.tsx. */
+/* Skillpack — the full-stack tool map. Each tile links to that tool's
+   topic page (/skillpack/:id, topics in ./topics). `icon` keys live in ./icons.tsx. */
 
-export type SkillTool = { name: string; icon: string; sub?: string };
+/** `id` is the URL key (/skillpack/:id) and the key into ./topics. A tool listed twice shares one id. */
+export type SkillTool = { id: string; name: string; icon: string; sub?: string };
 export type SkillGroup = { title: string; note?: string; tools: SkillTool[] };
 export type SkillTrack = {
   id: string;
@@ -23,30 +24,30 @@ export const SKILL_TRACKS: SkillTrack[] = [
       {
         title: 'Core Basics',
         tools: [
-          { name: 'HTML', icon: 'html' },
-          { name: 'CSS', icon: 'css' },
-          { name: 'JavaScript', icon: 'javascript' },
-          { name: 'TypeScript', icon: 'typescript' },
+          { id: 'html', name: 'HTML', icon: 'html' },
+          { id: 'css', name: 'CSS', icon: 'css' },
+          { id: 'javascript', name: 'JavaScript', icon: 'javascript' },
+          { id: 'typescript', name: 'TypeScript', icon: 'typescript' },
         ],
       },
       {
         title: 'Frameworks / Libraries',
         tools: [
-          { name: 'React', icon: 'react' },
-          { name: 'Vue.js', icon: 'vue' },
-          { name: 'Angular', icon: 'angular' },
-          { name: 'Next.js', icon: 'next', sub: 'React Framework' },
-          { name: 'NuxtJS', icon: 'nuxt' },
+          { id: 'react', name: 'React', icon: 'react' },
+          { id: 'vue', name: 'Vue.js', icon: 'vue' },
+          { id: 'angular', name: 'Angular', icon: 'angular' },
+          { id: 'nextjs', name: 'Next.js', icon: 'next', sub: 'React Framework' },
+          { id: 'nuxt', name: 'NuxtJS', icon: 'nuxt' },
         ],
       },
       {
         title: 'Styling / UI',
         tools: [
-          { name: 'Bootstrap', icon: 'bootstrap' },
-          { name: 'Tailwind CSS', icon: 'tailwind' },
-          { name: 'Material UI', icon: 'mui' },
-          { name: 'Chakra UI', icon: 'chakra' },
-          { name: 'shadcn/ui', icon: 'shadcn', sub: 'UI Components' },
+          { id: 'bootstrap', name: 'Bootstrap', icon: 'bootstrap' },
+          { id: 'tailwind-css', name: 'Tailwind CSS', icon: 'tailwind' },
+          { id: 'material-ui', name: 'Material UI', icon: 'mui' },
+          { id: 'chakra-ui', name: 'Chakra UI', icon: 'chakra' },
+          { id: 'shadcn', name: 'shadcn/ui', icon: 'shadcn', sub: 'UI Components' },
         ],
       },
     ],
@@ -60,26 +61,26 @@ export const SKILL_TRACKS: SkillTrack[] = [
       {
         title: 'Languages & Runtimes',
         tools: [
-          { name: 'Python', icon: 'python' },
-          { name: 'Node.js', icon: 'node' },
-          { name: 'Java', icon: 'java' },
-          { name: 'Ruby', icon: 'ruby' },
-          { name: 'PHP', icon: 'php' },
-          { name: 'C#', icon: 'csharp' },
-          { name: 'Rust', icon: 'rust' },
-          { name: 'Go', icon: 'go' },
+          { id: 'python', name: 'Python', icon: 'python' },
+          { id: 'node', name: 'Node.js', icon: 'node' },
+          { id: 'java', name: 'Java', icon: 'java' },
+          { id: 'ruby', name: 'Ruby', icon: 'ruby' },
+          { id: 'php', name: 'PHP', icon: 'php' },
+          { id: 'csharp', name: 'C#', icon: 'csharp' },
+          { id: 'rust', name: 'Rust', icon: 'rust' },
+          { id: 'go', name: 'Go', icon: 'go' },
         ],
       },
       {
         title: 'Frameworks',
         tools: [
-          { name: 'Express.js', icon: 'express' },
-          { name: 'Django', icon: 'django' },
-          { name: 'Spring Boot', icon: 'springboot' },
-          { name: 'Ruby on Rails', icon: 'rails' },
-          { name: 'ASP.NET', icon: 'dotnet' },
-          { name: 'Laravel', icon: 'laravel' },
-          { name: 'NestJS', icon: 'nest' },
+          { id: 'express', name: 'Express.js', icon: 'express' },
+          { id: 'django', name: 'Django', icon: 'django' },
+          { id: 'spring-boot', name: 'Spring Boot', icon: 'springboot' },
+          { id: 'ruby-on-rails', name: 'Ruby on Rails', icon: 'rails' },
+          { id: 'aspnet', name: 'ASP.NET', icon: 'dotnet' },
+          { id: 'laravel', name: 'Laravel', icon: 'laravel' },
+          { id: 'nestjs', name: 'NestJS', icon: 'nest' },
         ],
       },
     ],
@@ -90,22 +91,22 @@ export const SKILL_TRACKS: SkillTrack[] = [
     label: 'Databases',
     accent: 'data',
     groups: [
-      { title: 'Relational (RDBMS)', tools: [{ name: 'MySQL', icon: 'mysql' }, { name: 'PostgreSQL', icon: 'postgres' }] },
-      { title: 'NoSQL (Document)', tools: [{ name: 'MongoDB', icon: 'mongodb' }, { name: 'CouchDB', icon: 'couchdb' }] },
-      { title: 'Wide Column', tools: [{ name: 'Cassandra', icon: 'cassandra' }] },
-      { title: 'Search & Analytics', tools: [{ name: 'Elasticsearch', icon: 'elasticsearch' }] },
+      { title: 'Relational (RDBMS)', tools: [{ id: 'mysql', name: 'MySQL', icon: 'mysql' }, { id: 'postgresql', name: 'PostgreSQL', icon: 'postgres' }] },
+      { title: 'NoSQL (Document)', tools: [{ id: 'mongodb', name: 'MongoDB', icon: 'mongodb' }, { id: 'couchdb', name: 'CouchDB', icon: 'couchdb' }] },
+      { title: 'Wide Column', tools: [{ id: 'cassandra', name: 'Cassandra', icon: 'cassandra' }] },
+      { title: 'Search & Analytics', tools: [{ id: 'elasticsearch', name: 'Elasticsearch', icon: 'elasticsearch' }] },
       {
         title: 'Graph Database',
-        tools: [{ name: 'Neo4j', icon: 'neo4j' }, { name: 'ArangoDB', icon: 'arangodb', sub: 'Multi-Model' }],
+        tools: [{ id: 'neo4j', name: 'Neo4j', icon: 'neo4j' }, { id: 'arangodb', name: 'ArangoDB', icon: 'arangodb', sub: 'Multi-Model' }],
       },
-      { title: 'Caching / Key-Value', tools: [{ name: 'Redis', icon: 'redis' }] },
+      { title: 'Caching / Key-Value', tools: [{ id: 'redis', name: 'Redis', icon: 'redis' }] },
       {
         title: 'Message Queues & Event Streaming',
         tools: [
-          { name: 'Kafka', icon: 'kafka' },
-          { name: 'RabbitMQ', icon: 'rabbitmq' },
-          { name: 'Amazon SQS', icon: 'sqs' },
-          { name: 'ZeroMQ', icon: 'zeromq' },
+          { id: 'kafka', name: 'Kafka', icon: 'kafka' },
+          { id: 'rabbitmq', name: 'RabbitMQ', icon: 'rabbitmq' },
+          { id: 'amazon-sqs', name: 'Amazon SQS', icon: 'sqs' },
+          { id: 'zeromq', name: 'ZeroMQ', icon: 'zeromq' },
         ],
       },
     ],
@@ -116,30 +117,30 @@ export const SKILL_TRACKS: SkillTrack[] = [
     label: 'DevOps',
     accent: 'net',
     groups: [
-      { title: 'Web Server / Reverse Proxy', tools: [{ name: 'Nginx', icon: 'nginx' }, { name: 'Apache', icon: 'apache' }] },
+      { title: 'Web Server / Reverse Proxy', tools: [{ id: 'nginx', name: 'Nginx', icon: 'nginx' }, { id: 'apache', name: 'Apache', icon: 'apache' }] },
       {
         title: 'Cloud Platforms',
-        tools: [{ name: 'AWS', icon: 'aws' }, { name: 'Azure', icon: 'azure' }, { name: 'Google Cloud', icon: 'gcloud' }],
+        tools: [{ id: 'aws', name: 'AWS', icon: 'aws' }, { id: 'azure', name: 'Azure', icon: 'azure' }, { id: 'google-cloud', name: 'Google Cloud', icon: 'gcloud' }],
       },
       {
         title: 'Infrastructure as Code',
-        tools: [{ name: 'Ansible', icon: 'ansible' }, { name: 'Terraform', icon: 'terraform' }, { name: 'Chef', icon: 'chef' }],
+        tools: [{ id: 'ansible', name: 'Ansible', icon: 'ansible' }, { id: 'terraform', name: 'Terraform', icon: 'terraform' }, { id: 'chef', name: 'Chef', icon: 'chef' }],
       },
       {
         title: 'CI/CD',
         tools: [
-          { name: 'Jenkins', icon: 'jenkins' },
-          { name: 'GitHub Actions', icon: 'ghactions' },
-          { name: 'GitLab CI/CD', icon: 'gitlab' },
+          { id: 'jenkins', name: 'Jenkins', icon: 'jenkins' },
+          { id: 'github-actions', name: 'GitHub Actions', icon: 'ghactions' },
+          { id: 'gitlab-ci', name: 'GitLab CI/CD', icon: 'gitlab' },
         ],
       },
       {
         title: 'Containers & Orchestration',
-        tools: [{ name: 'Docker', icon: 'docker' }, { name: 'Kubernetes', icon: 'kubernetes' }, { name: 'OpenShift', icon: 'openshift' }],
+        tools: [{ id: 'docker', name: 'Docker', icon: 'docker' }, { id: 'kubernetes', name: 'Kubernetes', icon: 'kubernetes' }, { id: 'openshift', name: 'OpenShift', icon: 'openshift' }],
       },
       {
         title: 'Monitoring & Logging',
-        tools: [{ name: 'ELK Stack', icon: 'elk' }, { name: 'Prometheus', icon: 'prometheus' }, { name: 'Grafana', icon: 'grafana' }],
+        tools: [{ id: 'elk', name: 'ELK Stack', icon: 'elk' }, { id: 'prometheus', name: 'Prometheus', icon: 'prometheus' }, { id: 'grafana', name: 'Grafana', icon: 'grafana' }],
       },
     ],
   },
@@ -152,22 +153,22 @@ export const SKILL_TRACKS: SkillTrack[] = [
       {
         title: 'Cross Platform',
         tools: [
-          { name: 'React Native', icon: 'react' },
-          { name: 'Flutter', icon: 'flutter' },
-          { name: 'Ionic', icon: 'ionic' },
-          { name: '.NET MAUI', icon: 'dotnet' },
-          { name: 'PWA', icon: 'pwa', sub: 'Progressive Web App' },
+          { id: 'react-native', name: 'React Native', icon: 'react' },
+          { id: 'flutter', name: 'Flutter', icon: 'flutter' },
+          { id: 'ionic', name: 'Ionic', icon: 'ionic' },
+          { id: 'maui', name: '.NET MAUI', icon: 'dotnet' },
+          { id: 'pwa', name: 'PWA', icon: 'pwa', sub: 'Progressive Web App' },
         ],
       },
       {
         title: 'Android',
         note: 'Native Development',
-        tools: [{ name: 'Java', icon: 'java' }, { name: 'Kotlin', icon: 'kotlin' }, { name: 'Android SDK', icon: 'android' }],
+        tools: [{ id: 'java', name: 'Java', icon: 'java' }, { id: 'kotlin', name: 'Kotlin', icon: 'kotlin' }, { id: 'android-sdk', name: 'Android SDK', icon: 'android' }],
       },
       {
         title: 'iOS',
         note: 'Native Development',
-        tools: [{ name: 'Swift', icon: 'swift' }, { name: 'Objective-C', icon: 'apple' }, { name: 'Xcode', icon: 'xcode' }],
+        tools: [{ id: 'swift', name: 'Swift', icon: 'swift' }, { id: 'objective-c', name: 'Objective-C', icon: 'apple' }, { id: 'xcode', name: 'Xcode', icon: 'xcode' }],
       },
     ],
   },

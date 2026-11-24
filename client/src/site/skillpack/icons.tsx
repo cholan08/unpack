@@ -500,9 +500,9 @@ export const SKILL_ICONS: Record<string, ReactNode> = {
   ),
 };
 
-export function SkillIcon({ name }: { name: string }) {
+export function SkillIcon({ name, size = 30 }: { name: string; size?: number }) {
   return (
-    <svg className="sk-ico" viewBox="0 0 24 24" width="30" height="30" aria-hidden>
+    <svg className="sk-ico" viewBox="0 0 24 24" width={size} height={size} aria-hidden>
       {SKILL_ICONS[name] ?? <circle cx="12" cy="12" r="9" fill="var(--muted-2)" />}
     </svg>
   );
