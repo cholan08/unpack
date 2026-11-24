@@ -20,6 +20,7 @@ import { usePrefersReducedMotion } from '@/lib/media';
 import { PILLAR_ICON } from './AppShell';
 import { continueTarget, courseDone, hasStarted, statsFor, type ContinueTarget } from './learner';
 import { Ring, fmtHours } from './ui';
+import { AppAnatomy } from './AppAnatomy';
 
 const PLANNED = [
   { title: 'System Design', blurb: 'From one server to millions of users.' },
@@ -543,6 +544,7 @@ export function HomePage() {
     <main className="home">
       {returning ? <Welcome t={t} /> : <Hero />}
       {!returning && <HowItWorks />}
+      <AppAnatomy />
       <Topics />
       {returning && <PracticeRow />}
       <VisualLanguage />

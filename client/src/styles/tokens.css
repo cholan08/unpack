@@ -19,64 +19,65 @@
   /* handwriting: only inside Notebooks and Handnotes, where it is the content */
   --font-hand: 'Caveat Variable', 'Bricolage Grotesque Variable', cursive;
 
-  /* neutrals — "soft paper": no pure white anywhere, so the page never glares.
-     Cards are a warm off-white on a slightly deeper canvas. */
-  --bg: #eceae4;
-  --bg-2: #e4e2db;
-  --surface: #f6f5f1;
-  --surface-2: #f1efea;
-  --surface-3: #e8e6df;
-  --line: #d9d6ce;
-  --line-soft: #e2e0d9;
-  --line-strong: #c4c0b6;
-  --ink: #17181c;
-  --ink-2: #353941;
-  --muted: #575d67;
+  /* neutrals — "parchment": warm cream, never pure white, so the page never
+     glares. Cards are a lighter cream on a deeper sand canvas; lines are tan
+     and the ink is a warm brown-black rather than a cool grey. */
+  --bg: #eee5d9;
+  --bg-2: #e7ddcf;
+  --surface: #f7f2ea;
+  --surface-2: #f3ece2;
+  --surface-3: #ebe2d5;
+  --line: #dad0c2;
+  --line-soft: #e5dccf;
+  --line-strong: #c6bbac;
+  --ink: #1c1a17;
+  --ink-2: #332f2a;
+  --muted: #5e5850;
   /* tertiary text: ≥ 4.5:1 on every surface (WCAG AA) */
-  --muted-2: #5e646e;
-  --dot: rgba(23, 24, 28, 0.1);
-  --stage-bg: #f1f0eb;
+  --muted-2: #645d55;
+  --dot: rgba(60, 44, 24, 0.1);
+  --stage-bg: #f7f0e6;
   --focus: #1d55d4;
-  --scrim: rgba(20, 18, 14, 0.42);
+  --scrim: rgba(28, 22, 14, 0.42);
 
   /* role colours — where it runs. Tints are mixed into --surface (10% / 32%)
      so they sit *on* the card instead of glowing brighter than it; tones are
      a step deeper than usual so tone text on its tint stays ≥ 4.5:1. */
   --client: #1d55d4;
-  --client-soft: #e0e5ee;
-  --client-line: #b1c2e8;
+  --client-soft: #e1e2e8;
+  --client-line: #b1c0e3;
   --server: #9e4b06;
-  --server-soft: #ede4da;
-  --server-line: #dabea6;
+  --server-soft: #eee1d3;
+  --server-line: #dbbda1;
   --data: #0e7034;
-  --data-soft: #dfe8de;
-  --data-line: #accab5;
+  --data-soft: #e0e5d8;
+  --data-line: #acc8b0;
   --net: #6040cc;
-  --net-soft: #e7e3ed;
-  --net-line: #c6bbe5;
+  --net-soft: #e8e0e7;
+  --net-line: #c7b9e0;
   --auth: #b4285b;
-  --auth-soft: #efe1e2;
-  --auth-line: #e1b3c1;
+  --auth-soft: #f0dedc;
+  --auth-line: #e2b1bc;
   /* AI/ML: models, inference, embeddings */
   --ai: #9e27ad;
-  --ai-soft: #ede0ea;
-  --ai-line: #dab3db;
-  --neutral: #535c67;
-  --neutral-soft: #e6e6e3;
-  --neutral-line: #c2c4c5;
+  --ai-soft: #eedee4;
+  --ai-line: #dbb1d6;
+  --neutral: #5f5850;
+  --neutral-soft: #e8e3db;
+  --neutral-line: #c6c1b9;
   --danger: #bb2323;
-  --danger-soft: #f0e0dc;
-  --danger-line: #e3b2af;
+  --danger-soft: #f1ddd6;
+  --danger-line: #e4b0aa;
   --warn: #8f5500;
-  --warn-soft: #ece5d9;
-  --warn-line: #d5c2a4;
+  --warn-soft: #ede2d3;
+  --warn-line: #d6c09f;
   --ok: #0e7034;
-  --ok-soft: #dfe8de;
-  --ok-line: #accab5;
+  --ok-soft: #e0e5d8;
+  --ok-line: #acc8b0;
   /* interactive "Try it" steps */
-  --try: #08716a;
-  --try-soft: #dee8e3;
-  --try-line: #a9cbc6;
+  --try: #066861;
+  --try-soft: #dfe4dc;
+  --try-line: #aac6be;
 
   /* packets: what is travelling */
   --pk-req: #2563eb;
@@ -101,11 +102,11 @@
   --syn-fn: #2f5fd0;
   --syn-str: #3f8f2f;
   --syn-num: #b55a00;
-  --syn-com: #9198a1;
+  --syn-com: #8f877c;
   --syn-tag: #c2185b;
   --syn-attr: #b55a00;
   --syn-prop: #0b7285;
-  --syn-punc: #6b7280;
+  --syn-punc: #6f685f;
 
   /* shape */
   --radius-xs: 6px;
@@ -113,10 +114,10 @@
   --radius: 12px;
   --radius-lg: 16px;
   --radius-xl: 22px;
-  --shadow-1: 0 1px 0 rgba(21, 23, 27, 0.03), 0 1px 2px rgba(21, 23, 27, 0.05);
-  --shadow-2: 0 1px 0 rgba(21, 23, 27, 0.03), 0 4px 14px -6px rgba(21, 23, 27, 0.13);
-  --shadow-3: 0 2px 0 rgba(21, 23, 27, 0.02), 0 18px 40px -18px rgba(21, 23, 27, 0.26);
-  --shadow-pop: 0 12px 32px -8px rgba(21, 23, 27, 0.22), 0 0 0 1px rgba(21, 23, 27, 0.05);
+  --shadow-1: 0 1px 0 rgba(60, 44, 24, 0.04), 0 1px 2px rgba(60, 44, 24, 0.06);
+  --shadow-2: 0 1px 0 rgba(60, 44, 24, 0.04), 0 4px 14px -6px rgba(60, 44, 24, 0.15);
+  --shadow-3: 0 2px 0 rgba(60, 44, 24, 0.03), 0 18px 40px -18px rgba(60, 44, 24, 0.28);
+  --shadow-pop: 0 12px 32px -8px rgba(60, 44, 24, 0.24), 0 0 0 1px rgba(60, 44, 24, 0.06);
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -215,18 +216,18 @@
    zone platforms sit on the desk and use the theme's own colours.
    ------------------------------------------------------------------ */
 :root {
-  --paper: #fbfaf6;
-  --paper-2: #efede7;
-  --paper-3: #e5e2da;
-  --paper-ink: #17171a;
-  --paper-line: #d4d0c6;
+  --paper: #fcf9f3;
+  --paper-2: #f3ece2;
+  --paper-3: #e9e0d3;
+  --paper-ink: #1c1a17;
+  --paper-line: #d6ccbd;
   /* the desk */
-  --desk: #e3e0d8;
-  --desk-grid: rgba(23, 23, 26, 0.075);
-  --slab: #eeebe5;
-  --slab-edge: #d5d1c7;
-  --wire: #3b3b41;
-  --wire-strong: #17171a;
+  --desk: #ede4d7;
+  --desk-grid: rgba(60, 44, 24, 0.08);
+  --slab: #f5efe5;
+  --slab-edge: #d8cdbd;
+  --wire: #3d3731;
+  --wire-strong: #1c1a17;
 }
 :root[data-theme='dark'] {
   --paper: #e8e3d9;
