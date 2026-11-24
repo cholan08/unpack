@@ -5,7 +5,7 @@ import { Stage } from '@/engine/Stage';
 import { frameOf } from '@/engine/geometry';
 import { stepScene } from '@/engine/sandbox';
 import type { Course, Lesson, Scene } from '@/engine/types';
-import { COURSES, courseStats, lessonEntries, loadLesson, peekLesson } from '@/content/registry';
+import { COURSES, courseStats, loadLesson, peekLesson } from '@/content/registry';
 import { prefetchLessonPage } from './prefetch';
 import { useProgress } from '@/lib/progress';
 import { usePrefersReducedMotion } from '@/lib/media';
@@ -55,7 +55,6 @@ function Hero() {
   const lastCourse = last && COURSES.find((c) => c.id === last[0]);
   const lastLesson = lastCourse?.lessons[last![1]];
   const lastStep = lastLesson ? progress.lessons[progress.last!]?.step : undefined;
-  const first = course && lessonEntries(course).find((e) => e.meta);
 
   return (
     <section className="hero">
@@ -81,16 +80,19 @@ function Hero() {
                 Continue: {lastLesson.title} <ArrowRight size={16} />
               </Link>
             ) : (
-              first && (
-                <Link className="btn btn--primary btn--lg" to={`/${course.id}/${first.stub.id}`} onMouseEnter={() => prefetchLessonPage(course, first.stub.id)}>
-                  Start with {first.meta!.title} <ArrowRight size={16} />
-                </Link>
-              )
+              <Link className="btn btn--primary btn--lg" to="/start">
+                Start here <ArrowRight size={16} />
+              </Link>
             )}
             {course && (
-              <Link className="btn btn--lg" to={`/${course.id}`}>
-                <BookOpen size={16} /> See the course map
-              </Link>
+              <>
+                <Link className="btn btn--lg" to={`/${course.id}/roadmap`}>
+                  Roadmap
+                </Link>
+                <Link className="btn btn--lg" to={`/${course.id}`}>
+                  <BookOpen size={16} /> See the course map
+                </Link>
+              </>
             )}
           </div>
         </div>

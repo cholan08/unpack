@@ -1,4 +1,4 @@
-import { actor, box, db, defineLesson, flow, item, link, patch, stack } from '@/content/dsl';
+import { actor, box, choice, db, defineLesson, defineSandbox, flow, fmt, humanTime, item, link, patch, range, stack, toggle } from '@/content/dsl';
 import type { Item, LinkSpec, NodeSpec } from '@/engine/types';
 
 /* ---------- layout: a person and a bot → the limiter (with its bucket) → the login route → the DB ---------- */
@@ -21,6 +21,60 @@ const botFlood = (blocked: boolean) =>
       : flow(['bot', 'limiter', 'route', 'users'], { kind: 'err', label: o === 0 ? ['guess', 'pass', 'find'] : undefined, every: 1.6, offset: o }),
   );
 
+/* ---------- sandbox: the limit, the bot's speed, how many servers count ---------- */
+const COMMON = 10000; // the attacker's list of most common passwords
+const sandbox = defineSandbox({
+  intro: 'Set the limit (per 15 minutes), make the bot faster, and add servers. How long until the bot has tried the **10,000 most common passwords** on Ana’s account?',
+  controls: [
+    range('limit', 'Attempts allowed per 15 min', { min: 1, max: 100, value: 10 }),
+    range('bot', 'Bot tries per minute', { min: 1, max: 100_000, value: 10_000, log: true, format: fmt }),
+    choice('servers', 'Servers', [['1', '1'], ['3', '3'], ['10', '10']]),
+    toggle('shared', 'Counters shared in Redis'),
+  ],
+  compute: (v) => {
+    const limit = Number(v.limit);
+    const bot = Number(v.bot);
+    const servers = Number(v.servers);
+    const shared = v.shared === true;
+    const allowed = (limit / 15) * (shared ? 1 : servers); // per minute; the load balancer spreads the bot over servers
+    const through = Math.min(bot, allowed);
+    const blocked = bot > allowed;
+    const minutes = COMMON / through;
+    const anaOk = limit >= 2; // Ana mistypes once, then gets it right
+    const rate = through < 10 ? String(Math.round(through * 10) / 10) : fmt(through);
+    const counters = servers > 1 && !shared;
+    const nodes: Record<string, NodeSpec> = {
+      ...patch(base, {
+        bot: { sub: `${fmt(bot)} tries/min` },
+        ana: anaOk ? {} : { sub: 'typo → locked out', badge: { text: '429', tone: 'danger' } },
+        limiter: {
+          label: servers > 1 ? `rateLimit × ${servers}` : 'rateLimit',
+          sub: `${limit} per 15 min`,
+          state: 'active',
+          badge: counters ? { text: `${servers} separate counters`, tone: 'warn' } : blocked ? { text: '429 for the bot', tone: 'auth' } : { text: 'bot under the limit', tone: 'warn' },
+        },
+        route: { state: blocked ? undefined : 'busy' },
+      }),
+      ...(shared ? { redis: box(650, 150, 'Redis', { sub: 'shared count', icon: 'bolt', tone: 'data', w: 180, state: 'active' }) } : {}),
+    };
+    const flows = [
+      ...botFlood(blocked).slice(0, bot < 10 ? 1 : 4),
+      anaOk ? anaTry : flow(['ana', 'limiter'], { kind: 'auth', label: '2nd try', back: 'err', backLabel: '429', every: 4.8 }),
+    ];
+    const note =
+      `The bot gets **${rate}** guesses a minute past the limiter, so 10,000 common passwords take **${humanTime(minutes * 60)}**.` +
+      (counters ? ` Each of the ${servers} servers counts on its own, so the bot gets ${servers}× the limit — share the counters in Redis.` : '') +
+      (!blocked ? ' The bot is under the limit, so nothing slows it down at all.' : '') +
+      (!anaOk ? ' But Ana mistypes once and is locked out for 15 minutes — too strict hurts real people.' : '');
+    return {
+      scene: { nodes, links: [...links, ...(shared ? [link('limiter', 'redis', { style: 'dashed' })] : [])], flows },
+      metrics: { guesses: Math.round(through * 10) / 10, ana: anaOk ? 'yes' : 'locked out' },
+      tone: minutes < 24 * 60 ? 'danger' : !anaOk || minutes < 7 * 24 * 60 ? 'warn' : 'ok',
+      note,
+    };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'guesses', label: 'Bot guesses reaching the DB / min', better: 'lower' },
@@ -33,6 +87,7 @@ export default defineLesson({
     { text: 'How a token bucket works', step: 3 },
     { text: 'Limits across several servers', step: 5 },
     { text: 'Handling 429 as a client', step: 6 },
+    { text: 'Tune a limiter against a real attack', step: 7 },
   ],
   steps: [
     {
@@ -141,6 +196,13 @@ app.use('/api/login', rateLimit({
         links,
         flows: [flow(['ana', 'limiter'], { kind: 'auth', label: 'login', back: 'err', backLabel: '429 Retry-After: 30', every: 4 }), flow(['ana', 'limiter', 'route', 'users'], { kind: 'auth', label: ['after 30 s', 'ok', 'find'], back: 'res', every: 8, offset: 4 })],
       },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Tune the limiter',
+      body: ['One bot, one account, a list of the 10,000 most common passwords. Find a limit that stops the bot without locking Ana out.'],
+      sandbox,
     },
     {
       short: 'Recap',

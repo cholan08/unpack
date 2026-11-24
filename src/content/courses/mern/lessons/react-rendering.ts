@@ -1,4 +1,4 @@
-import { box, browser, defineLesson, flow, link, patch, zone } from '@/content/dsl';
+import { box, browser, defineLesson, flow, link, patch, practice, zone } from '@/content/dsl';
 import type { LinkSpec, ScreenLine } from '@/engine/types';
 
 /* ---------- layout: the component tree as an outline, the real page on the right ---------- */
@@ -287,6 +287,35 @@ export default defineLesson({
         }),
         links: [...treeLinks3, link('app', 'page', { route: 'hv', style: 'dashed', label: 'commit' })],
         flows: [flow(['app', 'page'], { kind: 'data', label: '+1 <li>', every: 3.2 })],
+      },
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Pure state updates for lists',
+      body: [
+        'React state requires pure functions without mutating existing state arrays or objects.',
+        'Implement `toggleTodo(todos, id)` that returns a new array where the item with matching `id` has its `done` boolean inverted.',
+      ],
+      practice: practice(
+        'Return a new array of todos with the item matching id toggled. Do NOT mutate the original array or item!',
+        `function toggleTodo(todos, id) {\n  // Return a new array with the target todo toggled\n}`,
+        `function toggleTodo(todos, id) {\n  return todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t));\n}`,
+        [
+          { label: 'inverts done status for matching item', run: '(() => { const list = [{ id: 1, done: false }, { id: 2, done: true }]; const res = toggleTodo(list, 1); return res[0].done === true && res[1].done === true; })()' },
+          { label: 'does not mutate original array or item', run: '(() => { const item = { id: 1, done: false }; const list = [item]; toggleTodo(list, 1); return list[0].done === false && item.done === false; })()' },
+          { label: 'leaves non-matching items identical by reference', run: '(() => { const item2 = { id: 2, done: false }; const list = [{ id: 1, done: false }, item2]; const res = toggleTodo(list, 1); return res[1] === item2; })()' },
+        ],
+        [
+          'Use todos.map(...) to generate a new array.',
+          'For items where item.id === id, return a new object: { ...item, done: !item.done }',
+          'For non-matching items, return the item as-is.',
+        ],
+      ),
+      metrics: { renders: 1, dom: 1 },
+      scene: {
+        nodes: patch(withNew, { list: { state: 'active' }, page: { screen: three() } }),
+        links: [...treeLinks3, commitLink],
       },
     },
     {

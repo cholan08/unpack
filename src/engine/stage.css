@@ -319,7 +319,7 @@
 .list-item[data-state='active'] { border-color: var(--tone); box-shadow: 0 0 0 3px var(--tone-soft); }
 .list-item[data-state='error'] { border-color: var(--danger); background: var(--danger-soft); }
 .list-item[data-state='ok'] { border-color: var(--ok); background: var(--ok-soft); }
-.list-item[data-state='dim'] { opacity: 0.45; }
+.list-item[data-state='dim'] { filter: saturate(0.4); } /* opacity: see ItemRow */
 .list-empty {
   position: absolute;
   inset: 0;

@@ -1,0 +1,107 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'ship',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'ship-q1',
+      kind: 'mcq',
+      q: 'In Git, what is a branch pointer?',
+      options: [
+        'A copy of every file in the repository stored in a separate folder',
+        'A lightweight 40-character SHA-1 pointer that points to a specific commit snapshot',
+        'A remote server on GitHub',
+        'A tag that cannot be modified',
+      ],
+      answer: 1,
+      explain: 'Git branches are merely movable pointers to commits. Making a new commit advances the current branch pointer.',
+      teachAt: { lessonId: 'git', step: 2 },
+    },
+    {
+      id: 'ship-q2',
+      kind: 'mcq',
+      q: 'According to the Testing Pyramid, why should you have more unit tests than end-to-end (E2E) tests?',
+      options: [
+        'Because E2E tests are not supported on Node.js',
+        'Unit tests are fast, cheap to run, and isolate errors immediately; E2E tests are slower, brittle, and expensive to maintain',
+        'Because unit tests test CSS while E2E tests only test HTML',
+        'Because CI servers charge per test line',
+      ],
+      answer: 1,
+      explain: 'The testing pyramid emphasizes a broad base of fast unit tests, fewer integration tests, and a small layer of end-to-end tests.',
+      teachAt: { lessonId: 'testing', step: 1 },
+    },
+    {
+      id: 'ship-q3',
+      kind: 'mcq',
+      q: 'What is the role of a production build tool like Vite for a React app?',
+      options: [
+        'To run the Express server in production',
+        'To compile JSX/TypeScript, bundle modules, tree-shake unused code, minify JS/CSS, and generate hashed file names for long-term caching',
+        'To seed MongoDB with sample users',
+        'To register domain names automatically',
+      ],
+      answer: 1,
+      explain: 'Vite transforms modern source code into lean, optimized static assets with cache-busting hashes for fast CDN delivery.',
+      teachAt: { lessonId: 'build-tools', step: 2 },
+    },
+    {
+      id: 'ship-q4',
+      kind: 'mcq',
+      q: 'Why should database credentials and API secrets NEVER be hardcoded into Git repositories?',
+      options: [
+        'Because Git cannot store strings longer than 16 characters',
+        'Because Git history is immutable and accessible to anyone with repository access; once committed, secrets must be revoked and rotated',
+        'Because MongoDB rejects connection strings stored in .git folders',
+        'Because it causes merge conflicts on every pull',
+      ],
+      answer: 1,
+      explain: 'Committed secrets leak into Git history. Always inject secrets via environment variables at runtime.',
+      teachAt: { lessonId: 'deploying', step: 3 },
+    },
+    {
+      id: 'ship-q5',
+      kind: 'mcq',
+      q: 'What is the benefit of layer caching in Dockerfile builds?',
+      options: [
+        'It speeds up database queries',
+        'Docker reuses cached layers that haven’t changed (like npm install dependencies) and only rebuilds layers that follow an altered file',
+        'It shrinks Docker images to 0 bytes',
+        'It disables runtime health checks',
+      ],
+      answer: 1,
+      explain: 'By copying package.json and running npm install before copying the rest of your source, Docker caches the slow dependency install layer.',
+      teachAt: { lessonId: 'containers', step: 3 },
+    },
+    {
+      id: 'ship-q6',
+      kind: 'mcq',
+      q: 'What is the purpose of an automated CI (Continuous Integration) pipeline?',
+      options: [
+        'To write code automatically for developers',
+        'To automatically run linting, type-checking, and tests on every branch or pull request before merging',
+        'To purchase cloud server capacity dynamically',
+        'To replace user feedback sessions',
+      ],
+      answer: 1,
+      explain: 'CI ensures broken code or failing tests are caught automatically before merging into main branches.',
+      teachAt: { lessonId: 'cicd', step: 1 },
+    },
+  ],
+  challenge: {
+    id: 'ship-challenge',
+    prompt: 'Implement a semantic version comparison function compareSemver(v1, v2) that returns 1 if v1 > v2, -1 if v1 < v2, and 0 if equal (e.g., "1.2.3" vs "1.2.4").',
+    starter: `function compareSemver(v1, v2) {\n  // Compare "MAJOR.MINOR.PATCH" strings\n}`,
+    language: 'js',
+    solution: `function compareSemver(v1, v2) {\n  const p1 = v1.split('.').map(Number);\n  const p2 = v2.split('.').map(Number);\n  for (let i = 0; i < 3; i++) {\n    if (p1[i] > p2[i]) return 1;\n    if (p1[i] < p2[i]) return -1;\n  }\n  return 0;\n}`,
+    tests: [
+      { label: 'correctly compares major and minor versions', run: 'compareSemver("2.0.0", "1.9.9") === 1 && compareSemver("1.2.0", "1.3.0") === -1' },
+      { label: 'returns 0 for identical semver versions', run: 'compareSemver("1.0.4", "1.0.4") === 0' },
+    ],
+    hints: [
+      'Split each version string by "." and convert elements to numbers.',
+      'Compare major first, then minor, then patch in a loop.',
+    ],
+  },
+} satisfies PartGate;

@@ -17,12 +17,14 @@ npm run new:course -- system-design "System Design"   # scaffold a course
 
 Press `/` or `⌘K` anywhere to search lessons and glossary terms.
 
+Lessons marked **Try it** end with an interactive sandbox: drag a slider or flip a switch and the diagram, the metrics and an explanation react live (see “Interactive sandboxes” in `docs/AUTHORING.md`).
+
 ## Where things live
 
 | Path | What |
 |---|---|
 | `src/content/courses/<course>/` | **Content**: course definition and one file per lesson |
-| `src/engine/` | The visual engine: stage, nodes, links, animated packets |
+| `src/engine/` | The visual engine: stage, nodes, links, animated packets, sandbox helpers |
 | `src/player/` | The lesson player: narrative, code, metrics, checks |
 | `src/site/` | Home, course map, glossary pages |
 | `docs/PLAN.md` | Vision, design system, curriculum and roadmap |

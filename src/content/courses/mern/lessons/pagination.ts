@@ -1,4 +1,4 @@
-import { box, defineLesson, flow, item, link, stack } from '@/content/dsl';
+import { approx, box, choice, defineLesson, defineSandbox, flow, fmt, item, link, practice, range, stack, toggle } from '@/content/dsl';
 import type { Item, LinkSpec, NodeSpec } from '@/engine/types';
 
 /* ---------- layout: the client asks Express; the collection is a long list, newest first ---------- */
@@ -18,6 +18,54 @@ const links: LinkSpec[] = [link('client', 'api'), link('api', 'coll')];
 const page = (label: string, back: string, o: Parameters<typeof flow>[1] = {}) =>
   flow(['client', 'api', 'coll'], { label: [label, 'find'], back: 'res', backLabel: [back, back], every: 4.4, ...o });
 
+/* ---------- sandbox: dig deep, change the page size, let new todos arrive ---------- */
+const sandbox = defineSandbox({
+  intro: 'Jump deep into the list, change the page size, and let a new todo arrive while you read. Then switch the paging style.',
+  controls: [
+    choice('mode', 'Paging style', [['offset', 'skip / limit'], ['cursor', 'cursor']]),
+    range('page', 'Page number', { min: 1, max: 2500, value: 2, log: true, format: fmt }),
+    choice('size', 'Page size', [['10', '10'], ['20', '20'], ['50', '50'], ['100', '100']], '20'),
+    toggle('added', 'A new todo arrives while you read'),
+  ],
+  compute: (v) => {
+    const cursor = v.mode === 'cursor';
+    const size = Number(v.size);
+    const last = Math.ceil(50000 / size);
+    const pg = Math.min(Number(v.page), last);
+    const skip = (pg - 1) * size;
+    const scanned = cursor ? size : skip + size;
+    const added = v.added === true;
+    const dupes = !cursor && added && pg > 1;
+    // 10 rows stand in for 50,000: the first `k` rows are what comes before this page
+    const k = pg === 1 ? 0 : Math.max(1, Math.min(7, Math.round(Math.log10(skip) * 1.6)));
+    const mm = String(59 - (k - 1)).padStart(2, '0');
+    const items = rows((i) => (i === 0 && added ? 'ok' : i < k ? (cursor ? (i === k - 1 ? 'ok' : undefined) : 'dim') : i < k + 3 ? (dupes && i === k ? 'error' : 'active') : undefined), added ? 'todo #50,001' : undefined).map(
+      (it, i) => (cursor && i === k - 1 ? { ...it, text: `${it.text} ← cursor` } : it),
+    );
+    const dwell = 0.18 + Math.min(1.8, scanned / 25000);
+    const deep = scanned > 5000;
+    const nodes: Record<string, NodeSpec> = {
+      ...base(items, cursor ? (pg === 1 ? 'GET /api/todos' : `?before=10:${mm}`) : `?page=${fmt(pg)}`),
+      coll: { ...coll(items), badge: cursor ? { text: `reads ${size}`, tone: 'ok' } : { text: `walks ${approx(scanned)}`, tone: deep ? 'warn' : 'neutral' }, state: deep && !cursor ? 'busy' : undefined },
+    };
+    const flows = cursor
+      ? [page(pg === 1 ? 'first page' : `?before=10:${mm}`, `${size} todos`)]
+      : [flow(['client', 'api', 'coll'], { label: [`?page=${fmt(pg)}`, `skip ${fmt(skip)}`], back: dupes ? 'err' : 'res', backLabel: [dupes ? 'has a repeat' : `${size} todos`, `${size} todos`], every: 4.4 + dwell, dwell })];
+    const note = cursor
+      ? `\`createdAt < cursor\` jumps straight to the right place in the index and reads just **${size}** entries — on page 1 or page ${fmt(pg)}.${added ? ' The new todo lands above your cursor, so nothing shifts.' : ''}`
+      : `\`skip(${fmt(skip)})\` walks over **${fmt(skip)}** entries and throws them away, then returns ${size}.` +
+        (deep ? ` Page ${fmt(pg)} pays for every page before it.` : pg === 1 ? ' Page 1 is cheap — the trouble starts deeper.' : ' Still cheap this close to the top.') +
+        (dupes ? ' And the new todo pushed everything down one, so this page **starts with a repeat**.' : '') +
+        (Number(v.page) > last ? ` (At ${size} per page there are only ${fmt(last)} pages.)` : '');
+    return {
+      scene: { nodes, links, flows },
+      metrics: { payload: `${size / 4} KB`, scanned, dupes: dupes ? 'yes' : 'no' },
+      tone: dupes ? 'danger' : deep && !cursor ? 'warn' : 'ok',
+      note,
+    };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'payload', label: 'Response size', better: 'lower' },
@@ -30,6 +78,7 @@ export default defineLesson({
     { text: 'Why deep pages get slow', step: 3 },
     { text: 'Why items shift between pages', step: 4 },
     { text: 'Cursor pagination', step: 5 },
+    { text: 'Dig deep with both styles', step: 8 },
   ],
   steps: [
     {
@@ -159,6 +208,40 @@ res.json({ todos, nextCursor });`,
       },
       metrics: { payload: '5 KB', scanned: 20, dupes: 'no' },
       scene: { nodes: base(rows((i) => (i < 4 ? 'dim' : i < 7 ? 'active' : undefined)), '?before=…'), links, flows: [page('?before=…', '20 todos')] },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Page 1, page 500, page 2,500',
+      body: ['Same 50,000 todos, two ways to page through them. Push both until one of them breaks.'],
+      sandbox,
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Calculate offset pagination parameters',
+      body: [
+        'When writing offset-based endpoints, the backend must calculate how many documents to skip, the total number of pages, and whether adjacent pages exist.',
+        'Implement `getPagination(page, limit, totalItems)` that returns an object `{ skip, totalPages, hasNext, hasPrev }`. Note that `page` is 1-indexed (page 1 skips 0).',
+      ],
+      practice: practice(
+        'Return { skip, totalPages, hasNext, hasPrev } for 1-based page, limit, and totalItems.',
+        `function getPagination(page, limit, totalItems) {\n  // Compute skip, totalPages, hasNext, hasPrev\n}`,
+        `function getPagination(page, limit, totalItems) {\n  const skip = (page - 1) * limit;\n  const totalPages = Math.ceil(totalItems / limit);\n  return {\n    skip,\n    totalPages,\n    hasNext: page < totalPages,\n    hasPrev: page > 1,\n  };\n}`,
+        [
+          { label: 'calculates skip correctly for page 2', run: 'getPagination(2, 10, 35).skip === 10' },
+          { label: 'calculates totalPages using ceiling', run: 'getPagination(1, 10, 35).totalPages === 4' },
+          { label: 'sets hasNext and hasPrev for first page', run: '(() => { const p = getPagination(1, 10, 35); return p.hasNext === true && p.hasPrev === false; })()' },
+          { label: 'sets hasNext false on last page', run: 'getPagination(4, 10, 35).hasNext === false' },
+        ],
+        [
+          'Calculate skip as (page - 1) * limit.',
+          'Calculate totalPages as Math.ceil(totalItems / limit).',
+          'hasNext is true when page < totalPages; hasPrev is true when page > 1.',
+        ],
+      ),
+      metrics: { payload: '5 KB', scanned: 10, dupes: 'no' },
+      scene: { nodes: base(rows((i) => (i < 3 ? 'ok' : undefined)), '?page=2&limit=10'), links },
     },
     {
       short: 'Recap',

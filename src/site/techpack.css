@@ -1,0 +1,119 @@
+/* ================= Techpack ================= */
+.tp-page { padding-bottom: 72px; }
+
+.tp-client { --tp: var(--client); --tp-soft: var(--client-soft); }
+.tp-server { --tp: var(--server); --tp-soft: var(--server-soft); }
+.tp-data { --tp: var(--data); --tp-soft: var(--data-soft); }
+.tp-net { --tp: var(--net); --tp-soft: var(--net-soft); }
+.tp-auth { --tp: var(--auth); --tp-soft: var(--auth-soft); }
+
+/* ---------- hero + sticky bar ---------- */
+.tp-hero { padding-top: 48px; }
+.tp-lede { max-width: 640px; font-size: 1.08rem; color: var(--ink-2); margin: 14px 0 0; }
+
+.tp-bar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px;
+  margin-top: 26px; padding: 12px 0;
+  background: var(--paper, var(--bg));
+  border-bottom: 2px dashed var(--line-strong);
+}
+.tp-jump { display: flex; flex-wrap: wrap; gap: 8px; flex: 1 1 520px; }
+.tp-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 4px 12px 4px 6px;
+  border: 1.5px solid var(--line-strong); border-radius: var(--wobble-sm, 999px);
+  background: var(--surface);
+  font: 600 19px/1.1 var(--font-hand, var(--font-sans)); color: var(--ink-2);
+  transition: border-color 0.15s, transform 0.15s var(--ease), background-color 0.15s;
+}
+.tp-chip:hover { border-color: var(--tp); color: var(--ink); background: color-mix(in srgb, var(--tp-soft) 70%, var(--surface)); transform: translateY(-1px) rotate(-0.6deg); }
+.tp-chip-ico { display: grid; place-items: center; width: 24px; height: 24px; color: var(--tp); }
+.tp-chip-ico svg { width: 22px; height: 22px; }
+
+.tp-search {
+  flex: 1 1 260px; max-width: 360px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px;
+  border: 2px solid var(--pen, var(--ink)); border-radius: var(--wobble-sm, 10px);
+  background: var(--surface); color: var(--muted);
+}
+.tp-search:focus-within { box-shadow: 3px 3px 0 var(--client); color: var(--ink); }
+.tp-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14.5px; }
+
+.tp-empty { margin-top: 40px; font-family: var(--font-hand); font-size: 1.5rem; color: var(--muted); }
+.tp-empty button { font: inherit; color: var(--client); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---------- sheet ---------- */
+.tp-sheet { padding-top: 56px; scroll-margin-top: 70px; }
+.tp-sheet-head { display: flex; align-items: center; gap: 16px; padding-bottom: 10px; border-bottom: 2.5px solid var(--tp); }
+.tp-sheet-head h2 { margin: 0; }
+.tp-sheet-head p { margin: 2px 0 0; font-size: 0.95rem; }
+.tp-sheet-ico {
+  flex: none; display: grid; place-items: center; width: 56px; height: 56px;
+  border: 2px solid var(--tp); border-radius: var(--wobble-sm, 14px);
+  background: color-mix(in srgb, var(--tp-soft) 80%, var(--surface)); color: var(--tp);
+  transform: rotate(-3deg);
+}
+.tp-sheet-ico svg { width: 32px; height: 32px; }
+.tp-sheet-n { margin-left: auto; align-self: flex-start; font: 700 2.4rem/1 var(--font-hand); color: color-mix(in srgb, var(--tp) 45%, transparent); }
+
+.tp-section { margin-top: 26px; }
+.tp-section h3 { margin: 0 0 12px; font-size: 1.6rem; color: var(--ink-2); }
+.tp-section h3::before { content: '✎ '; color: var(--tp); }
+
+.tp-grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 18px;
+  align-items: start;
+}
+
+/* card — base paper look comes from notebook.css ([class$='-card']) */
+.tp-card { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 14px; min-width: 0; transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease); }
+.tp-card:nth-child(3n + 1) { transform: rotate(-0.25deg); }
+.tp-card:nth-child(3n + 2) { transform: rotate(0.2deg); }
+.tp-card:hover { transform: translateY(-2px); box-shadow: 5px 7px 0 color-mix(in srgb, var(--tp) 35%, var(--line-strong)); }
+.tp-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tp-card-head h4 { margin: 0; font: 650 1.45rem/1.1 var(--font-hand, var(--font-sans)); color: var(--ink); }
+
+.tp-copy {
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border: 1.5px solid var(--line-strong); border-radius: var(--wobble-sm, 8px);
+  background: var(--surface); color: var(--muted); font: 600 12px var(--font-mono);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.tp-copy:hover { color: var(--ink); border-color: var(--pen, var(--ink)); }
+.tp-copy[data-done] { color: var(--ok); border-color: var(--ok-line); background: var(--ok-soft); }
+
+.tp-code {
+  margin: 0; padding: 11px 12px; overflow-x: auto;
+  border: 1.5px solid var(--line); border-left: 4px solid var(--tp); border-radius: 8px;
+  background: var(--stage-bg, var(--surface-2));
+}
+.tp-code .code-lines { display: block; font-family: var(--font-mono); font-size: 12.75px; line-height: 20px; }
+.tp-code .code-line { display: flex; }
+.tp-code .code-src { white-space: pre-wrap; overflow-wrap: anywhere; }
+.tp-code .token.keyword, .tp-code .token.module, .tp-code .token.control-flow, .tp-code .token.null, .tp-code .token.undefined { color: var(--syn-kw); }
+.tp-code .token.function, .tp-code .token.method { color: var(--syn-fn); }
+.tp-code .token.string, .tp-code .token.template-string, .tp-code .token.attr-value { color: var(--syn-str); }
+.tp-code .token.number, .tp-code .token.boolean, .tp-code .token.constant { color: var(--syn-num); }
+.tp-code .token.comment { color: var(--syn-com); font-style: italic; }
+.tp-code .token.tag, .tp-code .token.class-name { color: var(--syn-tag); }
+.tp-code .token.attr-name { color: var(--syn-attr); }
+.tp-code .token.property, .tp-code .token.property-access { color: var(--syn-prop); }
+.tp-code .token.punctuation, .tp-code .token.operator { color: var(--syn-punc); }
+
+.tp-note { margin: 0; font: 500 1.2rem/1.25 var(--font-hand, var(--font-sans)); color: var(--warn); }
+.tp-note::before { content: '↳ '; }
+.tp-lesson { display: inline-flex; align-items: center; gap: 5px; width: fit-content; font-size: 13px; font-weight: 600; color: var(--tp); }
+.tp-lesson:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 600px) {
+  .tp-grid { grid-template-columns: minmax(0, 1fr); }
+  .tp-search { max-width: none; }
+  .tp-bar { position: static; }
+  .tp-sheet-ico { width: 46px; height: 46px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-card, .tp-card:hover, .tp-chip:hover { transform: none; }
+}

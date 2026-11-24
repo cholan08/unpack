@@ -1,4 +1,4 @@
-import { chip, defineLesson, doc, field, flow, link, zone } from '@/content/dsl';
+import { chip, defineLesson, doc, field, flow, link, practice, zone } from '@/content/dsl';
 import type { LinkSpec, NodeSpec } from '@/engine/types';
 
 /* ---------- layout: variables on the stack (left), objects on the heap (right), arrows = references ---------- */
@@ -193,6 +193,41 @@ const markedDone = (t) => ({ ...t, done: true });    // ✅ returns a new one`,
           mern2: obj(845, 450, 'mern*', [['done', 'true', true]], { w: 170, state: 'ok', badge: { text: 'new', tone: 'ok' } }),
         },
         links: [ref('prev', 'a1'), ref('next', 'a2'), ref('a1', 'milk', { style: 'dashed' }), ref('a1', 'mern', { style: 'dashed' }), ref('a2', 'milk', { style: 'dashed' }), ref('a2', 'mern2', { style: 'dashed' })],
+      },
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Update nested object immutably',
+      body: [
+        'React state updates require creating new object references whenever data changes.',
+        'Implement `updateCity(user, newCity)` which returns a brand new user object with the updated city at `user.address.city`, without mutating the input object.',
+      ],
+      practice: practice(
+        'Return a new user object with user.address.city updated to newCity. Do NOT mutate user or user.address directly!',
+        `function updateCity(user, newCity) {\n  // Return a new object with updated address.city\n}`,
+        `function updateCity(user, newCity) {\n  return {\n    ...user,\n    address: {\n      ...user.address,\n      city: newCity\n    }\n  };\n}`,
+        [
+          { label: 'returns updated city', run: '(() => { const u = { name: "Ada", address: { city: "London" } }; return updateCity(u, "Paris").address.city === "Paris"; })()' },
+          { label: 'does not mutate original object', run: '(() => { const u = { name: "Ada", address: { city: "London" } }; updateCity(u, "Paris"); return u.address.city === "London"; })()' },
+          { label: 'preserves other properties', run: '(() => { const u = { name: "Ada", age: 36, address: { city: "London", zip: "10001" } }; const res = updateCity(u, "Paris"); return res.age === 36 && res.address.zip === "10001"; })()' },
+        ],
+        [
+          'Spread the outer user object: { ...user, address: ... }',
+          'Spread the inner address object: { ...user.address, city: newCity }',
+          'Make sure you return the resulting object.',
+        ],
+      ),
+      metrics: { objects: 3, surprise: 'no' },
+      scene: {
+        nodes: {
+          ...frame,
+          todo: v(200, 'user  →'),
+          copy: v(330, 'next  →'),
+          o1: obj(700, 180, 'original user', [['name', '"Ada"'], ['city', '"London"']]),
+          o2: obj(700, 380, 'updated copy', [['name', '"Ada"'], ['city', '"Paris"', true]], { state: 'ok' }),
+        },
+        links: [ref('todo', 'o1'), ref('copy', 'o2')],
       },
     },
     {

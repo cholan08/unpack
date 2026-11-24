@@ -1,0 +1,138 @@
+/* ================= Skillpack ================= */
+.sk-page { padding-bottom: 64px; }
+
+/* per-track accent */
+.sk-client { --sk: var(--client); }
+.sk-server { --sk: var(--server); }
+.sk-data { --sk: var(--data); }
+.sk-net { --sk: var(--net); }
+.sk-auth { --sk: var(--auth); }
+
+/* ---------- hero ---------- */
+.sk-hero { padding-top: 52px; padding-bottom: 12px; }
+.sk-kicker {
+  font: 500 12.5px var(--font-mono);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sk-title {
+  font-size: clamp(52px, 9vw, 112px);
+  font-weight: 800;
+  line-height: 0.92;
+  margin: 12px 0 14px;
+  text-transform: uppercase;
+}
+.sk-title em,
+.sk-track-title em { font-style: normal; color: var(--sk, var(--client)); }
+.sk-lede { font: 400 14.5px var(--font-mono); color: var(--muted); margin: 0; }
+
+.sk-jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+.sk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font: 600 13.5px var(--font-sans);
+  color: var(--ink-2);
+  transition: border-color 0.15s, color 0.15s, transform 0.15s var(--ease);
+}
+.sk-chip:hover { border-color: var(--sk); color: var(--ink); transform: translateY(-1px); }
+.sk-chip-n { font: 600 11.5px var(--font-mono); color: var(--sk); }
+.sk-chip-count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  font: 600 11.5px var(--font-mono);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- track ---------- */
+.sk-track { padding-top: 64px; scroll-margin-top: 60px; }
+.sk-track-head {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.sk-track-head::before {
+  content: '';
+  position: absolute;
+  inset: -40px -24px auto auto;
+  width: 420px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--sk) 14%, transparent), transparent);
+  pointer-events: none;
+  z-index: -1;
+}
+.sk-track-title {
+  margin: 0;
+  font-size: clamp(44px, 8vw, 92px);
+  font-weight: 800;
+  line-height: 0.95;
+  text-transform: uppercase;
+  white-space: pre;
+}
+.sk-track-pager {
+  flex: none;
+  margin-top: 6px;
+  padding: 3px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: 500 12.5px var(--font-mono);
+  color: var(--muted);
+}
+
+/* ---------- group ---------- */
+.sk-group { margin-top: 30px; }
+.sk-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.sk-group-head h3 { margin: 0; font: 650 19px var(--font-sans); letter-spacing: -0.01em; color: var(--ink); }
+.sk-group-n { font-family: var(--font-mono); color: var(--sk); margin-right: 10px; }
+.sk-group-note { font: 400 12.5px var(--font-mono); color: var(--muted); }
+
+.sk-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.sk-tile {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 64px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+.sk-tile:hover {
+  border-color: color-mix(in srgb, var(--sk) 55%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sk) 12%, transparent), var(--shadow-1);
+}
+.sk-tile-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; color: var(--ink); }
+.sk-ico { display: block; overflow: visible; }
+.sk-ico text { font-family: var(--font-sans); font-weight: 800; }
+.sk-ico text.sk-thin { font-weight: 300; }
+.sk-tile-text { display: flex; flex-direction: column; min-width: 0; }
+.sk-tile-name { font: 700 14.5px var(--font-mono); color: var(--ink); letter-spacing: -0.01em; }
+.sk-tile-sub { font: 400 11px var(--font-mono); color: var(--muted); margin-top: 1px; }
+
+@media (max-width: 600px) {
+  .sk-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .sk-tile { padding: 10px 12px; gap: 10px; }
+  .sk-tile-name { font-size: 13px; }
+}

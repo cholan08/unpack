@@ -1,4 +1,4 @@
-import { box, defineLesson, dot, flow, link, patch, zone } from '@/content/dsl';
+import { box, choice, defineLesson, defineSandbox, dot, flow, fmt, link, patch, practice, range, toggle, zone } from '@/content/dsl';
 import type { FlowSpec, LinkSpec } from '@/engine/types';
 
 /* ---------- layout: one async function on the left, three API endpoints on the right ---------- */
@@ -20,6 +20,54 @@ const call = (to: 'e1' | 'e2' | 'e3', label: string, o: Partial<FlowSpec> = {}):
   flow(['fn', to], { label, back: 'res', backLabel: 'data', speed: 1.6, every: 7, ...o });
 const sequential = [call('e1', 'getUser()'), call('e2', 'getTodos()', { offset: 2.1 }), call('e3', 'getStats()', { offset: 4.2 })];
 
+/* ---------- sandbox: how the dashboard waits, one slow endpoint, one failure ---------- */
+const sandbox = defineSandbox({
+  intro: 'Pick how `loadDashboard()` waits, slow down one endpoint, or make one fail. The **total wait** is what the user sits through.',
+  controls: [
+    choice('mode', 'How you wait', [['seq', 'await × 3'], ['all', 'Promise.all'], ['settled', 'allSettled']]),
+    range('stats', 'GET /api/stats takes', { min: 50, max: 3000, value: 100, log: true, unit: 'ms' }),
+    toggle('fail', 'GET /api/todos fails (500)'),
+  ],
+  compute: (v) => {
+    const mode = String(v.mode);
+    const stats = Number(v.stats);
+    const fail = v.fail === true;
+    const seq = mode === 'seq';
+    const total = seq ? (fail ? 200 : 200 + stats) : mode === 'all' && fail ? 100 : Math.max(100, stats);
+    const statsCalled = !(seq && fail);
+    const failed = fail && mode !== 'settled';
+    const tone = failed ? 'danger' : total > 300 ? 'warn' : 'ok';
+    const pace = Math.max(0.35, Math.min(1.6, 160 / stats)); // a slow endpoint → a slow packet
+    const every = (seq ? 7 : 3.8) + (pace < 1 ? 4 : 0);
+    const err = fail ? ({ back: 'err', backLabel: '500' } as const) : {};
+    const flows: FlowSpec[] = seq
+      ? [
+          call('e1', 'await getUser()', { every }),
+          call('e2', 'await getTodos()', { every, offset: 2.1, ...err }),
+          ...(statsCalled ? [call('e3', 'await getStats()', { every, offset: 4.2, speed: pace })] : []),
+        ]
+      : [call('e1', 'getUser()', { every }), call('e2', 'getTodos()', { every, ...err }), call('e3', 'getStats()', { every, speed: pace })];
+    const nodes = patch(base, {
+      fn: { state: failed ? 'error' : 'ok', badge: failed ? { text: 'catch (err)', tone: 'danger' } : { text: `${fmt(total)} ms`, tone } },
+      e2: fail ? { state: 'error', badge: { text: '500', tone: 'danger' } } : {},
+      e3: { sub: `${fmt(stats)} ms`, ...(statsCalled ? {} : { state: 'dim', badge: { text: 'never called', tone: 'neutral' } }) },
+    });
+    const note =
+      mode === 'seq'
+        ? fail
+          ? '`getTodos()` rejects, so its `await` throws and `getStats()` never even starts. The `catch` gets the error after **200 ms**.'
+          : `Each \`await\` waits for the one before: 100 + 100 + ${fmt(stats)} = **${fmt(total)} ms** — though none of them needed the others.`
+        : mode === 'all'
+          ? fail
+            ? '`Promise.all` rejects the moment `/api/todos` fails (**100 ms**) — and the user and stats results are thrown away, even though they worked.'
+            : `All three start at once; you wait for the slowest: **${fmt(total)} ms**.${stats > 300 ? ' One slow call holds up the whole dashboard — consider loading stats on their own.' : ''}`
+          : fail
+            ? `\`allSettled\` waits for all three (**${fmt(total)} ms**) and hands back *fulfilled · rejected · fulfilled*: show the user and stats, and an error just for the todos.`
+            : `Everything runs together, like \`Promise.all\` (**${fmt(total)} ms**). The difference shows up when something fails — try it.`;
+    return { scene: { nodes, links, flows }, metrics: { time: total, depth: 0 }, tone, note };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'time', label: 'Total wait', unit: 'ms', better: 'lower' },
@@ -32,6 +80,7 @@ export default defineLesson({
     { text: 'Handling errors with try/catch', step: 6 },
     { text: 'Running requests in parallel with Promise.all', step: 8 },
     { text: 'The classic async mistakes', step: 9 },
+    { text: 'Race sequential, parallel and settled waits', step: 10 },
   ],
   steps: [
     {
@@ -278,6 +327,39 @@ await Promise.all(items.map((t) => save(t)));  // ✅ all at once`,
         nodes: patch(base, { fn: { state: 'error', badge: { text: 'Promise {<pending>}', tone: 'danger' } }, e1: { state: 'dim' }, e3: { state: 'dim' } }),
         links,
         flows: [call('e2', 'getTodos()', { every: 3.6 })],
+      },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Wait in three different ways',
+      body: ['The same three requests. Change how you wait for them, then break one and see who copes.'],
+      sandbox,
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Run async tasks sequentially',
+      body: [
+        'Running async tasks with `forEach` fails to wait. Write `runSequential(tasks)` that accepts an array of async functions and executes them one after another, returning an array of all results.',
+      ],
+      practice: practice(
+        'Implement runSequential(tasks) to execute async functions in sequence and return their results in order.',
+        `async function runSequential(tasks) {\n  // Run each async task in order and collect results\n}`,
+        `async function runSequential(tasks) {\n  const results = [];\n  for (const task of tasks) {\n    results.push(await task());\n  }\n  return results;\n}`,
+        [
+          { label: 'runs tasks and collects results in order', run: '(async () => { const order = []; await runSequential([async () => { order.push(1); return "a"; }, async () => { order.push(2); return "b"; }]); return order.join("") === "12"; })()' },
+          { label: 'returns array of results', run: '(async () => { const res = await runSequential([async () => 10, async () => 20]); return res[0] === 10 && res[1] === 20; })()' },
+        ],
+        [
+          'Use an empty array const results = [] to collect the returned values.',
+          'Use a for...of loop over tasks: for (const task of tasks)',
+          'Inside the loop, await task() and push the result.',
+        ],
+      ),
+      scene: {
+        nodes: patch(base, { fn: { state: 'ok' } }),
+        links,
       },
     },
     {

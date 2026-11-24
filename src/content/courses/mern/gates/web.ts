@@ -1,0 +1,108 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'web',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'web-q1',
+      kind: 'mcq',
+      q: 'When typing a URL like https://example.com/api/todos, what must the browser resolve first before opening a TCP connection?',
+      options: [
+        'The TLS certificate of the server',
+        'The IP address of the domain via DNS lookup',
+        'The HTTP response headers from the CDN',
+        'The HTML document body',
+      ],
+      answer: 1,
+      explain: 'DNS translates human-readable hostnames into numeric IP addresses so the browser knows where to route TCP packets.',
+      teachAt: { lessonId: 'url-to-page', step: 2 },
+    },
+    {
+      id: 'web-q2',
+      kind: 'mcq',
+      q: 'Which HTTP status code category represents client mistakes, such as bad request syntax or missing credentials?',
+      options: [
+        '2xx (Success)',
+        '3xx (Redirection)',
+        '4xx (Client Error)',
+        '5xx (Server Error)',
+      ],
+      answer: 2,
+      explain: '4xx status codes (400 Bad Request, 401 Unauthorized, 404 Not Found) indicate an issue with the request sent by the client.',
+      teachAt: { lessonId: 'http', step: 3 },
+    },
+    {
+      id: 'web-q3',
+      kind: 'mcq',
+      q: 'What makes an HTTP method "idempotent"?',
+      options: [
+        'It executes faster than non-idempotent methods',
+        'Making the exact same request multiple times leaves the server state identical to making it once',
+        'It cannot return an error status code',
+        'It encrypts request parameters automatically',
+      ],
+      answer: 1,
+      explain: 'GET, PUT, and DELETE are idempotent: executing them 1 time or 10 times results in the same final system state.',
+      teachAt: { lessonId: 'http', step: 4 },
+    },
+    {
+      id: 'web-q4',
+      kind: 'mcq',
+      q: 'What is the critical rendering path?',
+      options: [
+        'The path packets take through physical fiber cables',
+        'The sequence of steps a browser takes from receiving HTML/CSS/JS to painting pixels on screen',
+        'The shortest route to the database from Express',
+        'The React router tree configuration',
+      ],
+      answer: 1,
+      explain: 'The critical rendering path is: DOM + CSSOM construction → Render Tree → Layout (Reflow) → Paint.',
+      teachAt: { lessonId: 'rendering', step: 2 },
+    },
+    {
+      id: 'web-q5',
+      kind: 'mcq',
+      q: 'Which CSS property changes trigger only "composite" and skip expensive layout and paint phases?',
+      options: [
+        'width and height',
+        'top and left',
+        'transform and opacity',
+        'margin and padding',
+      ],
+      answer: 2,
+      explain: 'transform and opacity can be handled directly on the GPU without recalculating layout geometry or repainting pixels.',
+      teachAt: { lessonId: 'rendering', step: 5 },
+    },
+    {
+      id: 'web-q6',
+      kind: 'mcq',
+      q: 'In the MERN architecture, where does React code execute?',
+      options: [
+        'Inside the MongoDB database engine',
+        'Exclusively on the Express server thread',
+        'In the client’s web browser (or client runtime)',
+        'In the operating system kernel',
+      ],
+      answer: 2,
+      explain: 'In standard MERN applications, React components and client-side logic execute in the user’s browser JavaScript runtime.',
+      teachAt: { lessonId: 'mern-map', step: 2 },
+    },
+  ],
+  challenge: {
+    id: 'web-challenge',
+    prompt: 'Write a helper parseHeaders(rawHeaders) that parses a raw HTTP response header string into a key-value object (lowercase keys).',
+    starter: `function parseHeaders(rawHeaders) {\n  // Parse "Content-Type: application/json\\nDate: Mon..." into an object\n}`,
+    language: 'js',
+    solution: `function parseHeaders(rawHeaders) {\n  const headers = {};\n  if (!rawHeaders) return headers;\n  const lines = rawHeaders.trim().split('\\n');\n  for (const line of lines) {\n    const colon = line.indexOf(':');\n    if (colon > 0) {\n      const key = line.slice(0, colon).trim().toLowerCase();\n      const val = line.slice(colon + 1).trim();\n      headers[key] = val;\n    }\n  }\n  return headers;\n}`,
+    tests: [
+      { label: 'parses multiple headers into lowercase keys', run: '(() => { const h = parseHeaders("Content-Type: application/json\\nX-Custom: 123"); return h["content-type"] === "application/json" && h["x-custom"] === "123"; })()' },
+      { label: 'handles empty input gracefully', run: 'Object.keys(parseHeaders("")).length === 0' },
+    ],
+    hints: [
+      'Split rawHeaders by newline: rawHeaders.trim().split("\\n")',
+      'Find the first colon with indexOf(":") to separate header name and value.',
+      'Normalize header names to lowercase with .toLowerCase().',
+    ],
+  },
+} satisfies PartGate;

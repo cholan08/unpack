@@ -1,0 +1,106 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'scale',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'scale-q1',
+      kind: 'mcq',
+      q: 'What is the "cache stampede" (or thundering herd) problem?',
+      options: [
+        'A physical server overheating in the datacenter',
+        'When a popular cached item expires, and hundreds of concurrent requests all simultaneously miss the cache and overwhelm the database together',
+        'When Redis runs out of disk space',
+        'A browser reloading a page infinitely',
+      ],
+      answer: 1,
+      explain: 'When high-traffic cached data expires, all incoming queries miss at once, flooding backend databases with redundant heavy queries.',
+      teachAt: { lessonId: 'caching', step: 4 },
+    },
+    {
+      id: 'scale-q2',
+      kind: 'mcq',
+      q: 'Why does offset pagination (skip: 50000, limit: 20) become slow on large MongoDB collections?',
+      options: [
+        'MongoDB only allows skips up to 100',
+        'The database engine must still walk and count through 50,000 index entries or documents before returning the 20 requested rows',
+        'Because limit creates a temporary table',
+        'Because skip disables indexes',
+      ],
+      answer: 1,
+      explain: 'Offset pagination forces the database to iterate through all skipped records. Cursor pagination (e.g., _id > lastSeen) jumps directly.',
+      teachAt: { lessonId: 'pagination', step: 2 },
+    },
+    {
+      id: 'scale-q3',
+      kind: 'mcq',
+      q: 'How does the "token bucket" rate-limiting algorithm work?',
+      options: [
+        'Tokens are stored in a database transaction and deleted on logout',
+        'A bucket has a maximum capacity and refills at a steady rate of tokens; each incoming request consumes one token, and requests are rejected (429) if the bucket is empty',
+        'It generates a random token for every API call',
+        'It limits bandwidth to 1 MB per hour',
+      ],
+      answer: 1,
+      explain: 'Token bucket allows bursts up to the bucket capacity while maintaining a steady sustained rate limit, replying 429 Too Many Requests when empty.',
+      teachAt: { lessonId: 'rate-limiting', step: 2 },
+    },
+    {
+      id: 'scale-q4',
+      kind: 'mcq',
+      q: 'What are RED metrics in service observability?',
+      options: [
+        'Redundancy, Encryption, and Decryption',
+        'Rate (requests per second), Errors (number of failing requests), and Duration (latency distribution)',
+        'RAM, Ethernet, and Disk space',
+        'React, Express, and Database',
+      ],
+      answer: 1,
+      explain: 'RED metrics (Rate, Errors, Duration) are the standard golden signals for monitoring request-driven microservices and APIs.',
+      teachAt: { lessonId: 'observability', step: 2 },
+    },
+    {
+      id: 'scale-q5',
+      kind: 'mcq',
+      q: 'What does "p95 latency of 150 ms" mean?',
+      options: [
+        'The average latency of all requests is 150 ms',
+        '95% of all requests completed in 150 ms or faster, while the slowest 5% took longer than 150 ms',
+        'The maximum possible response time is 150 ms',
+        '95 requests were made in 150 ms',
+      ],
+      answer: 1,
+      explain: 'Percentiles (like p95 or p99) highlight the tail latency experienced by users, which averages often conceal.',
+      teachAt: { lessonId: 'observability', step: 3 },
+    },
+    {
+      id: 'scale-q6',
+      kind: 'mcq',
+      q: 'What is the purpose of an Idempotency-Key header on critical endpoints like payment checkout?',
+      options: [
+        'To identify which country the user is from',
+        'To prevent duplicate processing: if the client retries a timed-out request with the same idempotency key, the server returns the cached initial result rather than charging twice',
+        'To encrypt credit card numbers',
+        'To bypass rate limits',
+      ],
+      answer: 1,
+      explain: 'Idempotency keys ensure network retries or accidental double-clicks execute an action exactly once on the backend.',
+      teachAt: { lessonId: 'design-cart', step: 4 },
+    },
+  ],
+  challenge: {
+    id: 'scale-challenge',
+    prompt: 'Implement a memory-based RateLimiter({ maxTokens, refillRatePerSec }) class with a tryConsume() method that returns true if a token was consumed or false if rate limited.',
+    starter: `class RateLimiter {\n  constructor({ maxTokens, refillRatePerSec }) {\n    // Initialize token bucket\n  }\n  tryConsume() {\n    // Return true if allowed, false if limit exceeded\n  }\n}`,
+    language: 'js',
+    solution: `class RateLimiter {\n  constructor({ maxTokens, refillRatePerSec }) {\n    this.maxTokens = maxTokens;\n    this.refillRate = refillRatePerSec;\n    this.tokens = maxTokens;\n    this.lastRefill = Date.now();\n  }\n  refill() {\n    const now = Date.now();\n    const elapsed = (now - this.lastRefill) / 1000;\n    this.tokens = Math.min(this.maxTokens, this.tokens + elapsed * this.refillRate);\n    this.lastRefill = now;\n  }\n  tryConsume() {\n    this.refill();\n    if (this.tokens >= 1) {\n      this.tokens -= 1;\n      return true;\n    }\n    return false;\n  }\n}`,
+    tests: [
+      { label: 'allows requests up to maxTokens capacity', run: '(() => { const rl = new RateLimiter({ maxTokens: 2, refillRatePerSec: 1 }); return rl.tryConsume() === true && rl.tryConsume() === true && rl.tryConsume() === false; })()' },
+    ],
+    hints: [
+      'Track this.tokens and this.lastRefill timestamp.',
+      'Before consuming, calculate elapsed time since last refill and add elapsed * refillRate to tokens (capped at maxTokens).',
+    ],
+  },
+} satisfies PartGate;

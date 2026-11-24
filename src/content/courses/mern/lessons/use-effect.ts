@@ -1,4 +1,4 @@
-import { box, browser, defineLesson, flow, item, link, patch, stack, zone } from '@/content/dsl';
+import { box, browser, defineLesson, flow, item, link, patch, practice, stack, zone } from '@/content/dsl';
 import type { Item, LinkSpec, ScreenLine } from '@/engine/types';
 
 /* ---------- layout: the component, its timeline and the page on the left; the API on the right ---------- */
@@ -330,6 +330,39 @@ const visible = todos.filter((t) => !t.done);`,
         }),
         links,
         flows: [flow(['comp', 'page'], { kind: 'data', label: 'list', every: 3.4 })],
+      },
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Implement effect dependency comparison',
+      body: [
+        'React decides whether to re-run an effect by comparing each item in its dependency array with the previous render using `Object.is`.',
+        'Implement `areDepsEqual(prevDeps, nextDeps)` that returns `true` if every element matches shallowly via `Object.is`, and `false` otherwise.',
+      ],
+      practice: practice(
+        'Return true if prevDeps and nextDeps have the same length and every element matches via Object.is.',
+        `function areDepsEqual(prevDeps, nextDeps) {\n  // Compare dependency arrays\n}`,
+        `function areDepsEqual(prevDeps, nextDeps) {\n  if (!prevDeps || !nextDeps) return false;\n  if (prevDeps.length !== nextDeps.length) return false;\n  for (let i = 0; i < prevDeps.length; i++) {\n    if (!Object.is(prevDeps[i], nextDeps[i])) return false;\n  }\n  return true;\n}`,
+        [
+          { label: 'returns true for equal dependencies', run: 'areDepsEqual([1, "a", true], [1, "a", true]) === true' },
+          { label: 'returns false for changed element', run: 'areDepsEqual([1, "a"], [1, "b"]) === false' },
+          { label: 'returns false for different lengths', run: 'areDepsEqual([1], [1, 2]) === false' },
+          { label: 'handles NaN correctly with Object.is', run: 'areDepsEqual([NaN], [NaN]) === true' },
+        ],
+        [
+          'Check if both arguments are truthy arrays and have the same length.',
+          'Loop from 0 to length - 1 and compare prevDeps[i] with nextDeps[i] using Object.is.',
+          'Return false immediately if any pair does not match; return true if the loop finishes.',
+        ],
+      ),
+      metrics: { renders: 1, requests: 0, shown: 'deps checked' },
+      scene: {
+        nodes: patch(base, {
+          comp: { sub: 'areDepsEqual(prev, next)' },
+          timeline: tl(T.effect('e1', 'deps comparison')),
+        }),
+        links,
       },
     },
     {

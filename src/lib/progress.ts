@@ -8,13 +8,66 @@ export interface LessonProgress {
   done: boolean;
   updated: number;
 }
-interface Store {
-  v: 1;
-  lessons: Record<string, LessonProgress>;
-  last?: string;
+
+export interface PlacementResult {
+  score: number;
+  total: number;
+  startPart: number;
+  ts: number;
 }
 
-const KEY = 'unpacked:progress:v1';
+export interface GateResult {
+  attempts: number;
+  bestScore: number;
+  passed: boolean;
+  skipped: boolean;
+  ts: number;
+  /** Map of wrong question ids to the lesson step they link back to */
+  weakTopics?: Record<string, { lessonId: string; step: number }>;
+}
+
+export interface ReviewCard {
+  id: string;
+  lessonId: string;
+  courseId: string;
+  prompt: string;
+  dueAt: number;
+  interval: number; /** days */
+  attempts: number;
+  lastResult?: 'pass' | 'fail';
+}
+
+export interface ExplainBackResult {
+  lessonId: string;
+  courseId: string;
+  stepKey: string;
+  result: 'pass' | 'needs-work';
+  ts: number;
+}
+
+export interface DashStats {
+  streakDays: number;
+  lastActiveDate: string;
+  timeSpentMs: number;
+}
+
+interface Store {
+  v: 2;
+  lessons: Record<string, LessonProgress>;
+  last?: string;
+  placement?: PlacementResult;
+  gates: Record<string, GateResult>; // key: `${courseId}/${partId}`
+  reviews: ReviewCard[];
+  explainBacks: ExplainBackResult[];
+  settings: {
+    tutorKey?: string;
+    noAiMode?: boolean;
+  };
+  dash: DashStats;
+}
+
+const KEY = 'unpacked:progress:v2';
+const LEGACY_KEY = 'unpacked:progress:v1';
 const listeners = new Set<() => void>();
 let state: Store = load();
 
@@ -23,12 +76,37 @@ function load(): Store {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s && s.v === 1 && s.lessons) return s;
+      if (s && s.v === 2 && s.lessons) return s;
+    }
+    // Migrate from v1
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const v1 = JSON.parse(legacy);
+      if (v1 && v1.v === 1 && v1.lessons) {
+        return {
+          v: 2,
+          lessons: v1.lessons,
+          last: v1.last,
+          gates: {},
+          reviews: [],
+          explainBacks: [],
+          settings: {},
+          dash: { streakDays: 0, lastActiveDate: '', timeSpentMs: 0 },
+        };
+      }
     }
   } catch {
     /* corrupt or unavailable: start fresh */
   }
-  return { v: 1, lessons: {} };
+  return {
+    v: 2,
+    lessons: {},
+    gates: {},
+    reviews: [],
+    explainBacks: [],
+    settings: {},
+    dash: { streakDays: 0, lastActiveDate: '', timeSpentMs: 0 },
+  };
 }
 
 function save(next: Store) {
@@ -42,17 +120,119 @@ function save(next: Store) {
 }
 
 export const lessonKey = (course: string, lesson: string) => `${course}/${lesson}`;
+export const gateKey = (course: string, part: string) => `${course}/${part}`;
 
 export function recordStep(course: string, lesson: string, step: number, total: number) {
   const key = lessonKey(course, lesson);
   const prev = state.lessons[key];
   const done = (prev?.done ?? false) || step >= total;
   if (prev && prev.step === step && prev.total === total && prev.done === done && state.last === key) return;
-  save({ ...state, last: key, lessons: { ...state.lessons, [key]: { step, total, done, updated: Date.now() } } });
+
+  // Update dash streak
+  const today = new Date().toISOString().slice(0, 10);
+  const dash = { ...state.dash };
+  if (dash.lastActiveDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    dash.streakDays = dash.lastActiveDate === yesterday ? (dash.streakDays || 0) + 1 : 1;
+    dash.lastActiveDate = today;
+  }
+
+  save({ ...state, last: key, dash, lessons: { ...state.lessons, [key]: { step, total, done, updated: Date.now() } } });
 }
 
 export function resetProgress() {
-  save({ v: 1, lessons: {} });
+  save({
+    v: 2,
+    lessons: {},
+    gates: {},
+    reviews: [],
+    explainBacks: [],
+    settings: state.settings,
+    dash: { streakDays: 0, lastActiveDate: '', timeSpentMs: 0 },
+  });
+}
+
+export function savePlacementResult(result: PlacementResult) {
+  save({ ...state, placement: result });
+}
+
+export function saveGateResult(courseId: string, partId: string, result: Omit<GateResult, 'attempts'>) {
+  const key = gateKey(courseId, partId);
+  const prev = state.gates[key];
+  save({
+    ...state,
+    gates: {
+      ...state.gates,
+      [key]: {
+        ...result,
+        attempts: (prev?.attempts ?? 0) + 1,
+        bestScore: Math.max(result.bestScore, prev?.bestScore ?? 0),
+        passed: result.passed || (prev?.passed ?? false),
+      },
+    },
+  });
+}
+
+export function skipGate(courseId: string, partId: string) {
+  const key = gateKey(courseId, partId);
+  const prev = state.gates[key];
+  save({
+    ...state,
+    gates: {
+      ...state.gates,
+      [key]: {
+        attempts: prev?.attempts ?? 0,
+        bestScore: prev?.bestScore ?? 0,
+        passed: prev?.passed ?? false,
+        skipped: true,
+        ts: Date.now(),
+      },
+    },
+  });
+}
+
+export function addReviewCard(card: Omit<ReviewCard, 'attempts' | 'lastResult'>) {
+  const existing = state.reviews.findIndex((r) => r.id === card.id);
+  if (existing >= 0) return; // already scheduled
+  save({
+    ...state,
+    reviews: [...state.reviews, { ...card, attempts: 0 }],
+  });
+}
+
+export function recordReview(cardId: string, result: 'pass' | 'fail') {
+  const INTERVALS = [1, 3, 7, 21]; // SRS schedule in days
+  save({
+    ...state,
+    reviews: state.reviews.map((r) => {
+      if (r.id !== cardId) return r;
+      const nextInterval = result === 'pass'
+        ? INTERVALS[Math.min(r.attempts, INTERVALS.length - 1)]
+        : 1;
+      return {
+        ...r,
+        attempts: r.attempts + 1,
+        lastResult: result,
+        interval: nextInterval,
+        dueAt: Date.now() + nextInterval * 86400000,
+      };
+    }),
+  });
+}
+
+export function saveExplainBack(result: ExplainBackResult) {
+  save({
+    ...state,
+    explainBacks: [...state.explainBacks.filter((e) => e.stepKey !== result.stepKey), result],
+  });
+}
+
+export function saveTutorKey(key: string) {
+  save({ ...state, settings: { ...state.settings, tutorKey: key } });
+}
+
+export function setNoAiMode(val: boolean) {
+  save({ ...state, settings: { ...state.settings, noAiMode: val } });
 }
 
 const subscribe = (cb: () => void) => {
@@ -67,6 +247,34 @@ window.addEventListener('storage', (e) => {
   }
 });
 
+function getSnapshot() { return state; }
+
 export function useProgress(): Store {
-  return useSyncExternalStore(subscribe, () => state);
+  return useSyncExternalStore(subscribe, getSnapshot);
+}
+
+export function usePlacement(): PlacementResult | undefined {
+  const s = useSyncExternalStore(subscribe, getSnapshot);
+  return s.placement;
+}
+
+export function useGates(): Record<string, GateResult> {
+  const s = useSyncExternalStore(subscribe, getSnapshot);
+  return s.gates;
+}
+
+export function useDueReviews(): ReviewCard[] {
+  const s = useSyncExternalStore(subscribe, getSnapshot);
+  const now = Date.now();
+  return s.reviews.filter((r) => r.dueAt <= now);
+}
+
+export function useSettings() {
+  const s = useSyncExternalStore(subscribe, getSnapshot);
+  return s.settings;
+}
+
+export function useDash() {
+  const s = useSyncExternalStore(subscribe, getSnapshot);
+  return s.dash;
 }

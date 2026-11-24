@@ -142,7 +142,8 @@ const ItemRow = forwardRef<HTMLDivElement, { it: Item; axis: 'y' | 'x'; mono?: b
       data-tone={it.tone}
       data-state={it.state}
       initial={axis === 'y' ? { opacity: 0, y: -16, scale: 0.96 } : { opacity: 0, x: 22, scale: 0.96 }}
-      animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+      // opacity is animated (not left to CSS) because motion's inline style would override a stylesheet rule
+      animate={{ opacity: it.state === 'dim' ? 0.42 : 1, x: 0, y: 0, scale: 1 }}
       exit={axis === 'y' ? { opacity: 0, x: 30, transition: { duration: 0.22 } } : { opacity: 0, y: -18, transition: { duration: 0.22 } }}
       transition={spring}
     >

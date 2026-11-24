@@ -125,6 +125,9 @@ export function CoursePage() {
                   {resume ? 'Continue' : done ? 'Next lesson' : 'Start'}: {cta.meta!.title} <ArrowRight size={16} />
                 </Link>
               )}
+              <Link className="btn btn--lg" to={`/${course.id}/roadmap`}>
+                Roadmap
+              </Link>
               <Link className="btn btn--lg" to={`/${course.id}/glossary`}>
                 Glossary
               </Link>
@@ -143,9 +146,14 @@ export function CoursePage() {
                   <div>
                     <h2 className="display">{part.title}</h2>
                     <p className="muted">{part.blurb}</p>
-                    <span className="part-count">
-                      {readyN} of {items.length} ready
-                    </span>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                      <span className="part-count">
+                        {readyN} of {items.length} ready
+                      </span>
+                      <Link to={`/${course.id}/gate/${part.id}`} className="pill" style={{ color: 'inherit' }}>
+                        Part {part.num} Gate →
+                      </Link>
+                    </div>
                   </div>
                 </header>
                 <div className="lcards">

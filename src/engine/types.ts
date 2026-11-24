@@ -219,6 +219,15 @@ export interface Sandbox {
   compute: (v: Values) => SandboxResult;
 }
 
+export interface TrySpec {
+  prompt: string;
+  starter: string;
+  language?: 'js';
+  tests: { label: string; run: string }[];
+  solution: string;
+  hints: string[];
+}
+
 interface StepBase {
   /** Short label for the progress rail. */
   short: string;
@@ -232,6 +241,7 @@ interface StepBase {
   changes?: string[];
   metrics?: Record<string, MetricValue>;
   check?: Check;
+  practice?: TrySpec;
 }
 
 /** A step shows a fixed scene — or, with a sandbox, a scene computed from the learner’s inputs. */
@@ -293,8 +303,56 @@ export interface Part {
   num: string;
   title: string;
   blurb: string;
+  /** Why the learner needs this part (the pain it solves). Used on the roadmap. */
+  why?: string;
+  /** 3 concrete things the learner will be able to do after this part. Used on the roadmap. */
+  outcomes?: string[];
   tone: Tone;
   lessons: LessonStub[];
+}
+
+/* ---- Gate content (Phase C) ---- */
+export interface QuizQuestion {
+  id: string;
+  q: string;
+  kind: 'mcq' | 'multi' | 'order';
+  options: string[];
+  /** For mcq: index of correct. For multi: array of indices. For order: sorted list of option indices. */
+  answer: number | number[];
+  explain: string;
+  /** The lesson + step this question links back to if the learner gets it wrong. */
+  teachAt?: { lessonId: string; step: number };
+}
+
+export interface GateChallenge {
+  id: string;
+  prompt: string;
+  starter: string;
+  language: 'js';
+  tests: { label: string; run: string }[];
+  solution: string;
+  hints: string[];
+}
+
+export interface PartGate {
+  partId: string;
+  questions: QuizQuestion[];
+  challenge?: GateChallenge;
+  /** Pass mark 0..1. Default 0.70. */
+  passMark?: number;
+}
+
+/* ---- Try step (Phase B) ---- */
+export interface TryStep extends StepBase {
+  kind: 'try';
+  prompt: string;
+  starter: string;
+  language: 'js';
+  tests: { label: string; run: string }[];
+  solution: string;
+  hints: string[];
+  /** Scene to show alongside the editor. */
+  scene: Scene;
 }
 
 export interface GlossaryEntry {

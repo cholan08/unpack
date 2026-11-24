@@ -1,5 +1,5 @@
-import { box, browser, chip, defineLesson, flow, link, patch, zone } from '@/content/dsl';
-import type { ScreenLine } from '@/engine/types';
+import { box, browser, chip, defineLesson, defineSandbox, flow, fmt, link, patch, range, toggle, zone } from '@/content/dsl';
+import type { FlowSpec, LinkSpec, NodeSpec, ScreenLine } from '@/engine/types';
 
 /* ---------- layout: browser left, the internet in between, origin server right ---------- */
 const blank: ScreenLine[] = [{ t: 'spinner', text: 'Waiting for todo-app.com…' }];
@@ -23,6 +23,62 @@ const toOrigin = link('web', 'origin');
 
 const RTT = 'one round trip';
 
+/* ---------- sandbox: move the server, slow it down, add a CDN, come back later ---------- */
+const sandbox = defineSandbox({
+  intro: 'Move the server nearer or further, change how long it thinks, then try a CDN and a return visit. Which change moves the **total** most?',
+  controls: [
+    range('rtt', 'Round trip to the server', { min: 5, max: 300, value: 60, step: 5, unit: 'ms' }),
+    range('think', 'Server thinking time', { min: 0, max: 400, value: 40, step: 10, unit: 'ms' }),
+    toggle('cdn', 'JS and CSS from a CDN (5 ms away)'),
+    toggle('repeat', 'Return visit (DNS and files cached)'),
+  ],
+  compute: (v) => {
+    const rtt = Number(v.rtt);
+    const think = Number(v.think);
+    const useCdn = v.cdn === true;
+    const repeat = v.repeat === true;
+    const dnsMs = repeat ? 0 : 20;
+    const html = rtt + think;
+    const assets = repeat ? 0 : (useCdn ? 15 : rtt) + 40; // the trip(s), then ~40 ms to download
+    const boot = 80; // parse and run the bundle
+    const total = dnsMs + rtt + rtt + html + assets + boot + (rtt + think);
+    const trips = 4 + (!repeat && !useCdn ? 1 : 0); // TCP, TLS, HTML, (bundle), API
+    const waiting = trips * rtt;
+    const pace = Math.min(2, Math.max(0.6, 70 / rtt)); // a far server → slow packets
+    const every = 6 / Math.min(1, pace);
+    const nodes: Record<string, NodeSpec> = {
+      ...base,
+      lock,
+      origin: { ...origin, badge: { text: `${rtt} ms away`, tone: rtt > 150 ? 'warn' : 'neutral' } },
+      web: { ...web, screen: loaded, badge: repeat ? { text: 'files from cache', tone: 'ok' } : undefined },
+      ...(repeat ? {} : { dns }),
+      ...(useCdn ? { cdn: { ...cdn, state: repeat ? 'dim' : 'active' } } : {}),
+    };
+    const links: LinkSpec[] = [toOrigin, ...(repeat ? [] : [link('web', 'dns')]), ...(useCdn ? [link('web', 'cdn')] : [])];
+    const flows: FlowSpec[] = [
+      ...(repeat ? [] : [flow(['web', 'dns'], { label: 'DNS', back: 'res', every })]),
+      flow(['web', 'origin'], { label: 'GET /', back: 'res', backLabel: 'HTML', every, offset: 0.6, speed: pace, dwell: think / 400 + 0.1 }),
+      ...(repeat
+        ? []
+        : [useCdn
+            ? flow(['web', 'cdn'], { label: 'app.js', back: 'res', every, offset: every * 0.35, speed: 2 })
+            : flow(['web', 'origin'], { label: 'app.js', back: 'res', every, offset: every * 0.35, speed: pace })]),
+      flow(['web', 'origin'], { kind: 'req', label: 'GET /api/todos', back: 'res', backLabel: 'JSON', every, offset: every * 0.6, speed: pace, dwell: think / 400 + 0.1 }),
+    ];
+    const extra = [
+      think >= 200 ? ` The server’s ${think} ms counts twice: once for the HTML, once for the API.` : '',
+      useCdn && !repeat ? ` The CDN saves ${rtt + 40 - 55} ms on the bundle — more the further away your users are.` : '',
+      repeat ? ' A return visit skips the DNS lookup and the bundle download entirely.' : '',
+    ].join('');
+    return {
+      scene: { nodes, links, flows },
+      metrics: { dns: dnsMs, tcp: rtt, tls: rtt, http: html, total },
+      tone: total < 400 ? 'ok' : total < 800 ? 'warn' : 'danger',
+      note: `**${fmt(total)} ms** until the list appears. ${trips} round trips × ${rtt} ms = **${fmt(waiting)} ms** of it (${Math.round((waiting / total) * 100)}%) is just waiting on distance.${extra}`,
+    };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'dns', label: 'DNS', unit: 'ms', better: 'lower' },
@@ -38,6 +94,7 @@ export default defineLesson({
     { text: 'What TLS (the S in HTTPS) adds', step: 5 },
     { text: 'What an HTTP request and response look like', step: 6 },
     { text: 'Where the time goes, and how CDNs help', step: 8 },
+    { text: 'Run the stopwatch with your own numbers', step: 9 },
   ],
   steps: [
     {
@@ -192,6 +249,13 @@ Cache-Control: no-cache
           flow(['web', 'origin'], { label: 'GET /api/todos', back: 'res', backLabel: 'JSON', every: 4.4, offset: 1 }),
         ],
       },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Your stopwatch',
+      body: ['Every number on the stopwatch comes from four things you can change here. Move them and watch the page load replay.'],
+      sandbox,
     },
     {
       short: 'Recap',

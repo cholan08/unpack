@@ -1,4 +1,4 @@
-import { chip, code, defineLesson, flow, item, link, patch, queue, stack } from '@/content/dsl';
+import { chip, code, defineLesson, flow, item, link, patch, practice, queue, stack } from '@/content/dsl';
 import type { Item } from '@/engine/types';
 
 /* ---------- layout ----------
@@ -321,6 +321,38 @@ export default defineLesson({
         }),
         links: machineLinks,
         flows: [flow(['apis', 'tasks'], { kind: 'req', label: 'request', every: 1.6 })],
+      },
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Build a non-blocking delay helper',
+      body: [
+        'Blocking with a while loop locks the thread and starves the event loop.',
+        'Use `setTimeout` inside a Promise to write `delay(ms, value)` that resolves non-blockingly with `value` after `ms` milliseconds.',
+      ],
+      practice: practice(
+        'Write delay(ms, value) returning a Promise that resolves with value after ms milliseconds.',
+        `function delay(ms, value) {\n  // Wrap setTimeout in a Promise\n}`,
+        `function delay(ms, value) {\n  return new Promise((resolve) => setTimeout(() => resolve(value), ms));\n}`,
+        [
+          { label: 'returns a Promise', run: 'delay(10, "ok") instanceof Promise' },
+          { label: 'resolves with value after delay', run: '(async () => { const val = await delay(10, 42); return val === 42; })()' },
+        ],
+        [
+          'Return a new Promise((resolve) => ...)',
+          'Call setTimeout inside the promise callback.',
+          'Pass a function to setTimeout that calls resolve(value).',
+        ],
+      ),
+      metrics: { output: 'await delay(10, 42)', waiting: 0 },
+      scene: {
+        nodes: patch(full, {
+          callStack: { items: [item('p', 'new Promise()', { tone: 'client' })] },
+          apis: { label: 'Timer API', items: [item('t', 'setTimeout(ms)', { tone: 'client' })] },
+          loop: { state: 'active' },
+        }),
+        links: machineLinks,
       },
     },
     {

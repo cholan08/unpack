@@ -1,0 +1,107 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'react',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'react-q1',
+      kind: 'mcq',
+      q: 'Why should you never mutate state directly in React (e.g., todos.push(newTodo); setTodos(todos))?',
+      options: [
+        'JavaScript throws a syntax error if an array is mutated',
+        'React checks if state changed by comparing object references (Object.is); mutating the same array keeps the same reference so React skips re-rendering',
+        'State mutations corrupt browser localStorage',
+        'State can only be mutated inside useEffect',
+      ],
+      answer: 1,
+      explain: 'React uses shallow reference equality checks. If the reference is identical, React assumes nothing changed and skips rendering.',
+      teachAt: { lessonId: 'react-rendering', step: 2 },
+    },
+    {
+      id: 'react-q2',
+      kind: 'mcq',
+      q: 'When does the cleanup function returned by useEffect run?',
+      options: [
+        'Only when the browser window closes',
+        'Before the component re-runs the effect with new dependencies, and when the component unmounts',
+        'Immediately before every component render',
+        'In parallel with the initial effect execution',
+      ],
+      answer: 1,
+      explain: 'Cleanup runs before the effect fires again (to clean up the previous render’s side effect) and when the component unmounts.',
+      teachAt: { lessonId: 'use-effect', step: 4 },
+    },
+    {
+      id: 'react-q3',
+      kind: 'mcq',
+      q: 'Why is using array index as a "key" prop problematic in dynamic or reorderable lists?',
+      options: [
+        'React does not allow numbers as keys',
+        'If items are inserted, deleted, or reordered, keys no longer match the same item identity, causing input focus bugs and state mismatches',
+        'It degrades network latency between client and server',
+        'Array indices cannot be read by screen readers',
+      ],
+      answer: 1,
+      explain: 'Keys provide stable identity across renders. Using index means index 0 always matches element 0, even if a new item was prepended.',
+      teachAt: { lessonId: 'lists-keys', step: 3 },
+    },
+    {
+      id: 'react-q4',
+      kind: 'mcq',
+      q: 'When should you choose React Context over passing props (prop drilling)?',
+      options: [
+        'For all state in the application without exception',
+        'When data is needed by many components at different nesting levels (like current user, theme, locale)',
+        'Only for database connection credentials',
+        'Whenever a component has more than two props',
+      ],
+      answer: 1,
+      explain: 'Context is meant for global or subtree-wide values like themes, authenticated user info, or active language.',
+      teachAt: { lessonId: 'context', step: 3 },
+    },
+    {
+      id: 'react-q5',
+      kind: 'mcq',
+      q: 'What does React.memo do for a functional component?',
+      options: [
+        'It saves the component output to disk',
+        'It skips re-rendering the component if its incoming props are shallowly equal to the previous render’s props',
+        'It prevents any children from ever rendering',
+        'It turns asynchronous state into synchronous state',
+      ],
+      answer: 1,
+      explain: 'React.memo memoizes the rendered output, skipping re-render if props have not changed by shallow comparison.',
+      teachAt: { lessonId: 'memo', step: 1 },
+    },
+    {
+      id: 'react-q6',
+      kind: 'mcq',
+      q: 'Why do single-page app (SPA) client routes 404 on refresh unless the server is configured with a fallback?',
+      options: [
+        'Because the browser deletes all cookies on reload',
+        'Because client-side routes exist only in JavaScript memory; when requesting the URL directly, the web server looks for a physical file that does not exist',
+        'Because React Router disables HTTP GET requests',
+        'Because DNS records expire when reloading',
+      ],
+      answer: 1,
+      explain: 'The production static server must serve index.html for all non-file routes so client-side JavaScript can boot and handle the route.',
+      teachAt: { lessonId: 'routing', step: 4 },
+    },
+  ],
+  challenge: {
+    id: 'react-challenge',
+    prompt: 'Implement a reducer-style state transition function updateQuantity(cart, productId, delta) that adjusts item quantity, removes items when quantity <= 0, and preserves immutability.',
+    starter: `function updateQuantity(cart, productId, delta) {\n  // cart: array of { id, quantity, price }\n  // Return new array with adjusted quantity or item removed if quantity <= 0\n}`,
+    language: 'js',
+    solution: `function updateQuantity(cart, productId, delta) {\n  return cart\n    .map((item) => {\n      if (item.id === productId) {\n        return { ...item, quantity: item.quantity + delta };\n      }\n      return item;\n    })\n    .filter((item) => item.quantity > 0);\n}`,
+    tests: [
+      { label: 'increases item quantity immutably', run: '(() => { const cart = [{ id: 1, quantity: 2 }]; const next = updateQuantity(cart, 1, 1); return next[0].quantity === 3 && cart[0].quantity === 2; })()' },
+      { label: 'removes item when quantity reaches zero', run: '(() => { const cart = [{ id: 1, quantity: 1 }, { id: 2, quantity: 5 }]; const next = updateQuantity(cart, 1, -1); return next.length === 1 && next[0].id === 2; })()' },
+    ],
+    hints: [
+      'Map through cart: when item.id === productId, return a new object with updated quantity.',
+      'Filter out items where quantity <= 0.',
+    ],
+  },
+} satisfies PartGate;

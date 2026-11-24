@@ -172,13 +172,22 @@ Each phase ships something usable end to end.
 - ✅ Link-preview image (og.png), app icons and web manifest
 - ✅ `npm run new:lesson` / `npm run new:course` scaffolding for future courses
 - ✅ QA also checks list rows and sideways overflow in the narrative
-- Optional, not started: accounts with server-synced progress (a small MERN backend), interactive sandboxes, per-step preview images, offline support, compact mobile layouts per lesson
+- ✅ Interactive sandboxes — "Try it" steps where sliders, switches and options drive the diagram, the metrics and an outcome note live. Eight lessons have one: Indexes (collection size × index), What Happens When You Visit a URL (distance, server time, CDN, return visit), Promises (await × 3 vs Promise.all vs allSettled, slow and failing calls), Password Hashing (SHA-256 vs bcrypt cost vs password strength), Pagination (offset vs cursor, deep pages, new items), Caching (TTL × traffic × freshness), Performance & Memoization (memo, useCallback, virtualization), Rate Limiting (limit, bot speed, servers, shared counters). QA drives every control to its extremes.
+
+### Phases A–F: From "Watch" to "Can Build Alone" · ✅ shipped
+- ✅ **Phase A — Orientation**: `/start` prerequisite checks, placement quiz with skippable recommendations, `/:course/roadmap` visual path with `why` and `outcomes` for all 10 parts, home hero primary CTA.
+- ✅ **Phase B — Practice**: Code beside diagram `try` steps with CodeEditor, Web Worker sandbox runner with timeout protection, hint ladder, and integrated practice across core lessons.
+- ✅ **Phase C — Proof**: Per-part Gates with comprehensive MCQs and coding challenges (`src/content/courses/mern/gates/*.ts`), and `/me` learner dashboard tracking streaks, gates passed, and weak topics.
+- ✅ **Phase D — AI Tutor**: Dogfooding Express backend (`server/`) with rate/size limiting and zero-leak key proxying, Socratic hint ladder (nudge → diagram → scaffold → solution), explain-back grading, and privacy-preserving settings.
+- ✅ **Phase E — Capstone: TaskFlow**: 10 milestone curriculum (`src/content/courses/mern/capstone.ts`), starter repo (`capstone/starter/`), reference solutions (`capstone/solutions/`), and interactive checklist UI (`/capstone`).
+- ✅ **Phase F — Retention & Independence**: Spaced review cards (`/review`) with 1/3/7/21 day scheduling, Common Errors glossary (`/errors`), and No-AI practice mode.
+- Optional, not started: accounts with server-synced progress (a small MERN backend), per-step preview images, offline support, compact mobile layouts per lesson
 - Future courses: System Design, Git, DSA, DevOps — each is a new folder under src/content/courses
 - ✅ Engineering: lesson content and the player load on demand (main bundle 96 → 26 KB gzipped; each lesson is a 3–5 KB chunk, prefetched on hover); failed chunk downloads reload once, then show a retry screen
 - Fill the rest of the curriculum
 - Mobile: per-lesson compact layouts so diagrams fit narrow screens without panning
 - `Ctrl/⌘ K` search across lessons and glossary
-- Interactive sandboxes: edit a value and watch the diagram react (e.g. change an index, see the scan count change)
+- ✅ Interactive sandboxes: edit a value and watch the diagram react — more lessons can add one (candidates: load balancing, CORS, event loop, embed vs reference)
 - Per-step OG images for sharing; PWA/offline
 - Optional MERN backend for accounts and synced progress (dogfooding the course itself)
 - More courses: System Design, Git, DSA, DevOps

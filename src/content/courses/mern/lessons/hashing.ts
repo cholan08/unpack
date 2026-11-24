@@ -1,5 +1,5 @@
-import { actor, box, browser, chip, defineLesson, doc, field, flow, link } from '@/content/dsl';
-import type { Field, LinkSpec, ScreenLine } from '@/engine/types';
+import { actor, approx, box, browser, chip, choice, defineLesson, defineSandbox, doc, field, flow, humanTime, link, range } from '@/content/dsl';
+import type { Field, LinkSpec, NodeSpec, ScreenLine } from '@/engine/types';
 
 /* ---------- layout: sign-up form → server → users collection; the attacker waits below ---------- */
 const signup: ScreenLine[] = [
@@ -43,11 +43,68 @@ const passwordHash = await bcrypt.hash(password, 12); // cost 12 = 2¹² rounds
 
 await User.create({ email, passwordHash });`;
 
+/* ---------- sandbox: the defender picks the hash, the user picks the password ---------- */
+const CHARSETS: Record<string, [number, string]> = {
+  digits: [10, '4821390756184203'],
+  lower: [26, 'qmzkvhtrawpelsxn'],
+  alnum: [36, 'k3v9q2mz7r1xw5pa'],
+  all: [94, 'k3V#9q!Z2m$R7x@P'],
+};
+const YEAR = 365 * 24 * 3600;
+const sandbox = defineSandbox({
+  intro: 'Be the defender: pick the hash and its cost. Then be the user: pick the password. The attacker has the leaked database and one gaming GPU.',
+  controls: [
+    choice('algo', 'Hash function', [['sha', 'SHA-256 + salt'], ['bcrypt', 'bcrypt']]),
+    range('cost', 'bcrypt cost', { min: 8, max: 16, value: 12 }),
+    range('len', 'Password length', { min: 6, max: 16, value: 8, unit: 'chars' }),
+    choice('chars', 'Characters used', [['digits', '0–9'], ['lower', 'a–z'], ['alnum', 'a–z 0–9'], ['all', 'A–z 0–9 #!']], 'alnum'),
+  ],
+  compute: (v) => {
+    const isBcrypt = v.algo === 'bcrypt';
+    const cost = Number(v.cost);
+    const len = Number(v.len);
+    const [size, sample] = CHARSETS[String(v.chars)];
+    const perSec = isBcrypt ? 1500 * 2 ** (12 - cost) : 1e10;
+    const space = size ** len;
+    const seconds = space / perSec;
+    const loginMs = Math.round(250 * 2 ** (cost - 12));
+    const login = loginMs < 1000 ? `${loginMs} ms` : `${(loginMs / 1000).toFixed(1)} s`;
+    const weak = seconds < YEAR;
+    const pw = sample.slice(0, len);
+    const stored = (isBcrypt ? BCRYPT.map((h) => h.replace('$12$', `$${String(cost).padStart(2, '0')}$`)) : SALTED) as [string, string, string];
+    const nodes: Record<string, NodeSpec> = {
+      web: { ...web, screen: [signup[0], signup[1], { t: 'input', text: pw }, signup[3]] },
+      route,
+      ...(isBcrypt ? {} : { salt }),
+      hasher: isBcrypt ? { ...hasher, label: 'bcrypt.hash()', sub: `cost ${cost} · ~${login}`, state: loginMs >= 1000 ? 'error' : 'busy' } : hasher,
+      users: { ...users(stored), state: weak ? 'error' : undefined },
+      attacker: { ...attacker, state: weak ? 'busy' : 'dim', badge: { text: `${approx(perSec)} guesses/s`, tone: weak ? 'danger' : 'ok' } },
+    };
+    const signupFlow = isBcrypt
+      ? flow(['web', 'route', 'hasher', 'users'], { kind: 'auth', label: [pw, pw, stored[0].slice(1, 14) + '…'], every: 5, dwell: Math.min(1.6, 0.2 + loginMs / 1000) })
+      : flow(['web', 'route', 'salt', 'hasher', 'users'], { kind: 'auth', label: [pw, pw, 'pw + salt', stored[0].slice(1, 13) + '…'], every: 5 });
+    const attack = perSec > 1e6
+      ? flow(['attacker', 'users'], { kind: 'err', label: 'guess #8,312,004,117', every: 0.7, speed: 2.4, fail: true })
+      : flow(['attacker', 'users'], { kind: 'err', label: 'guess', every: 5, speed: 0.4, fail: true });
+    const note =
+      `${approx(space)} possible ${len}-character passwords ÷ ${approx(perSec)} guesses a second → **${humanTime(seconds)}** to try them all.` +
+      (isBcrypt && loginMs >= 1000 ? ` But every real login now burns **${login}** of server CPU — the cost is a dial, not a free win.` : '') +
+      (!isBcrypt && weak ? ' A fast hash lets the attacker try everything.' : '') +
+      (isBcrypt && !weak && loginMs < 1000 ? ' Slow for the attacker, unnoticeable for one login.' : '');
+    return {
+      scene: { nodes, links: [...(isBcrypt ? hashLinks : saltLinks), leak], flows: [signupFlow, attack] },
+      metrics: { leak: isBcrypt ? `bcrypt, cost ${cost}` : 'salted SHA-256', guesses: perSec, crack: seconds > 4.3e17 ? 'longer than the universe' : `≈ ${humanTime(seconds)}` },
+      tone: seconds < 24 * 3600 ? 'danger' : weak || loginMs >= 1000 ? 'warn' : 'ok',
+      note,
+    };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'leak', label: 'If the database leaks' },
     { id: 'guesses', label: 'Attacker guesses / second', better: 'lower' },
-    { id: 'crack', label: 'Crack an 8-char password' },
+    { id: 'crack', label: 'Time to crack' },
   ],
   legend: { auth: 'password', err: 'stolen data / guess' },
   goals: [
@@ -57,6 +114,7 @@ export default defineLesson({
     { text: 'What a salt does', step: 5 },
     { text: 'Why the hash must be slow — bcrypt', step: 7 },
     { text: 'Checking a password at login', step: 8 },
+    { text: 'Pit hash speed against password strength', step: 9 },
   ],
   steps: [
     {
@@ -264,6 +322,14 @@ sha256('hunter3');  // a completely different string
           flow(['route', 'hasher'], { kind: 'auth', label: 'compare', back: 'res', backLabel: 'true ✓', every: 6.4, offset: 3.2 }),
         ],
       },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Attacker vs. defender',
+      body: ['The leak has happened. What decides whether a stolen hash takes minutes or millennia to crack?'],
+      callout: { kind: 'warn', text: 'These times assume a **random** password. Common ones like `password123` sit at the top of every attacker’s list and fall in seconds whatever the hash — so also reject known-breached passwords at sign-up.' },
+      sandbox,
     },
     {
       short: 'Recap',

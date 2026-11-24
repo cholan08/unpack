@@ -1,0 +1,108 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'auth',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'auth-q1',
+      kind: 'mcq',
+      q: 'Why must user passwords be stored using slow, salted one-way hashing functions (like bcrypt or argon2) rather than encryption or fast hashes like SHA-256?',
+      options: [
+        'Because bcrypt is cheaper to compute on mobile devices',
+        'To prevent rainbow table precomputation via unique salts, and to make brute-force guessing computationally prohibitive if the database leaks',
+        'Because SHA-256 is deprecated by the W3C',
+        'Because encryption keys cannot be stored in environment variables',
+      ],
+      answer: 1,
+      explain: 'Salts defeat precomputed lookup tables; configurable work factors (slowness) protect against offline GPU brute-force attacks.',
+      teachAt: { lessonId: 'hashing', step: 2 },
+    },
+    {
+      id: 'auth-q2',
+      kind: 'mcq',
+      q: 'What is the structure of a JSON Web Token (JWT)?',
+      options: [
+        'An encrypted binary blob containing an AES key',
+        'Three base64url-encoded parts separated by dots: header.payload.signature',
+        'A plain XML document with a digital certificate',
+        'A single SHA-512 checksum of the user record',
+      ],
+      answer: 1,
+      explain: 'A JWT consists of Header (algorithm & token type), Payload (claims/data), and Signature (HMAC or RSA hash of header + payload using server secret).',
+      teachAt: { lessonId: 'jwt-auth', step: 1 },
+    },
+    {
+      id: 'auth-q3',
+      kind: 'mcq',
+      q: 'What does the httpOnly cookie flag prevent?',
+      options: [
+        'It prevents network requests over HTTPS',
+        'It hides the cookie from client-side JavaScript, preventing attackers from stealing session tokens via Cross-Site Scripting (XSS)',
+        'It limits requests to only GET methods',
+        'It forces the browser to delete the cookie after 5 minutes',
+      ],
+      answer: 1,
+      explain: 'An httpOnly cookie cannot be accessed via document.cookie in JavaScript, blocking XSS-based token theft.',
+      teachAt: { lessonId: 'sessions-tokens', step: 3 },
+    },
+    {
+      id: 'auth-q4',
+      kind: 'mcq',
+      q: 'What is the difference between Authentication (AuthN) and Authorization (AuthZ)?',
+      options: [
+        'AuthN checks passwords; AuthZ checks usernames',
+        'AuthN verifies WHO you are (identity); AuthZ determines WHAT you are allowed to access or perform (permissions)',
+        'AuthN is done on the client; AuthZ is done on the database',
+        'They are synonymous terms for login',
+      ],
+      answer: 1,
+      explain: 'Authentication verifies identity (e.g. logging in); Authorization enforces permissions (e.g. can user X edit document Y).',
+      teachAt: { lessonId: 'authn-authz', step: 1 },
+    },
+    {
+      id: 'auth-q5',
+      kind: 'mcq',
+      q: 'What is an Insecure Direct Object Reference (IDOR) vulnerability?',
+      options: [
+        'Calling a method on null or undefined',
+        'An endpoint authenticates the user, but fails to check whether the requested resource ID actually belongs to that user (e.g. GET /api/orders/:id)',
+        'Storing passwords in plain text in MongoDB',
+        'Failing to specify a CORS origin header',
+      ],
+      answer: 1,
+      explain: 'An IDOR happens when an app verifies you are logged in, but lets you access any other user’s record by guessing its ID.',
+      teachAt: { lessonId: 'protected-routes', step: 3 },
+    },
+    {
+      id: 'auth-q6',
+      kind: 'mcq',
+      q: 'Why is client-side route protection (e.g. in React Router) NOT a security boundary by itself?',
+      options: [
+        'Because React Router does not support TypeScript',
+        'Because client code runs in the user’s browser and can be bypassed or modified; real security must be enforced by backend API endpoint checks',
+        'Because routers only work on GET requests',
+        'Because client routes cannot read localStorage',
+      ],
+      answer: 1,
+      explain: 'Client-side route guards are UX conveniences to redirect logged-out users. Real security enforcement must happen on the backend server.',
+      teachAt: { lessonId: 'protected-routes', step: 1 },
+    },
+  ],
+  challenge: {
+    id: 'auth-challenge',
+    prompt: 'Implement parseJwtPayload(token) that decodes the payload portion (second part) of a JWT and returns the parsed JSON object without external libraries.',
+    starter: `function parseJwtPayload(token) {\n  // Decode and parse the base64url payload of a JWT\n}`,
+    language: 'js',
+    solution: `function parseJwtPayload(token) {\n  if (!token || typeof token !== 'string') return null;\n  const parts = token.split('.');\n  if (parts.length !== 3) return null;\n  try {\n    // Base64url to base64\n    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');\n    const json = atob(base64);\n    return JSON.parse(json);\n  } catch {\n    return null;\n  }\n}`,
+    tests: [
+      { label: 'correctly decodes standard JWT payload', run: '(() => { const token = "header." + btoa(JSON.stringify({ userId: "u123", role: "admin" })).replace(/=/g, "") + ".sig"; const res = parseJwtPayload(token); return res && res.userId === "u123" && res.role === "admin"; })()' },
+      { label: 'returns null for invalid token strings', run: 'parseJwtPayload("not-a-token") === null' },
+    ],
+    hints: [
+      'Split token by "." into three parts.',
+      'Replace "-" with "+" and "_" with "/" in parts[1] for standard base64 decoding.',
+      'Use atob() to decode base64, then JSON.parse().',
+    ],
+  },
+} satisfies PartGate;

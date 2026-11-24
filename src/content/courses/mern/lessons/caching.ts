@@ -1,4 +1,4 @@
-import { box, browser, db, defineLesson, flow, link, patch } from '@/content/dsl';
+import { box, browser, db, defineLesson, defineSandbox, flow, fmt, humanTime, link, patch, range, toggle } from '@/content/dsl';
 import type { LinkSpec, NodeSpec } from '@/engine/types';
 
 /* ---------- layout: browser · CDN (above) · Express · Redis (above) and MongoDB (below) ---------- */
@@ -26,6 +26,52 @@ const asideCode = `async function getPopularLists() {
   return lists;
 }`;
 
+/* ---------- sandbox: cache on/off, how long entries live, how busy the site is ---------- */
+const DB_CAPACITY = 12000; // aggregations per minute MongoDB can run before queuing
+const sandbox = defineSandbox({
+  intro: 'Switch the Redis cache on and off, change how long entries live, and turn the traffic up. Watch the **database load** and how **fresh** the data is.',
+  controls: [
+    toggle('cache', 'Redis cache (cache-aside)', true),
+    range('ttl', 'Entries live for (EX)', { min: 1, max: 3600, value: 60, log: true, format: (s) => humanTime(s) }),
+    range('rpm', 'Requests per minute', { min: 10, max: 100_000, value: 6000, log: true, format: fmt }),
+  ],
+  compute: (v) => {
+    const on = v.cache === true;
+    const ttl = Number(v.ttl);
+    const rpm = Number(v.rpm);
+    const misses = on ? Math.min(rpm, 60 / ttl) : rpm; // one refill per TTL
+    const hitRate = 1 - misses / rpm;
+    const load = misses / DB_CAPACITY;
+    const dbMs = Math.round(400 * (1 + Math.max(0, load - 0.5) * 6)); // queries queue once it's busy
+    const latency = on ? Math.round(hitRate * 6 + (1 - hitRate) * (dbMs + 6)) : dbMs + 20;
+    const perMin = misses < 1 ? misses.toFixed(2) : fmt(misses);
+    const pct = hitRate >= 0.9995 ? '99.9+' : String(Math.round(hitRate * 1000) / 10);
+    const nodes = patch(base, {
+      cdn: { state: 'dim' },
+      api: { badge: { text: `${fmt(latency)} ms`, tone: latency < 100 ? 'ok' : latency < 1000 ? 'warn' : 'danger' } },
+      redis: on ? { state: 'active', sub: `${pct}% hits` } : { state: 'ghost', sub: 'off' },
+      mongo: { state: load > 1 ? 'error' : load > 0.5 ? 'busy' : undefined, sub: `${perMin} queries/min` },
+    });
+    const flows = !on
+      ? [0, 1.2, 2.4].slice(0, rpm > 1000 ? 3 : 1).map((o) => flow(['web', 'api', 'mongo'], { label: o ? undefined : ['GET popular', 'aggregate'], back: 'res', backLabel: o ? undefined : [`${fmt(dbMs)} ms`, `${fmt(latency)} ms`], every: 3.6, offset: o, dwell: load > 0.5 ? 1.2 : 0.4 }))
+      : hitRate >= 0.5
+        ? [hit({ every: 2.4 }), ...miss({ every: 9.6, offset: 1.2 })]
+        : [...miss(), hit({ every: 6.4, offset: 3.2 })];
+    const note = on
+      ? `**${pct}%** of requests are answered from Redis in ~6 ms; MongoDB runs the query ${misses < 1 ? `once every ${humanTime(ttl)}` : `${perMin} times a minute`}. The price: data can be up to **${humanTime(ttl)}** old.` +
+        (hitRate < 0.5 ? ' With this little traffic, entries expire before anyone reuses them — the cache barely helps.' : '') +
+        (load > 0.5 ? ' Even the misses alone are too many for the database — cache for longer.' : '')
+      : `Every request runs the 400 ms aggregation: **${fmt(rpm)} queries a minute** on MongoDB.` +
+        (load > 1 ? ' That’s more than it can handle — requests queue up and start timing out.' : load > 0.5 ? ' It’s straining, so responses slow down as queries queue.' : '');
+    return {
+      scene: { nodes, links, flows },
+      metrics: { latency, dbload: misses < 1 ? Number(misses.toFixed(2)) : Math.round(misses), fresh: on ? `≤ ${humanTime(ttl)} old` : 'yes' },
+      tone: latency >= 1000 ? 'danger' : latency >= 100 || hitRate < 0.5 ? 'warn' : 'ok',
+      note,
+    };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'latency', label: 'Response time', unit: 'ms', better: 'lower' },
@@ -39,6 +85,7 @@ export default defineLesson({
     { text: 'Cache-aside with Redis', step: 4 },
     { text: 'Invalidating stale data', step: 5 },
     { text: 'Avoiding cache stampedes', step: 6 },
+    { text: 'Tune a cache: TTL vs. traffic vs. freshness', step: 8 },
   ],
   steps: [
     {
@@ -134,6 +181,13 @@ export default defineLesson({
       ],
       metrics: { latency: 6, dbload: 1, fresh: '≤ 60 s old' },
       scene: { nodes: patch(base, { redis: { sub: 'per-user keys' } }), links, flows: [hit()] },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Tune the cache yourself',
+      body: ['One popular endpoint, one slow aggregation. Three dials decide how hard the database works and how stale the answers get.'],
+      sandbox,
     },
     {
       short: 'Recap',

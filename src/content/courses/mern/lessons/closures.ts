@@ -1,4 +1,4 @@
-import { box, chip, defineLesson, flow, link, zone } from '@/content/dsl';
+import { box, chip, defineLesson, flow, link, practice, zone } from '@/content/dsl';
 import type { NodeSpec } from '@/engine/types';
 
 /* ---------- layout: scopes are nested zones; names are chips inside them ---------- */
@@ -218,6 +218,39 @@ app.post('/api/todos', validate(TodoInput), createTodo);`,
         },
         links: [link('mw', 'schema', { label: 'remembers' })],
         flows: [flow(['mw', 'schema'], { kind: 'req', label: 'request #1…#1000', back: 'res', backLabel: 'same schema', every: 2.6 })],
+      },
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Build a limited-call wrapper',
+      body: [
+        'Use closure to encapsulate private state. Write `createLimitedFunction(fn, limit)` that allows `fn` to be invoked up to `limit` times.',
+        'Calls beyond the limit should return the result of the last successful call without running `fn` again.',
+      ],
+      practice: practice(
+        'Implement createLimitedFunction(fn, limit) using a closure to keep count and cache the last return value.',
+        `function createLimitedFunction(fn, limit) {\n  // Write your closure here\n}`,
+        `function createLimitedFunction(fn, limit) {\n  let count = 0;\n  let lastResult;\n  return function(...args) {\n    if (count < limit) {\n      count++;\n      lastResult = fn(...args);\n    }\n    return lastResult;\n  };\n}`,
+        [
+          { label: 'calls fn up to limit times', run: '(() => { const f = createLimitedFunction(x => x * 2, 2); return f(1) === 2 && f(2) === 4 && f(3) === 4; })()' },
+          { label: 'count is not exposed globally', run: 'typeof count === "undefined"' },
+        ],
+        [
+          'Declare let count = 0 inside createLimitedFunction.',
+          'Declare let lastResult to remember the previous return value.',
+          'Return an inner function that checks if count < limit before calling fn.',
+        ],
+      ),
+      scene: {
+        nodes: {
+          globalZ,
+          fnZ: zone(600, 330, 640, 400, 'createLimitedFunction() scope', { tone: 'client', icon: 'code' }),
+          counter: v(160, 330, 'wrapper()  →', { w: 170 }),
+          count: v(470, 330, 'count < limit', { w: 160, state: 'ok' }),
+          fn: box(760, 330, 'fn(...args)', { sub: 'called if under limit', icon: 'code', tone: 'client', w: 200 }),
+        },
+        links: [link('counter', 'count'), link('count', 'fn')],
       },
     },
     {

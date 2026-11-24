@@ -1,4 +1,4 @@
-import { box, browser, chip, defineLesson, flow, link, patch } from '@/content/dsl';
+import { box, browser, chip, choice, defineLesson, defineSandbox, flow, fmt, link, patch, range, toggle } from '@/content/dsl';
 import type { LinkSpec, NodeSpec } from '@/engine/types';
 
 /* ---------- layout: component tree on the left, the page on the right ---------- */
@@ -17,6 +17,62 @@ const SKIPPED = { state: 'dim', badge: { text: 'skipped', tone: 'ok' } } as cons
 const keystroke = (o: Parameters<typeof flow>[1] = {}) => flow(['page', 'search', 'app'], { kind: 'event', label: ['type “k”', 'setQuery'], every: 3.6, ...o });
 const linksWithPage = [...links, link('page', 'search', { style: 'dashed' })];
 
+/* ---------- sandbox: grow the list, then apply the fixes one by one ---------- */
+const sandbox = defineSandbox({
+  intro: 'Grow the list, then try the fixes one at a time. Smooth typing needs about **16 ms** or less per keystroke.',
+  controls: [
+    range('count', 'Todos in the list', { min: 10, max: 10_000, value: 1000, log: true, format: fmt }),
+    toggle('memo', 'Wrap TodoList in memo'),
+    choice('handler', 'onToggle prop', [['inline', 'inline arrow'], ['stable', 'useCallback']]),
+    toggle('virtual', 'Virtualize the list'),
+  ],
+  compute: (v) => {
+    const count = Number(v.count);
+    const memo = v.memo === true;
+    const stable = v.handler === 'stable';
+    const virtual = v.virtual === true;
+    const skipped = memo && stable;
+    const shown = virtual ? Math.min(20, count) : count;
+    const items = skipped ? 0 : shown;
+    const ms = Math.max(1, Math.round(2 + items * 0.118));
+    const rendered = 2 + (skipped ? 0 : 1 + items);
+    const tone = ms <= 16 ? 'ok' : ms <= 50 ? 'warn' : 'danger';
+    const nodes = patch(tree, {
+      app: RENDERED,
+      search: RENDERED,
+      list: skipped
+        ? { ...SKIPPED, sub: 'memo · props equal' }
+        : memo
+          ? { state: 'error', sub: 'memo: new onToggle', badge: { text: 're-rendered anyway', tone: 'danger' } }
+          : { ...RENDERED, sub: `${fmt(count)} todos`, badge: { text: `re-rendered · ${ms} ms`, tone } },
+      items: { label: `TodoItem × ${fmt(shown)}`, w: 220, ...(skipped ? { state: 'dim', badge: undefined } : RENDERED), ...(virtual && !skipped ? { badge: { text: 'virtualized', tone: 'ok' } } : {}) },
+      page: { screen: [{ t: 'input', text: 'mil|' }, { t: 'item', text: 'Buy milk' }, { t: 'item', text: 'Learn MERN' }, { t: 'item', text: `… ${fmt(Math.max(0, count - 2))} more` }] },
+    });
+    const flows = [
+      keystroke(),
+      ...(skipped
+        ? []
+        : memo
+          ? [flow(['app', 'list'], { kind: 'err', label: 'new onToggle', every: 3.6, offset: 1.3 }), flow(['list', 'items'], { kind: 'data', label: `render × ${fmt(items)}`, every: 3.6, offset: 2.1 })]
+          : [flow(['app', 'list', 'items'], { kind: 'data', label: ['render', `render × ${fmt(items)}`], every: 3.6, offset: 1.3 })]),
+    ];
+    const why = skipped
+      ? `\`memo\` compares props: \`todos\` is the same array and \`toggle\` the same function, so React skips the whole list.`
+      : memo
+        ? `\`memo\` runs its check — but an inline \`onToggle\` is a brand-new function each render, so the props never match and ${fmt(items)} items re-render anyway.`
+        : stable
+          ? '`useCallback` alone changes nothing: without `memo`, React re-renders children whether or not their props changed.'
+          : `Every keystroke re-renders \`App\`, so every child renders too: ${fmt(rendered)} components.`;
+    const cost = ms <= 16 ? ` **${ms} ms** — inside the 16 ms budget.` : ` **${ms} ms** per keystroke — over the 16 ms budget, so typing stutters.`;
+    return {
+      scene: { nodes, links: linksWithPage, flows },
+      metrics: { ms, rendered },
+      tone,
+      note: why + cost + (virtual && !skipped ? ' Virtualization keeps it to the ~20 rows on screen.' : ''),
+    };
+  },
+});
+
 export default defineLesson({
   metrics: [
     { id: 'ms', label: 'Render per keystroke', unit: 'ms', better: 'lower' },
@@ -30,6 +86,7 @@ export default defineLesson({
     { text: 'Why new functions break memo', step: 5 },
     { text: 'useCallback and useMemo', step: 6 },
     { text: 'When not to bother', step: 8 },
+    { text: 'Find the fix that actually works', step: 9 },
   ],
   steps: [
     {
@@ -203,6 +260,13 @@ export default defineLesson({
         links: linksWithPage,
         flows: [flow(['list', 'items'], { kind: 'data', label: 'render 20', every: 3.2 })],
       },
+    },
+    {
+      short: 'Try it',
+      beat: 'try',
+      title: 'Make typing smooth again',
+      body: ['1,000 todos and a laggy search box. Which fixes help on their own, which only work together, and which do nothing?'],
+      sandbox,
     },
     {
       short: 'Recap',

@@ -6,6 +6,8 @@ import { frameOf } from '@/engine/geometry';
 import { defaultValues, stepScene, stepScenes } from '@/engine/sandbox';
 import type { ControlValue, MetricValue, Values } from '@/engine/types';
 import { SandboxPanel } from './SandboxPanel';
+import { PracticePanel } from './PracticePanel';
+import { TutorPanel } from './TutorPanel';
 import type { Course, Lesson, Step } from '@/engine/types';
 import { findEntry, nextReady, prefetchLesson } from '@/content/registry';
 import { lessonKey, recordStep, useProgress } from '@/lib/progress';
@@ -60,7 +62,12 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
   const sbResult = useMemo(() => (sandbox && values ? sandbox.compute(values) : undefined), [sandbox, values]);
   // Metric deltas compare with the previous setting (or the previous step on arrival).
   const lastMetrics = useRef<{ s: number; m?: Record<string, MetricValue> }>();
-  const prevMetrics = sbResult && lastMetrics.current?.s === s ? lastMetrics.current.m : prevStep?.metrics;
+  // Read the ref only when the shown result changes, so unrelated re-renders (pause, help) keep the deltas.
+  const prevMetrics = useMemo(
+    () => (sbResult && lastMetrics.current?.s === s ? lastMetrics.current.m : prevStep?.metrics),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sbResult, s],
+  );
   useEffect(() => {
     lastMetrics.current = { s, m: sbResult?.metrics ?? step?.metrics };
   }, [s, sbResult, step]);
@@ -188,10 +195,20 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
                 {sandbox && values && sbResult && (
                   <SandboxPanel sandbox={sandbox} values={values} result={sbResult} onChange={setValue} onReset={resetValues} changed={!!sbValues[s]} />
                 )}
+                {step.practice && <PracticePanel step={step.practice} stepKey={s} />}
                 {step.callout && <Callout c={step.callout} />}
                 {step.code && <CodeBlock c={step.code} />}
                 {step.changes && <Changes lines={step.changes} />}
                 {step.check && <CheckBlock c={step.check} key={`check-${s}`} />}
+                <TutorPanel
+                  lessonTitle={lesson.title}
+                  stepTitle={step.title}
+                  stepBody={step.body.join(' ')}
+                  code={step.code?.code}
+                  lessonId={lesson.id}
+                  courseId={course.id}
+                  stepKey={s}
+                />
                 {finished && <Finish course={course} next={next} />}
               </article>
             ) : (

@@ -136,6 +136,37 @@ async function exerciseSandbox(where) {
   await page.evaluate(() => document.activeElement?.blur());
 }
 
+/** Check that practice starter fails tests and solution passes. */
+async function exercisePractice(where) {
+  const panel = page.locator('.practice-panel');
+  if (await panel.count()) {
+    // 1. Run starter -> must NOT pass all
+    await panel.locator('button:has-text("Run")').click();
+    await page.waitForTimeout(400);
+    const passedEarly = await panel.locator('.practice-pass').count();
+    if (passedEarly > 0) {
+      issues++;
+      console.log(`✗ ${where}\n    practice starter passed all tests unexpectedly`);
+    }
+
+    // 2. Click show solution -> confirm -> run -> must pass all
+    const solBtn = panel.locator('.practice-solution-btn');
+    if (await solBtn.count()) {
+      await solBtn.click();
+      await page.waitForTimeout(100);
+      const confirmBtn = panel.locator('button:has-text("I\'m stuck")');
+      if (await confirmBtn.count()) await confirmBtn.click();
+      await panel.locator('button:has-text("Run")').click();
+      await page.waitForTimeout(600);
+      const passedLate = await panel.locator('.practice-pass').count();
+      if (passedLate === 0) {
+        issues++;
+        console.log(`✗ ${where}\n    practice solution failed tests`);
+      }
+    }
+  }
+}
+
 // Discover courses from the home page, lessons from each course page.
 await page.goto(base, { waitUntil: 'networkidle' });
 const courses = onlyCourse ? [onlyCourse] : await page.$$eval('.course-card', (as) => as.map((a) => new URL(a.href).pathname.slice(1)));
@@ -154,6 +185,7 @@ for (const course of courses) {
       steps++;
       await check(`${course}/${id} step ${s}`);
       if (await page.locator('.sandbox').count()) await exerciseSandbox(`${course}/${id} step ${s}`);
+      if (await page.locator('.practice-panel').count()) await exercisePractice(`${course}/${id} step ${s}`);
     }
   }
 }

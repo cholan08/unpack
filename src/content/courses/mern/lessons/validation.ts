@@ -1,4 +1,4 @@
-import { box, browser, db, defineLesson, doc, field, flow, link, patch } from '@/content/dsl';
+import { box, browser, db, defineLesson, doc, field, flow, link, patch, practice } from '@/content/dsl';
 import type { Field, LinkSpec, NodeSpec, ScreenLine } from '@/engine/types';
 
 /* ---------- layout: two kinds of client on the left → the edge → controller → database ---------- */
@@ -265,6 +265,35 @@ mongoose.set('sanitizeFilter', true); // safety net for every query`,
         }),
         links: links.slice(0, 4),
         flows: [goodPost, badPost('POST { role: "admin" }', '400')],
+      },
+    },
+    {
+      short: 'Practice',
+      beat: 'try',
+      title: 'Practice: Build an edge payload validator',
+      body: [
+        'Never pass raw request bodies directly to the database. Strip unknown fields and validate types at the edge.',
+        'Implement `validateTodoInput(body)` that checks: `title` is a non-empty string <= 100 chars, `done` is an optional boolean (defaults to false), and strips any unknown properties.',
+      ],
+      practice: practice(
+        'Validate body and return { ok: true, data: { title, done } } or { ok: false, errors: string[] }',
+        `function validateTodoInput(body) {\n  // Validate title and done, strip other fields\n}`,
+        `function validateTodoInput(body) {\n  if (!body || typeof body !== 'object') return { ok: false, errors: ['Body must be an object'] };\n  const errors = [];\n  if (typeof body.title !== 'string' || body.title.trim().length === 0) {\n    errors.push('Title is required');\n  } else if (body.title.trim().length > 100) {\n    errors.push('Title must be <= 100 characters');\n  }\n  let done = false;\n  if ('done' in body) {\n    if (typeof body.done !== 'boolean') errors.push('Done must be boolean');\n    else done = body.done;\n  }\n  if (errors.length > 0) return { ok: false, errors };\n  return { ok: true, data: { title: body.title.trim(), done } };\n}`,
+        [
+          { label: 'accepts valid input and trims title', run: '(() => { const res = validateTodoInput({ title: "  Buy milk  " }); return res.ok === true && res.data.title === "Buy milk" && res.data.done === false; })()' },
+          { label: 'rejects empty title', run: 'validateTodoInput({ title: "   " }).ok === false' },
+          { label: 'strips unauthorized extra keys', run: '(() => { const res = validateTodoInput({ title: "Test", role: "admin", evil: 1 }); return res.ok === true && !("role" in res.data) && !("evil" in res.data); })()' },
+        ],
+        [
+          'Check that body exists and is an object.',
+          'Verify body.title is a string with trimmed length > 0 and <= 100.',
+          'Return an object containing only title and done inside data.',
+        ],
+      ),
+      metrics: { bad: 'no', status: '200' },
+      scene: {
+        nodes: patch(base, { edge: validator }),
+        links: links.slice(0, 3),
       },
     },
     {

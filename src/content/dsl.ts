@@ -23,6 +23,7 @@ import type {
   QueueNode,
   Sandbox,
   StackNode,
+  TrySpec,
   ZoneNode,
 } from '@/engine/types';
 
@@ -112,6 +113,15 @@ export const choice = (id: string, label: string, options: [string, string][], v
 });
 export const defineSandbox = (s: Sandbox) => s;
 
+export const practice = (
+  prompt: string,
+  starter: string,
+  solution: string,
+  tests: { label: string; run: string }[],
+  hints: string[] = [],
+  language: 'js' = 'js',
+): TrySpec => ({ prompt, starter, solution, tests, hints, language });
+
 /** 1234567 → "1,234,567" */
 export const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
 
@@ -132,4 +142,18 @@ export function humanTime(seconds: number): string {
   const n = v < 10 ? Math.round(v * 10) / 10 : Math.round(v);
   const plural = (name === 'hour' || name === 'day' || name === 'year') && n !== 1 ? 's' : '';
   return `${n.toLocaleString('en-US')} ${name}${plural}`;
+}
+
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+/** Big counts in words: 950 → "950", 2.8e12 → "2.8 trillion", 6e31 → "6 × 10³¹". */
+export function approx(n: number): string {
+  if (n < 1e6) return n < 10 && n % 1 ? String(Math.round(n * 10) / 10) : fmt(n);
+  const short = (x: number) => (x < 10 ? Math.round(x * 10) / 10 : Math.round(x));
+  if (n >= 1e21) {
+    const e = Math.floor(Math.log10(n));
+    return `${short(n / 10 ** e)} × 10${String(e).replace(/\d/g, (d) => SUP[+d])}`;
+  }
+  const names: [number, string][] = [[1e18, 'quintillion'], [1e15, 'quadrillion'], [1e12, 'trillion'], [1e9, 'billion'], [1e6, 'million']];
+  const [size, name] = names.find(([s]) => n >= s)!;
+  return `${short(n / size)} ${name}`;
 }

@@ -16,6 +16,12 @@ export default defineCourse({
       num: '01',
       title: 'How the Web Works',
       blurb: 'The ground everything else stands on: where code runs, and how a page reaches your screen.',
+      why: 'Without knowing how a request travels from browser to server and back, every MERN bug is a mystery. Latency, caching errors, 404s — they all make sense once you can picture the journey.',
+      outcomes: [
+        'Trace a page load from DNS lookup to final pixel, naming every hop',
+        'Read HTTP request and response headers and understand status codes',
+        'Explain what blocks the first paint and what a browser has to parse',
+      ],
       tone: 'net',
       lessons: [
         {
@@ -30,6 +36,7 @@ export default defineCourse({
           title: 'What Happens When You Visit a URL',
           minutes: 11,
           level: 'beginner',
+          interactive: true,
           summary: 'Follow one page load hop by hop — and find out where the time really goes.',
         },
         {
@@ -53,6 +60,12 @@ export default defineCourse({
       num: '02',
       title: 'JavaScript, Under the Hood',
       blurb: 'The one language of the whole stack — and the machinery that runs it.',
+      why: 'JavaScript has surprises that catch everyone: values that share memory, closures that go stale, an event loop that never really sleeps. These surprises become bugs. Seeing the machinery makes them predictable.',
+      outcomes: [
+        'Predict which variables a closure captures and when it goes stale',
+        'Read a call-stack and microtask queue diagram and explain execution order',
+        'Rewrite callback-based code using promises and async/await',
+      ],
       tone: 'warn',
       lessons: [
         {
@@ -81,6 +94,7 @@ export default defineCourse({
           title: 'Promises & async/await',
           minutes: 12,
           level: 'beginner',
+          interactive: true,
           summary: 'How JavaScript waits for the network without freezing — from callback pyramids to promises to async/await, and the mistakes that still trip everyone up.',
         },
         {
@@ -97,6 +111,12 @@ export default defineCourse({
       num: '03',
       title: 'React',
       blurb: 'Turning data into UI: components, state, effects, and what really happens on a re-render.',
+      why: 'React is not magic. If you do not understand why it re-renders or when effects run, you will write components that fight the framework — infinite loops, stale data, broken lists.',
+      outcomes: [
+        'Explain the full re-render cycle from setState to DOM commit',
+        'Correctly use useEffect with a dependency array to avoid stale closures and infinite loops',
+        'Choose between local state, lifting, and context for different data-sharing needs',
+      ],
       tone: 'client',
       lessons: [
         {
@@ -153,6 +173,7 @@ export default defineCourse({
           title: 'Performance & Memoization',
           minutes: 12,
           level: 'intermediate',
+          interactive: true,
           summary: 'Measure first, then skip work: React.memo, useCallback, useMemo, and when not to bother.',
         },
       ],
@@ -162,6 +183,12 @@ export default defineCourse({
       num: '04',
       title: 'Node & Express',
       blurb: 'Your code on the server: one thread, many requests, and a pipeline of middleware.',
+      why: 'Node handles thousands of connections with one thread — until your code accidentally blocks it. Express is just a middleware pipeline, and once you see the pipeline, every route makes sense.',
+      outcomes: [
+        'Explain how Node handles concurrent requests without spawning threads',
+        'Write an Express middleware chain with error handling and async support',
+        'Design a REST API with consistent naming, appropriate HTTP methods, and meaningful status codes',
+      ],
       tone: 'server',
       lessons: [
         {
@@ -213,6 +240,12 @@ export default defineCourse({
       num: '05',
       title: 'MongoDB',
       blurb: 'Documents instead of tables: modelling, querying, and keeping it fast.',
+      why: 'MongoDB is flexible by design — which means you can build a schema that makes every query slow and hard to change. Getting the data model right up front saves weeks of pain later.',
+      outcomes: [
+        'Choose between embedding and referencing and justify the trade-off',
+        'Write queries with filters, projections, and aggregation pipeline stages',
+        'Create the right index for a query and explain why a collection scan is slow',
+      ],
       tone: 'data',
       lessons: [
         {
@@ -272,6 +305,12 @@ export default defineCourse({
       num: '06',
       title: 'Connecting the Stack',
       blurb: 'Wiring React to your API — and the browser rules that get in the way.',
+      why: 'The browser has opinions about which pages can talk to which servers, and those opinions look like cryptic errors until you understand why they exist. This part makes the full stack click together.',
+      outcomes: [
+        'Fix a CORS error by understanding the same-origin policy and the headers that lift it',
+        'Build a single API client module that handles errors, auth headers, and session expiry',
+        'Add real-time updates with WebSockets without breaking on multi-server deploys',
+      ],
       tone: 'neutral',
       lessons: [
         {
@@ -316,6 +355,12 @@ export default defineCourse({
       num: '07',
       title: 'Auth & Security',
       blurb: 'Who are you, what may you do, and how attackers try to skip both questions.',
+      why: 'Auth bugs are the most dangerous and the most common. Storing plain-text passwords or trusting client-side auth checks are mistakes that make real headlines — and they are easy to avoid if you understand the primitives.',
+      outcomes: [
+        'Store passwords using salted hashing and explain why encryption is the wrong choice',
+        'Implement JWT auth end-to-end: login, signing, verifying, refreshing, and revoking',
+        'Identify XSS, CSRF, and injection attack vectors and apply the standard defenses',
+      ],
       tone: 'auth',
       lessons: [
         {
@@ -330,6 +375,7 @@ export default defineCourse({
           title: 'Password Hashing',
           minutes: 12,
           level: 'intermediate',
+          interactive: true,
           summary: 'Your database will leak one day. Store passwords so that the leak is nearly worthless — salted, slow hashes.',
         },
         {
@@ -367,6 +413,12 @@ export default defineCourse({
       num: '08',
       title: 'Shipping Software',
       blurb: 'The craft around the code: version control, tests, builds, and getting it live.',
+      why: 'Code that works on your laptop and dies in production is useless. This part gives you the tools to collaborate, verify correctness, and deploy with confidence — the difference between a hobby project and a real one.',
+      outcomes: [
+        'Use Git branches, merges, and pull requests without fear',
+        'Write unit and integration tests that catch real bugs and run in CI',
+        'Deploy a MERN app to a cloud platform and automate future deploys on push',
+      ],
       tone: 'ok',
       lessons: [
         {
@@ -418,6 +470,12 @@ export default defineCourse({
       num: '09',
       title: 'Performance & Scale',
       blurb: 'When it works but gets slow: caching, paging, limits and visibility.',
+      why: 'Apps that return everything, skip caches, and have no rate limits are fine for 10 users and painful for 10,000. This part shows you the levers to pull before you need to.',
+      outcomes: [
+        'Add a cache layer and reason about TTL, invalidation, and stampede prevention',
+        'Implement cursor-based pagination that stays fast on a million-row collection',
+        'Read structured logs and RED metrics to find the slow path in production',
+      ],
       tone: 'danger',
       lessons: [
         {
@@ -425,6 +483,7 @@ export default defineCourse({
           title: 'Caching Layers',
           minutes: 12,
           level: 'advanced',
+          interactive: true,
           summary: 'Browser, CDN and Redis caches: how each layer saves work, and the two hard problems — stale data and stampedes.',
         },
         {
@@ -432,6 +491,7 @@ export default defineCourse({
           title: 'Pagination',
           minutes: 10,
           level: 'intermediate',
+          interactive: true,
           summary: 'Never return everything: offset pages, why deep pages get slow and shift, and cursor-based paging for feeds.',
         },
         {
@@ -439,6 +499,7 @@ export default defineCourse({
           title: 'Rate Limiting',
           minutes: 10,
           level: 'intermediate',
+          interactive: true,
           summary: 'Stop one client from hogging or hammering your API: limits per key, token buckets, shared counters and polite retries.',
         },
         {
@@ -455,6 +516,12 @@ export default defineCourse({
       num: '10',
       title: 'Build It',
       blurb: 'Whole apps, designed end to end with everything from the course.',
+      why: 'Knowing the pieces is not the same as knowing how to combine them. Building a real, complete app — with auth, data, real-time, and deployment — is the only way to find out what you actually understand.',
+      outcomes: [
+        'Design a full-stack app schema, API, and component tree from scratch',
+        'Implement the TaskFlow capstone app across all 10 milestones locally',
+        'Defend your design decisions: why this data model, this auth strategy, this deployment approach',
+      ],
       tone: 'neutral',
       lessons: [
         {

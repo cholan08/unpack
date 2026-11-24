@@ -1,0 +1,107 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'js',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'js-q1',
+      kind: 'mcq',
+      q: 'What is stored in a variable when assigning an object: const a = { x: 1 }?',
+      options: [
+        'A full independent copy of the object on the stack',
+        'A reference (memory address) pointing to the object on the heap',
+        'A JSON string representation',
+        'An immutable frozen symbol',
+      ],
+      answer: 1,
+      explain: 'Objects and arrays are stored on the heap; variables hold references to those memory locations.',
+      teachAt: { lessonId: 'values-references', step: 1 },
+    },
+    {
+      id: 'js-q2',
+      kind: 'mcq',
+      q: 'Why does a closure remember variables from an outer function even after the outer function has returned?',
+      options: [
+        'Because the outer function never really finishes running',
+        'Because JavaScript keeps the scope environment record alive in memory as long as the inner function reference exists',
+        'Because variables declared with let become global automatically',
+        'Because closures serialize variables to localStorage',
+      ],
+      answer: 1,
+      explain: 'Functions in JS maintain a hidden reference to their lexical environment (scope chain), preventing garbage collection.',
+      teachAt: { lessonId: 'closures', step: 3 },
+    },
+    {
+      id: 'js-q3',
+      kind: 'mcq',
+      q: 'In the event loop, when do microtasks (Promise.then callbacks) execute?',
+      options: [
+        'Immediately after each setTimeout timer fires',
+        'As soon as the call stack empties, before the next macrotask (timer, I/O) is processed',
+        'Only on the next second tick of the system clock',
+        'In parallel on a separate background thread',
+      ],
+      answer: 1,
+      explain: 'The microtask queue has priority over macrotasks: whenever the call stack becomes empty, all queued microtasks run.',
+      teachAt: { lessonId: 'event-loop', step: 4 },
+    },
+    {
+      id: 'js-q4',
+      kind: 'mcq',
+      q: 'What happens if you use await inside an Array.prototype.forEach callback?',
+      options: [
+        'The loop pauses synchronously between each item',
+        'forEach returns a promise that resolves when all callbacks finish',
+        'forEach ignores the returned promise from the async callback and proceeds immediately without waiting',
+        'A runtime TypeError is thrown',
+      ],
+      answer: 2,
+      explain: 'Array.prototype.forEach does not inspect or await return values of callbacks. Use for...of or Promise.all(items.map(...)).',
+      teachAt: { lessonId: 'promises', step: 5 },
+    },
+    {
+      id: 'js-q5',
+      kind: 'mcq',
+      q: 'What is the primary difference between CommonJS (require/module.exports) and ES Modules (import/export)?',
+      options: [
+        'CommonJS is synchronous and evaluated at runtime; ES Modules are statically analyzable and support asynchronous loading',
+        'ES Modules only work in browsers, never in Node.js',
+        'CommonJS can only export strings, while ES Modules export objects',
+        'ES Modules require a build step to run in modern Node.js',
+      ],
+      answer: 0,
+      explain: 'ES Modules allow bundlers to perform static analysis and tree-shaking because imports and exports are declarative.',
+      teachAt: { lessonId: 'modules', step: 2 },
+    },
+    {
+      id: 'js-q6',
+      kind: 'mcq',
+      q: 'What is the result of Promise.all([p1, p2]) if p1 resolves to "A" and p2 rejects with Error("Fail")?',
+      options: [
+        'It resolves with ["A", undefined]',
+        'It immediately rejects with Error("Fail")',
+        'It waits for both and returns a list of results and errors',
+        'It ignores the rejected promise and returns "A"',
+      ],
+      answer: 1,
+      explain: 'Promise.all has fail-fast behavior: as soon as any promise in the array rejects, the entire aggregate promise rejects.',
+      teachAt: { lessonId: 'promises', step: 3 },
+    },
+  ],
+  challenge: {
+    id: 'js-challenge',
+    prompt: 'Implement once(fn): a function that takes a function fn and returns a new function that can only be executed once. Subsequent calls should return the first result.',
+    starter: `function once(fn) {\n  // Return a function that executes fn only on the first call\n}`,
+    language: 'js',
+    solution: `function once(fn) {\n  let called = false;\n  let result;\n  return function(...args) {\n    if (!called) {\n      called = true;\n      result = fn.apply(this, args);\n    }\n    return result;\n  };\n}`,
+    tests: [
+      { label: 'calls fn only on the first invocation', run: '(() => { let count = 0; const f = once(() => ++count); f(); f(); return count === 1; })()' },
+      { label: 'returns first result on subsequent calls', run: '(() => { const f = once(x => x * 10); return f(5) === 50 && f(99) === 50; })()' },
+    ],
+    hints: [
+      'Use a boolean variable called in the closure scope.',
+      'Save the result of fn in a result variable in the closure scope.',
+    ],
+  },
+} satisfies PartGate;

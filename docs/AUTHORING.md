@@ -46,7 +46,7 @@ export default defineLesson({
 ```ts
 {
   short: 'Hot spot',                       // label on the progress bar
-  beat: 'problem',                         // setup | problem | solution | technique | tradeoff | insight | recap
+  beat: 'problem',                         // setup | problem | solution | technique | tradeoff | insight | try | recap
   title: 'Three servers, one address',
   body: ['Paragraph with **bold**, `code`, [[glossary-key]] and {server:coloured text}.'],
   callout: { kind: 'warn', text: '…' },    // insight | warn | tip | mistake
@@ -54,7 +54,14 @@ export default defineLesson({
   changes: ['+ added', '~ changed', '- removed'],
   metrics: { p95: 1800 },                  // numbers show ↑/↓ vs the previous step; 'yes'/'no' are coloured
   check: { q: '…', options: ['…', '…'], answer: 1, explain: '…' },   // a "predict" question
-  scene: { nodes, links, flows },
+  practice: practice(                      // optional interactive "Try it" code practice beside diagram
+    'Prompt description',
+    `function starter() { ... }`,
+    `function solution() { ... }`,
+    [{ label: 'returns true', run: 'starter() === true' }],
+    ['Hint 1', 'Hint 2']
+  ),
+  scene: { nodes, links, flows },          // …or `sandbox` instead (see below)
 }
 ```
 
@@ -131,6 +138,40 @@ nodes: patch(base, { mongo: db(830, 345, 'MongoDB'), you: null })
 
 Nodes that keep their id **animate** between steps, so moving a node is how you show "reordering". `patch(base, { json: { y: 395 } })` slides the JSON parser below the route.
 
+## Interactive sandboxes ("Try it" steps)
+
+A step can carry a **sandbox** instead of a fixed `scene`: a few controls, and a `compute` function that turns their values into the scene, the metrics and a one-line outcome. The learner drags a slider and the diagram, the metrics (with ↑/↓ against the previous setting) and the note all react.
+
+```ts
+import { defineSandbox, fmt, humanTime, range, toggle, choice } from '@/content/dsl';
+
+const sandbox = defineSandbox({
+  intro: 'Drag the collection size and flip the index on and off.',
+  controls: [
+    range('docs', 'Todos in the collection', { min: 1000, max: 100_000_000, value: 10_000_000, log: true, format: fmt }),
+    toggle('indexed', 'Index on userId'),                       // default off
+    choice('mode', 'Paging style', [['offset', 'skip / limit'], ['cursor', 'cursor']]),
+  ],
+  compute: (v) => ({
+    scene: { nodes, links, flows },                             // build from the same layout as the other steps
+    metrics: { examined: v.indexed ? 2 : Number(v.docs) },      // the lesson's metric ids
+    note: 'IXSCAN: still about **1 ms**.',                      // rich text, shown under the controls
+    tone: 'ok',                                                 // ok | warn | danger | neutral — colours the note
+  }),
+});
+
+// in steps, just before the recap:
+{ short: 'Try it', beat: 'try', title: 'Grow the data, flip the index', body: ['…'], sandbox },
+```
+
+- **Controls:** `range` (`min`, `max`, `value`, optional `step`, `unit`, `format`; `log: true` for ranges spanning orders of magnitude — the slider rounds to 2 significant digits), `toggle`, `choice` (2–4 short options). Two to four controls is the sweet spot.
+- **`compute` must be pure and cheap** — it runs on every slider tick. Derive everything from the values; reuse the lesson's node builders so the sandbox scene animates from the step before it.
+- **Keep it honest:** use the same model as the lesson's prose (if step 2 says 2,140 ms for 10 M docs, the sandbox should too). State assumptions in a `callout`.
+- **Make the outcome readable:** the note should name the cause ("`skip(49,980)` walks over…"), not just the number. Use `tone` to flag bad outcomes, and `humanTime(seconds)`, `fmt(n)` and `approx(n)` for numbers.
+- Mark the lesson `interactive: true` in `course.ts` so its card shows the **Try it** pill (in dev, a console warning reminds you).
+- The camera frames every scene the sandbox can produce (each control at its extremes), and `npm run qa` drives every control to its min/max/each option and checks each resulting layout — so clipped labels at extreme values are caught.
+- The learner's values are kept per step while they move around the lesson; **Reset** returns to the defaults.
+
 ## Visual language (keep it consistent)
 
 - **Tone = where it runs:** `client` blue (browser/React) · `server` orange (Node/Express) · `data` green (MongoDB) · `net` violet (network/infra) · `auth` rose (security).
@@ -147,6 +188,58 @@ Nodes that keep their id **animate** between steps, so moving a node is how you 
 2. Add lessons as above. The home page catalog and the header pick it up automatically.
 3. Remove it from the "Coming later" list in `src/site/HomePage.tsx`.
 
+## Add a handwritten notebook
+
+Notebooks (`/notebooks`) are exam-style study notes drawn as handwriting on ruled paper, one notebook per subject (DBMS first). They are pure data: the renderer draws the paper, ink, boxes, tables and diagrams.
+
+> Shortcut: `npm run new:notebook -- os "OS" "Operating Systems"` creates the folder, a starter `notebook.ts` and one page.
+
+```
+src/content/notebooks/<book-id>/
+  notebook.ts          cover + ordered page list (loaded up front)
+  pages/<page-id>.ts   one page each (loaded on demand)
+```
+
+1. `notebook.ts` exports `defineNotebook({ id, title, name, tagline, color, cover, pages })`. `id` must match the folder. Page 1 is always the cover; it lists the pages as Key Topics and counts them automatically.
+2. Each entry in `pages` needs `pages/<id>.ts`. A missing file shows "still being written", and a file that isn't listed triggers a dev warning.
+3. The shelf and the reader pick the notebook up automatically, with no routes or menu to edit.
+
+**A page** is a list of rows. Each row is either two columns of sections or one full-width section. Sections number themselves in reading order (left column, then right).
+
+```ts
+import { definePage, exam, full, row, sec, table, ul } from '../../dsl';
+
+export default definePage({
+  rows: [
+    row(sec('What is a Process ?', ul('A __program in execution__.', 'Has its own **memory**.')), sec('States', /* … */)),
+    full(exam('Point one for the exam.', 'Point two.')),
+  ],
+  quote: 'One line to remember this page by.',
+});
+```
+
+**Ink markup** in any text: `__underline__` · `**bold ink**` · `==highlighter==` · `` `code` `` · `σ_{sub}` · `x^{sup}`.
+
+**Building blocks** (all from `@/content/notebooks/dsl`):
+
+| Block | Draws |
+| --- | --- |
+| `ul` `stars` `checks` `arrows` `nums` `circles` `ul2` `stars2` | bullet lists (`li(text, ...sub)` for nested points) |
+| `pairs(['Term', 'meaning'], …)` | aligned term – meaning rows |
+| `table(head, rows)` / `mini(title, head, rows)` | ruled comparison table / small example table |
+| `code(src, label?, tone?)` | hand-copied code in a box; indent it with the source, the common indent is removed |
+| `tag` `box` `toneBox` `note` | highlighter label, framed fact, dashed ★ call-out |
+| `sub(title, …)` `cols([…], […])` | "(1) Sub-heading" groups, side-by-side blocks |
+| `cards({ label, sub, tone, points }…)` | colour-keyed boxes (normal forms, states) |
+| `ops(tbl(spec(…)), op('σ_{Age>20}'), tbl(…))` | table → operation → table |
+| `venn('inner' \| 'left' \| 'right' \| 'full' \| 'none')` | join / set diagrams |
+| `sketch({ w, h, nodes, edges }, caption?)` | any hand-drawn diagram (below) |
+| `exam(...points)` | the starred "Important Points (Exam)" section |
+
+**Sketches**: nodes are placed by their **centre** (`x`, `y`) in the sketch's own units. Shapes: `box` `box2` `diamond` `diamond2` `oval` `oval2` `ovalDash` `circle` `pill` `note` `db` `cloud` `pc` `server` `laptop` `user` `text` `point`. Boxes take an `icon` (`pc` `server` `db` `user` `laptop`), and `key: true` underlines a label. Edges run between node ids and clip to the shape outline automatically. Options: `arrow: 'to' | 'from' | 'both' | 'none'`, `dash`, `double` (total participation), `curve`, `via`, `label` (nudge it with `lx` / `ly`). Keep `w` ≤ ~480 for a half-width column and ≤ ~700 for a full-width one. Colours (`tone`) come from the theme, so dark mode works on its own.
+
+**House style**: write the notes in your own words, keep bullets short, underline the 1–3 words a student must remember, use one shared example table across a page, and end every page with an exam section and a one-line quote. Check each page in light and dark and at phone width; the sheet must never scroll sideways.
+
 ## Quality checklist
 
 - [ ] `npm run build` passes (types catch broken scenes)
@@ -154,3 +247,4 @@ Nodes that keep their id **animate** between steps, so moving a node is how you 
 - [ ] Stepped through in light **and** dark
 - [ ] Every `[[term]]` exists in the glossary (QA reports unknown ones)
 - [ ] Each step teaches one idea; the diagram changes in a way that shows it
+- [ ] A sandbox's note explains *why* the number changed, and every control visibly changes the diagram

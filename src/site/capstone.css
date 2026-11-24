@@ -1,0 +1,105 @@
+/* ============================================================
+   Capstone Page (Phase E)
+   ============================================================ */
+.capstone { padding-block: 3rem 5rem; display: flex; flex-direction: column; gap: 2rem; }
+
+.capstone-head { display: flex; flex-direction: column; gap: .5rem; }
+.capstone-lede { font-size: 1.0625rem; max-width: 720px; line-height: 1.6; }
+
+/* Milestone Rail */
+.capstone-rail {
+  display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .5rem;
+  border-bottom: 1px solid var(--line);
+}
+.capstone-step-btn {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem .75rem; border-radius: var(--radius-sm);
+  background: var(--surface-2); border: 1.5px solid var(--line);
+  font-size: .8125rem; white-space: nowrap; cursor: pointer;
+  transition: all .15s;
+}
+.capstone-step-btn:hover { border-color: var(--line-strong); }
+.capstone-step-btn[data-state='current'] {
+  border-color: var(--client); background: var(--client-soft); color: var(--client);
+  font-weight: 600;
+}
+.capstone-step-btn[data-state='done'] {
+  border-color: var(--ok-line); background: var(--ok-soft); color: var(--ok);
+}
+.capstone-step-n { font-size: .75rem; opacity: .7; }
+.capstone-check-icon { margin-left: .25rem; }
+
+/* Milestone Card */
+.capstone-card {
+  background: var(--surface); border: 1.5px solid var(--line);
+  border-radius: var(--radius-lg); padding: 2rem;
+  display: flex; flex-direction: column; gap: 1.75rem;
+}
+
+.capstone-card-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 1rem;
+}
+.capstone-card-header h2 { margin: .2rem 0 0; font-size: 1.5rem; }
+
+.capstone-goal {
+  font-size: 1.0625rem; line-height: 1.6; color: var(--ink-2);
+  margin: 0; padding-left: 1rem; border-left: 3px solid var(--client);
+}
+
+.capstone-why {
+  background: var(--warn-soft); border: 1px solid var(--warn-line);
+  border-radius: var(--radius); padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; gap: .35rem;
+}
+.capstone-why p { margin: 0; font-size: .9375rem; color: var(--ink); }
+
+.capstone-section { display: flex; flex-direction: column; gap: .75rem; }
+
+/* Commands */
+.capstone-commands { display: flex; flex-direction: column; gap: .75rem; }
+.capstone-cmd-box {
+  background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); overflow: hidden;
+}
+.capstone-cmd-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .4rem .75rem; background: var(--surface-3);
+  border-bottom: 1px solid var(--line);
+}
+.capstone-cmd-title { font-size: .75rem; font-weight: 600; display: flex; align-items: center; gap: .35rem; }
+.capstone-cmd-code {
+  margin: 0; padding: .75rem 1rem; font-family: var(--font-mono);
+  font-size: .8125rem; white-space: pre-wrap;
+}
+
+/* Acceptance Checklist */
+.capstone-checks { display: flex; flex-direction: column; gap: .5rem; }
+.capstone-check-item {
+  display: flex; align-items: flex-start; gap: .75rem;
+  padding: .75rem 1rem; background: var(--surface-2);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  cursor: pointer; transition: all .15s;
+}
+.capstone-check-item:hover { border-color: var(--line-strong); }
+.capstone-check-item[data-checked] {
+  background: var(--ok-soft); border-color: var(--ok-line);
+}
+.capstone-check-item input { position: absolute; opacity: 0; }
+.capstone-checkbox {
+  width: 1.25rem; height: 1.25rem; border-radius: 4px;
+  border: 1.5px solid var(--line-strong); flex-shrink: 0; margin-top: .1rem;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); color: var(--ok);
+}
+.capstone-check-item[data-checked] .capstone-checkbox {
+  border-color: var(--ok); background: var(--ok); color: white;
+}
+.capstone-check-label { display: flex; flex-direction: column; gap: .35rem; font-size: .9375rem; }
+.capstone-sample-output {
+  margin: 0; padding: .4rem .6rem; background: var(--bg-2);
+  border-radius: 4px; font-family: var(--font-mono); font-size: .75rem;
+  color: var(--muted);
+}
+
+.capstone-nav { display: flex; gap: .75rem; align-items: center; margin-top: 1rem; }

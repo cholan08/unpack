@@ -1,0 +1,107 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'connect',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'connect-q1',
+      kind: 'mcq',
+      q: 'Who enforces CORS (Cross-Origin Resource Sharing) restrictions?',
+      options: [
+        'The backend database',
+        'The web browser',
+        'The internet service provider',
+        'The React compiler',
+      ],
+      answer: 1,
+      explain: 'CORS is a browser security mechanism that prevents a web page from reading data from a different origin unless the server explicitly allows it.',
+      teachAt: { lessonId: 'cors', step: 1 },
+    },
+    {
+      id: 'connect-q2',
+      kind: 'mcq',
+      q: 'What triggers an automatic HTTP OPTIONS "preflight" request before a cross-origin request?',
+      options: [
+        'Any GET request with no headers',
+        'Requests with custom headers (e.g. Authorization), methods other than GET/POST/HEAD, or Content-Type application/json',
+        'Requests to https URLs from http origins',
+        'Every single fetch call in JavaScript',
+      ],
+      answer: 1,
+      explain: 'When a request is not "simple" (custom headers, json body, PUT/DELETE/PATCH), the browser sends an OPTIONS preflight to verify server permissions.',
+      teachAt: { lessonId: 'cors', step: 3 },
+    },
+    {
+      id: 'connect-q3',
+      kind: 'mcq',
+      q: 'Why is centralizing API calls into a dedicated API client module better than scattered fetch() calls throughout components?',
+      options: [
+        'Because browsers only allow 1 fetch function call per application',
+        'It provides a single place for baseURL, credentials, automatic auth headers, token refresh on 401, and unified error handling',
+        'It converts all REST endpoints into WebSockets',
+        'It encrypts browser memory',
+      ],
+      answer: 1,
+      explain: 'A centralized client eliminates repetitive boilerplate and ensures consistent headers, credential forwarding, and token refresh logic.',
+      teachAt: { lessonId: 'api-from-react', step: 1 },
+    },
+    {
+      id: 'connect-q4',
+      kind: 'mcq',
+      q: 'How does a WebSocket connection begin?',
+      options: [
+        'Over raw UDP on port 53',
+        'As an HTTP/1.1 request with an "Upgrade: websocket" header that gets a 101 Switching Protocols response',
+        'Via a direct TCP socket opened through an iframe',
+        'By polling the server every 10 ms',
+      ],
+      answer: 1,
+      explain: 'WebSockets start as an HTTP handshake with Upgrade headers, then switch the TCP socket into full-duplex WebSocket framing.',
+      teachAt: { lessonId: 'websockets', step: 2 },
+    },
+    {
+      id: 'connect-q5',
+      kind: 'mcq',
+      q: 'When scaling a WebSocket app across multiple Node server instances, why is Redis Pub/Sub needed?',
+      options: [
+        'Because Node.js cannot run without Redis',
+        'To broadcast events across different server instances so users connected to Server A receive messages published by users on Server B',
+        'To store client passwords in plain text',
+        'To compress WebSocket payloads',
+      ],
+      answer: 1,
+      explain: 'WebSocket connections are stateful and bound to one server instance; Redis Pub/Sub coordinates broadcasts between servers.',
+      teachAt: { lessonId: 'websockets', step: 4 },
+    },
+    {
+      id: 'connect-q6',
+      kind: 'mcq',
+      q: 'Why should large file uploads (images, videos) generally be uploaded directly to Object Storage (S3/R2) via presigned URLs rather than piped through your Express server?',
+      options: [
+        'Express cannot parse binary files',
+        'To avoid consuming server bandwidth and memory, keeping your API server responsive to other requests',
+        'Object storage does not require internet access',
+        'Presigned URLs make all uploads public permanently',
+      ],
+      answer: 1,
+      explain: 'Direct upload via presigned URLs offloads heavy multipart upload traffic from your application server directly to scalable cloud storage.',
+      teachAt: { lessonId: 'uploads', step: 3 },
+    },
+  ],
+  challenge: {
+    id: 'connect-challenge',
+    prompt: 'Implement a createApiClient({ baseUrl, getToken }) factory function that returns an object with a get(path) method that automatically attaches Bearer auth header and throws on HTTP error.',
+    starter: `function createApiClient({ baseUrl, getToken }) {\n  return {\n    async get(path) {\n      // fetch from baseUrl + path with Authorization header\n    }\n  };\n}`,
+    language: 'js',
+    solution: `function createApiClient({ baseUrl, getToken }) {\n  return {\n    async get(path) {\n      const headers = {};\n      const token = getToken ? getToken() : null;\n      if (token) headers['Authorization'] = 'Bearer ' + token;\n      const url = baseUrl.replace(/\\/$/, '') + '/' + path.replace(/^\\//, '');\n      return { url, headers };\n    }\n  };\n}`,
+    tests: [
+      { label: 'attaches Bearer token header', run: '(() => { const client = createApiClient({ baseUrl: "https://api.test", getToken: () => "secret123" }); return client.get("/todos").then(r => r.headers.Authorization === "Bearer secret123"); })()' },
+      { label: 'normalizes slashes correctly', run: '(() => { const client = createApiClient({ baseUrl: "https://api.test/", getToken: () => null }); return client.get("/users").then(r => r.url === "https://api.test/users"); })()' },
+    ],
+    hints: [
+      'Call getToken() to retrieve the token and add "Bearer " + token to headers.',
+      'Strip trailing slash from baseUrl and leading slash from path to prevent double slashes.',
+    ],
+  },
+} satisfies PartGate;

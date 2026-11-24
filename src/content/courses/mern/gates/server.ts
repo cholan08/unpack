@@ -1,0 +1,107 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'server',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'server-q1',
+      kind: 'mcq',
+      q: 'How does Node.js handle thousands of concurrent I/O connections on a single JavaScript thread?',
+      options: [
+        'By creating thousands of OS threads in the V8 engine',
+        'Via libuv’s event loop and non-blocking asynchronous system calls (epoll/kqueue)',
+        'By running multiple copies of the Node binary automatically',
+        'By compiling all JavaScript into hardware microcode',
+      ],
+      answer: 1,
+      explain: 'Node delegates I/O operations to the operating system kernel and libuv, notifying the JS event loop via callbacks when data is ready.',
+      teachAt: { lessonId: 'node-runtime', step: 2 },
+    },
+    {
+      id: 'server-q2',
+      kind: 'mcq',
+      q: 'In Express, what does calling next() inside a middleware function do?',
+      options: [
+        'Immediately sends the HTTP response to the client',
+        'Passes execution control to the next middleware or route handler in the pipeline',
+        'Restarts the Express server process',
+        'Rolls back the current database transaction',
+      ],
+      answer: 1,
+      explain: 'Express middleware operates as a sequential pipeline; next() invokes the next handler in line.',
+      teachAt: { lessonId: 'middleware', step: 2 },
+    },
+    {
+      id: 'server-q3',
+      kind: 'mcq',
+      q: 'How does Express identify an error-handling middleware?',
+      options: [
+        'By decorating the function with @ErrorHandler',
+        'By defining exactly 4 arguments in the function signature: (err, req, res, next)',
+        'By naming the function "handleError"',
+        'By placing it at the very top before app.use(express.json())',
+      ],
+      answer: 1,
+      explain: 'Express checks fn.length === 4 to distinguish error-handling middleware from normal (req, res, next) handlers.',
+      teachAt: { lessonId: 'errors', step: 3 },
+    },
+    {
+      id: 'server-q4',
+      kind: 'mcq',
+      q: 'Why should you validate request bodies with a schema validator (e.g. Zod) at the API edge rather than relying on Mongoose alone?',
+      options: [
+        'Mongoose cannot run on the server',
+        'To reject malformed input early before database calls, return clear field-specific error messages, and strip unpermitted fields',
+        'Because Express crashes if unvalidated JSON is received',
+        'Because Zod encrypts the request payload',
+      ],
+      answer: 1,
+      explain: 'Edge validation stops malformed payloads and malicious keys (mass assignment) before they ever reach business logic or the database.',
+      teachAt: { lessonId: 'validation', step: 2 },
+    },
+    {
+      id: 'server-q5',
+      kind: 'mcq',
+      q: 'Why are environment variables prefixed with VITE_ in a frontend build NOT secret?',
+      options: [
+        'Vite encrypts them with a public certificate',
+        'Vite replaces them as literal strings in the client bundle during build, making them visible to anyone who opens browser DevTools',
+        'They are stored in cookies that expire after 1 hour',
+        'Only the server can read VITE_ variables',
+      ],
+      answer: 1,
+      explain: 'Any environment variable bundled into client-side JS is baked into static assets and visible to anyone viewing the source code.',
+      teachAt: { lessonId: 'config', step: 3 },
+    },
+    {
+      id: 'server-q6',
+      kind: 'mcq',
+      q: 'Which HTTP method should be used when creating a new resource in a RESTful API?',
+      options: [
+        'GET',
+        'POST',
+        'PUT',
+        'PATCH',
+      ],
+      answer: 1,
+      explain: 'POST is the standard method for creating a new subordinate resource under a collection (e.g., POST /api/todos).',
+      teachAt: { lessonId: 'rest-api', step: 2 },
+    },
+  ],
+  challenge: {
+    id: 'server-challenge',
+    prompt: 'Implement a simple middleware pipeline runner runPipeline(middlewares, req, res) that executes array of (req, res, next) functions in order.',
+    starter: `function runPipeline(middlewares, req, res) {\n  // Execute each middleware sequentially via next()\n}`,
+    language: 'js',
+    solution: `function runPipeline(middlewares, req, res) {\n  let index = 0;\n  function next(err) {\n    if (err) return;\n    if (index < middlewares.length) {\n      const mw = middlewares[index++];\n      mw(req, res, next);\n    }\n  }\n  next();\n}`,
+    tests: [
+      { label: 'executes middlewares in sequence', run: '(() => { const log = []; const m1 = (req, res, n) => { log.push(1); n(); }; const m2 = (req, res, n) => { log.push(2); n(); }; runPipeline([m1, m2], {}, {}); return log.join("") === "12"; })()' },
+      { label: 'stops execution if next() is not called', run: '(() => { const log = []; const m1 = (req, res, n) => { log.push("stop"); }; const m2 = (req, res, n) => { log.push("unreachable"); n(); }; runPipeline([m1, m2], {}, {}); return log.length === 1 && log[0] === "stop"; })()' },
+    ],
+    hints: [
+      'Define a recursive next() function that tracks the current middleware index.',
+      'Call the current middleware with (req, res, next) and increment index.',
+    ],
+  },
+} satisfies PartGate;

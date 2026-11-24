@@ -1,0 +1,108 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'mongo',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'mongo-q1',
+      kind: 'mcq',
+      q: 'What is BSON in MongoDB?',
+      options: [
+        'A SQL dialect used by MongoDB drivers',
+        'Binary JSON — a binary serialization format that encodes JSON-like documents with extra types like Date and ObjectId',
+        'A browser storage engine',
+        'A background backup daemon',
+      ],
+      answer: 1,
+      explain: 'MongoDB stores documents on disk and over the wire in BSON, adding rich types (ObjectId, Date, 64-bit int) to standard JSON.',
+      teachAt: { lessonId: 'documents', step: 2 },
+    },
+    {
+      id: 'mongo-q2',
+      kind: 'mcq',
+      q: 'What is the main danger of calling db.collection.deleteMany({}) without a filter query?',
+      options: [
+        'MongoDB throws an error and rejects empty queries',
+        'It matches and permanently deletes every document in the collection',
+        'It only deletes documents older than 30 days',
+        'It renames the collection to "deleted"',
+      ],
+      answer: 1,
+      explain: 'An empty query {} matches all documents in the collection, so deleteMany({}) removes everything.',
+      teachAt: { lessonId: 'crud', step: 4 },
+    },
+    {
+      id: 'mongo-q3',
+      kind: 'mcq',
+      q: 'When should you embed sub-documents instead of referencing them by ObjectId?',
+      options: [
+        'When the data is unbounded and could grow to millions of entries',
+        'When data is read together, updated together, and has a bounded 1:1 or 1:few relationship',
+        'Always, because MongoDB does not support references',
+        'Only when storing binary image files',
+      ],
+      answer: 1,
+      explain: 'Embedding provides fast, single-document atomic reads and writes for tightly coupled data with bounded size (< 16 MB limit).',
+      teachAt: { lessonId: 'embed-reference', step: 2 },
+    },
+    {
+      id: 'mongo-q4',
+      kind: 'mcq',
+      q: 'What is the difference between a COLLSCAN and an IXSCAN in a MongoDB query explain plan?',
+      options: [
+        'COLLSCAN uses indexes; IXSCAN does not',
+        'COLLSCAN reads every document in the collection sequentially; IXSCAN navigates a sorted B-tree index directly to matching documents',
+        'COLLSCAN is for aggregation; IXSCAN is for find()',
+        'IXSCAN locks the entire database during reads',
+      ],
+      answer: 1,
+      explain: 'COLLSCAN scans every document in the collection. An index scan (IXSCAN) uses the index to pinpoint documents in logarithmic time.',
+      teachAt: { lessonId: 'indexes', step: 2 },
+    },
+    {
+      id: 'mongo-q5',
+      kind: 'mcq',
+      q: 'In Mongoose, what is the effect of using .lean() on a query (e.g., Todo.find().lean())?',
+      options: [
+        'It encrypts the returned documents',
+        'It returns plain JavaScript objects instead of heavy Mongoose Documents, saving memory and CPU when documents only need to be read',
+        'It deletes documents after reading them',
+        'It limits results to 10 items automatically',
+      ],
+      answer: 1,
+      explain: '.lean() skips instantiating Mongoose Document instances (getters, virtuals, change-tracking), returning fast plain objects.',
+      teachAt: { lessonId: 'mongoose', step: 4 },
+    },
+    {
+      id: 'mongo-q6',
+      kind: 'mcq',
+      q: 'Which aggregation pipeline stage is used to join documents from another collection?',
+      options: [
+        '$match',
+        '$group',
+        '$lookup',
+        '$project',
+      ],
+      answer: 2,
+      explain: '$lookup performs a left outer join to an unsharded collection in the same database.',
+      teachAt: { lessonId: 'aggregation', step: 3 },
+    },
+  ],
+  challenge: {
+    id: 'mongo-challenge',
+    prompt: 'Implement buildMongoQuery(filters) that takes an object with optional { status, minPriority, search } and returns a clean MongoDB query object.',
+    starter: `function buildMongoQuery(filters) {\n  // Return MongoDB query object with $gte for minPriority and $regex for search\n}`,
+    language: 'js',
+    solution: `function buildMongoQuery(filters) {\n  const query = {};\n  if (!filters) return query;\n  if (filters.status) query.status = filters.status;\n  if (typeof filters.minPriority === 'number') query.priority = { $gte: filters.minPriority };\n  if (filters.search) query.title = { $regex: filters.search, $options: 'i' };\n  return query;\n}`,
+    tests: [
+      { label: 'builds status and minPriority query', run: '(() => { const q = buildMongoQuery({ status: "active", minPriority: 3 }); return q.status === "active" && q.priority.$gte === 3; })()' },
+      { label: 'ignores empty/undefined filter keys', run: '(() => { const q = buildMongoQuery({ search: "milk" }); return !("status" in q) && !("priority" in q) && q.title.$regex === "milk"; })()' },
+    ],
+    hints: [
+      'Initialize an empty query = {} object.',
+      'Check if minPriority is a number before setting query.priority = { $gte: ... }.',
+      'Set query.title = { $regex: filters.search, $options: "i" } if search is provided.',
+    ],
+  },
+} satisfies PartGate;
