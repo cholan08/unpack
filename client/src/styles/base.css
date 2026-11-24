@@ -24,6 +24,13 @@ body {
   transition: background-color 0.3s var(--ease), color 0.3s var(--ease);
 }
 
+/* night desk: a faint warm lamp-glow at the top of the page */
+:root[data-theme='dark'] body {
+  background-image: radial-gradient(1100px 560px at 62% -160px, rgba(255, 180, 110, 0.06), transparent 70%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 #root { min-height: 100dvh; display: flex; flex-direction: column; }
 
 h1, h2, h3, h4 { margin: 0; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
@@ -85,7 +92,7 @@ input, textarea, select { font: inherit; color: inherit; }
 /* a primary in the current topic's colour (needs data-tone on it or an ancestor) */
 .btn--tone { background: var(--tone); border-color: var(--tone); color: #fff; }
 .btn--tone:hover { background: color-mix(in srgb, var(--tone) 88%, #000); border-color: color-mix(in srgb, var(--tone) 88%, #000); }
-[data-theme='dark'] .btn--tone { color: #0b0d11; }
+[data-theme='dark'] .btn--tone { color: #141210; }
 [data-theme='dark'] .btn--tone:hover { background: color-mix(in srgb, var(--tone) 85%, #fff); border-color: color-mix(in srgb, var(--tone) 85%, #fff); }
 .btn--ghost { background: transparent; border-color: transparent; box-shadow: none; color: var(--ink-2); }
 .btn--ghost:hover { background: var(--surface-3); border-color: transparent; color: var(--ink); }

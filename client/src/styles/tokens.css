@@ -19,61 +19,64 @@
   /* handwriting: only inside Notebooks and Handnotes, where it is the content */
   --font-hand: 'Caveat Variable', 'Bricolage Grotesque Variable', cursive;
 
-  /* neutrals */
-  --bg: #f6f6f3;
-  --bg-2: #efeeea;
-  --surface: #ffffff;
-  --surface-2: #fafaf8;
-  --surface-3: #f2f1ee;
-  --line: #e4e2dc;
-  --line-soft: #eeede9;
-  --line-strong: #cfccc4;
-  --ink: #15171b;
-  --ink-2: #383c44;
-  --muted: #5f6570;
-  /* tertiary text: ≥ 4.5:1 on every surface (WCAG AA); was #8b9099 (≈3:1) */
-  --muted-2: #686e78;
-  --dot: rgba(21, 23, 27, 0.09);
-  --stage-bg: #fbfbf9;
-  --focus: #2563eb;
-  --scrim: rgba(12, 14, 18, 0.42);
+  /* neutrals — "soft paper": no pure white anywhere, so the page never glares.
+     Cards are a warm off-white on a slightly deeper canvas. */
+  --bg: #eceae4;
+  --bg-2: #e4e2db;
+  --surface: #f6f5f1;
+  --surface-2: #f1efea;
+  --surface-3: #e8e6df;
+  --line: #d9d6ce;
+  --line-soft: #e2e0d9;
+  --line-strong: #c4c0b6;
+  --ink: #17181c;
+  --ink-2: #353941;
+  --muted: #575d67;
+  /* tertiary text: ≥ 4.5:1 on every surface (WCAG AA) */
+  --muted-2: #5e646e;
+  --dot: rgba(23, 24, 28, 0.1);
+  --stage-bg: #f1f0eb;
+  --focus: #1d55d4;
+  --scrim: rgba(20, 18, 14, 0.42);
 
-  /* role colours — where it runs */
-  --client: #2563eb;
-  --client-soft: #e8effd;
-  --client-line: #bccdf5;
-  --server: #c9610a;
-  --server-soft: #fcefe1;
-  --server-line: #f0c89f;
-  --data: #13803b;
-  --data-soft: #e3f3e7;
-  --data-line: #abd9b8;
-  --net: #6c47db;
-  --net-soft: #efe9fd;
-  --net-line: #cfc1f6;
-  --auth: #cc2f68;
-  --auth-soft: #fce8ef;
-  --auth-line: #f2b6cb;
+  /* role colours — where it runs. Tints are mixed into --surface (10% / 32%)
+     so they sit *on* the card instead of glowing brighter than it; tones are
+     a step deeper than usual so tone text on its tint stays ≥ 4.5:1. */
+  --client: #1d55d4;
+  --client-soft: #e0e5ee;
+  --client-line: #b1c2e8;
+  --server: #9e4b06;
+  --server-soft: #ede4da;
+  --server-line: #dabea6;
+  --data: #0e7034;
+  --data-soft: #dfe8de;
+  --data-line: #accab5;
+  --net: #6040cc;
+  --net-soft: #e7e3ed;
+  --net-line: #c6bbe5;
+  --auth: #b4285b;
+  --auth-soft: #efe1e2;
+  --auth-line: #e1b3c1;
   /* AI/ML: models, inference, embeddings */
-  --ai: #b42fc4;
-  --ai-soft: #f8e9fb;
-  --ai-line: #e5b6ee;
-  --neutral: #56606b;
-  --neutral-soft: #eff1f3;
-  --neutral-line: #d3d8de;
-  --danger: #d42a2a;
-  --danger-soft: #fdeaea;
-  --danger-line: #f3b5b5;
-  --warn: #a86400;
-  --warn-soft: #fdf2db;
-  --warn-line: #ebd09a;
-  --ok: #13803b;
-  --ok-soft: #e3f3e7;
-  --ok-line: #abd9b8;
+  --ai: #9e27ad;
+  --ai-soft: #ede0ea;
+  --ai-line: #dab3db;
+  --neutral: #535c67;
+  --neutral-soft: #e6e6e3;
+  --neutral-line: #c2c4c5;
+  --danger: #bb2323;
+  --danger-soft: #f0e0dc;
+  --danger-line: #e3b2af;
+  --warn: #8f5500;
+  --warn-soft: #ece5d9;
+  --warn-line: #d5c2a4;
+  --ok: #0e7034;
+  --ok-soft: #dfe8de;
+  --ok-line: #accab5;
   /* interactive "Try it" steps */
-  --try: #0d9488;
-  --try-soft: #ddf3f0;
-  --try-line: #a1d8d1;
+  --try: #08716a;
+  --try-soft: #dee8e3;
+  --try-line: #a9cbc6;
 
   /* packets: what is travelling */
   --pk-req: #2563eb;
@@ -124,25 +127,28 @@
   --page-pad: 40px;
 }
 
+/* Dark — "night desk": warm graphite and cream ink, like a desk under a lamp,
+   instead of the usual blue-black. It matches the cream paper blocks the
+   diagrams already use in dark mode. */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0b0d11;
-  --bg-2: #0f1116;
-  --surface: #14171d;
-  --surface-2: #171b21;
-  --surface-3: #1d2129;
-  --line: #262b34;
-  --line-soft: #1d2129;
-  --line-strong: #363d49;
-  --ink: #eef0f4;
-  --ink-2: #c6cbd4;
-  --muted: #8d95a2;
-  /* ≥ 4.5:1 on bg / surface (WCAG AA); was #656d7b (≈3.4:1) */
-  --muted-2: #7f8795;
-  --dot: rgba(255, 255, 255, 0.07);
-  --stage-bg: #0e1015;
-  --focus: #79a8ff;
-  --scrim: rgba(0, 0, 0, 0.6);
+  --bg: #141210;
+  --bg-2: #191714;
+  --surface: #1e1b18;
+  --surface-2: #221f1b;
+  --surface-3: #2a2622;
+  --line: #342f2a;
+  --line-soft: #2a2622;
+  --line-strong: #4a433c;
+  --ink: #f3ece2;
+  --ink-2: #d5ccbf;
+  --muted: #a89e90;
+  /* ≥ 4.5:1 on bg / every surface (WCAG AA) */
+  --muted-2: #9c9284;
+  --dot: rgba(255, 236, 214, 0.065);
+  --stage-bg: #181613;
+  --focus: #8cb0ff;
+  --scrim: rgba(8, 6, 4, 0.62);
 
   --client: #7aa8ff;
   --client-soft: rgba(122, 168, 255, 0.13);
@@ -162,9 +168,9 @@
   --ai: #e27ef5;
   --ai-soft: rgba(226, 126, 245, 0.13);
   --ai-line: rgba(226, 126, 245, 0.38);
-  --neutral: #9ba6b5;
-  --neutral-soft: rgba(155, 166, 181, 0.12);
-  --neutral-line: rgba(155, 166, 181, 0.3);
+  --neutral: #b0a697;
+  --neutral-soft: rgba(176, 166, 151, 0.12);
+  --neutral-line: rgba(176, 166, 151, 0.3);
   --danger: #ff6b6b;
   --danger-soft: rgba(255, 107, 107, 0.13);
   --danger-line: rgba(255, 107, 107, 0.4);
@@ -189,16 +195,16 @@
   --syn-fn: #7fb0ff;
   --syn-str: #93d677;
   --syn-num: #ffb46b;
-  --syn-com: #6b7584;
+  --syn-com: #857b6e;
   --syn-tag: #ff8fb5;
   --syn-attr: #ffc27a;
   --syn-prop: #6fd6e8;
-  --syn-punc: #8d95a3;
+  --syn-punc: #9a9083;
 
   --shadow-1: 0 1px 0 rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-2: 0 1px 0 rgba(0, 0, 0, 0.25), 0 6px 16px -6px rgba(0, 0, 0, 0.55);
   --shadow-3: 0 2px 0 rgba(0, 0, 0, 0.25), 0 22px 44px -18px rgba(0, 0, 0, 0.75);
-  --shadow-pop: 0 14px 36px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-pop: 0 14px 36px -8px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 236, 214, 0.07);
 }
 
 /* ------------------------------------------------------------------
@@ -209,31 +215,31 @@
    zone platforms sit on the desk and use the theme's own colours.
    ------------------------------------------------------------------ */
 :root {
-  --paper: #ffffff;
-  --paper-2: #f3f1ec;
-  --paper-3: #e9e6df;
+  --paper: #fbfaf6;
+  --paper-2: #efede7;
+  --paper-3: #e5e2da;
   --paper-ink: #17171a;
-  --paper-line: #d9d5cc;
+  --paper-line: #d4d0c6;
   /* the desk */
-  --desk: #e9e6df;
+  --desk: #e3e0d8;
   --desk-grid: rgba(23, 23, 26, 0.075);
-  --slab: #f4f2ed;
-  --slab-edge: #dcd8cf;
+  --slab: #eeebe5;
+  --slab-edge: #d5d1c7;
   --wire: #3b3b41;
   --wire-strong: #17171a;
 }
 :root[data-theme='dark'] {
-  --paper: #ece8e0;
-  --paper-2: #dfdacf;
-  --paper-3: #d3cdc1;
-  --paper-ink: #141416;
-  --paper-line: #c7c0b3;
-  --desk: #18181a;
-  --desk-grid: rgba(255, 255, 255, 0.05);
-  --slab: #222225;
-  --slab-edge: #141416;
-  --wire: #a9a49a;
-  --wire-strong: #ece8e0;
+  --paper: #e8e3d9;
+  --paper-2: #dcd6ca;
+  --paper-3: #d0c9bc;
+  --paper-ink: #151311;
+  --paper-line: #c3bbad;
+  --desk: #1a1815;
+  --desk-grid: rgba(255, 236, 214, 0.05);
+  --slab: #26231f;
+  --slab-edge: #110f0d;
+  --wire: #ada594;
+  --wire-strong: #ece6dc;
 }
 
 @media (max-width: 720px) {

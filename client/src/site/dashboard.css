@@ -79,7 +79,7 @@ a.dash-bin-sq:hover { transform: translateY(-2px) scale(1.14); box-shadow: 0 0 0
 .dash-gate-state { display: flex; align-items: center; gap: 10px; }
 .dash-gate-score { font-size: 11.5px; color: var(--muted); }
 .dash-gates li[data-state='passed'] .dash-gate-num { background: var(--ok); color: #fff; }
-[data-theme='dark'] .dash-gates li[data-state='passed'] .dash-gate-num { color: #0b0d11; }
+[data-theme='dark'] .dash-gates li[data-state='passed'] .dash-gate-num { color: #141210; }
 @media (max-width: 640px) {
   .dash-gates li { grid-template-columns: 30px minmax(0, 1fr) auto; }
   .dash-gate-state { grid-column: 2; grid-row: 2; }

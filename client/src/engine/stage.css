@@ -577,7 +577,7 @@
 .pk-burst path { stroke: var(--pk-err); stroke-width: 2.6; stroke-linecap: round; }
 .pk-label rect { fill: var(--c); stroke: var(--desk); stroke-width: 1.5; }
 .pk-label text { font: 700 10.5px var(--font-mono); fill: #fff; text-anchor: middle; }
-[data-theme='dark'] .pk-label text { fill: #0c0e12; }
+[data-theme='dark'] .pk-label text { fill: #141210; }
 
 /* ----------------------- code tokens (shared) ----------------------- */
 .code-lines { display: block; font-family: var(--font-mono); font-size: 12.75px; line-height: 21px; }

@@ -126,7 +126,7 @@
 .side-meta { font: 500 11.5px var(--font-mono); color: var(--muted-2); }
 .side-item[aria-current='page'] .side-meta { color: var(--tone, var(--muted)); }
 .side-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--auth); color: #fff; font: 700 11px/20px var(--font-sans); text-align: center; }
-[data-theme='dark'] .side-badge { color: #0b0d11; }
+[data-theme='dark'] .side-badge { color: #141210; }
 /* "G then …" shortcut: only on hover / keyboard focus, so the sidebar stays calm */
 .side-keys { display: inline-flex; gap: 3px; margin-left: auto; opacity: 0; transition: opacity 0.12s; }
 .side-keys kbd { min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; color: var(--muted); }
@@ -195,6 +195,8 @@
   background-clip: text;
   color: transparent;
 }
+/* light theme deepens the role tones for small text; display type keeps them vivid */
+:root:not([data-theme='dark']) .hm-hero-title em { background-image: linear-gradient(100deg, #2563eb 8%, #d06a10 52%, #13803b 94%); }
 .hm-hero-lede { font-size: clamp(16px, 1.4vw, 18px); line-height: 1.62; color: var(--ink-2); max-width: 540px; }
 .hm-hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
 .hm-hero-facts { display: flex; gap: 32px; margin: 32px 0 0; padding-top: 20px; border-top: 1px solid var(--line); }
@@ -605,7 +607,7 @@
 .toast { display: inline-flex; align-items: center; gap: 9px; padding: 8px 15px 8px 9px; border-radius: 999px; background: var(--ink); color: var(--bg); font: 600 13.5px/1.2 var(--font-sans); white-space: nowrap; box-shadow: var(--shadow-3); }
 .toast-ico { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--bg) 18%, transparent); }
 .toast-ico[data-icon='check'] { background: var(--ok); color: #fff; }
-[data-theme='dark'] .toast-ico[data-icon='check'] { color: #0b0d11; }
+[data-theme='dark'] .toast-ico[data-icon='check'] { color: #141210; }
 @media (max-width: 959px) { .toasts { bottom: calc(88px + env(safe-area-inset-bottom)); } }
 
 /* ================= spotlight: a glow that follows the pointer (lib/spotlight.ts) ================= */

@@ -8,7 +8,7 @@ const read = (): Theme => (document.documentElement.dataset.theme === 'dark' ? '
 
 function apply(t: Theme) {
   document.documentElement.dataset.theme = t;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t === 'dark' ? '#0c0e12' : '#f5f4ef');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t === 'dark' ? '#141210' : '#eceae4');
   listeners.forEach((l) => l());
 }
 

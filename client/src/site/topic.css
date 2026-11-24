@@ -127,7 +127,7 @@ a.lcard:hover .lcard-title { color: var(--tone, var(--ink)); }
 .lcard-state > .lcard-n { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); }
 .lcard .ui-ring .lcard-n { color: var(--tone); font-size: 10.5px; }
 .lcard-tick { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--ok); color: #fff; }
-[data-theme='dark'] .lcard-tick { color: #0b0d11; }
+[data-theme='dark'] .lcard-tick { color: #141210; }
 .lcard-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .lcard-title { font-weight: 650; font-size: 15px; line-height: 1.3; letter-spacing: -0.01em; color: var(--ink); transition: color 0.15s; }
 .lcard-sum { font-size: 13.5px; line-height: 1.45; color: var(--muted); }
