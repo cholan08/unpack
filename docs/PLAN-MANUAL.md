@@ -14,7 +14,7 @@
 |---|---|---|
 | **M0 · Vision** | `VISION.md`: the goal, learner psychology, the manual's shape, decisions | ✅ |
 | **M1 · The spine + one model chapter** | `/manual` (four parts, every chapter, topic filter, honest status) and `/manual/:chapter`. Every chapter links what already exists. **"Know who the user is"** is written in full as the model for the rest | ✅ |
-| **M2 · Assemble every chapter** | Write the full chapter (same sections as the model) for every chapter that already has lessons — 23 of them, a few at a time. Reviewed by the owner | 🚧 3 of 23 drafted, awaiting review: *How a web page reaches you*, *Answer requests*, *Remember things* |
+| **M2 · Assemble every chapter** | Write the full chapter (same sections as the model) for every chapter that already has lessons — 23 of them, a few at a time. Reviewed by the owner | 🚧 6 of 23 drafted, awaiting review: *How a web page reaches you*, *Answer requests*, *Remember things*, *Show something to the user*, *Let people interact*, *Control access and stay safe* |
 | **M3 · Three doors** | Home becomes Explore / Build / Path. Explore = a feed of curiosity questions. Build = "I want to build ___" → the chapters it needs. Sidebar slims down: the Manual, your path, the shelf | |
 | **M4 · First ship in an hour** | Level 1: a guided first build (a personal page, put online, with AI as a pair). The new start of the Path door | |
 | **M5 · The builder's craft** | Part III chapters, starting with **Building with AI** (specify → generate → read → verify) and **Turn a problem into a plan** | |
