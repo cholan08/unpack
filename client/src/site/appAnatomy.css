@@ -98,21 +98,31 @@
 /* ---- the story of the current step ---- */
 .an-story {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 22px; align-items: stretch;
-  margin-top: 18px; padding: 18px 20px; min-height: 212px;
+  margin-top: 18px; padding: 18px 20px;
   border-left: 4px solid var(--tone, var(--ink)); border-radius: 4px 14px 14px 4px;
   background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line-soft);
 }
+/* All steps share one grid cell; the hidden ones still take up room, so the cell is always as tall
+   as the tallest step and the height never changes between steps. */
+.an-stack { display: grid; grid-template-columns: minmax(0, 1fr); }
+.an-stack > * { grid-area: 1 / 1; min-width: 0; }
+.an-stack > :not([data-on]) { visibility: hidden; }
 .an-story-copy { display: flex; flex-direction: column; gap: 8px; }
+.an-story-tx { display: flex; flex-direction: column; gap: 8px; }
 .an-story-k { display: flex; align-items: center; gap: 8px; font: 650 12px/1.3 var(--font-sans); letter-spacing: 0.02em; color: var(--tone, var(--muted)); }
 .an-story-k i { width: 8px; height: 8px; border-radius: 3px; background: var(--tone, var(--ink)); }
-.an-story h3 { font: 700 clamp(20px, 2vw, 25px)/1.12 var(--font-display); letter-spacing: -0.03em; animation: an-in 0.35s var(--ease-out) both; }
-.an-story p { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); animation: an-in 0.4s 0.05s var(--ease-out) both; }
+.an-story h3 { font: 700 clamp(20px, 2vw, 25px)/1.12 var(--font-display); letter-spacing: -0.03em; }
+.an-story p { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
+.an-story-tx[data-on] h3 { animation: an-in 0.35s var(--ease-out) both; }
+.an-story-tx[data-on] p { animation: an-in 0.4s 0.05s var(--ease-out) both; }
 .an-code {
-  display: flex; align-items: center; min-width: 0; overflow-x: auto;
+  align-items: center; min-width: 0;
   padding: 12px 4px; border-radius: 12px; border: 1px solid var(--paper-line);
   background: var(--paper); color: var(--paper-ink); box-shadow: var(--shadow-1);
-  animation: an-in 0.35s 0.08s var(--ease-out) both;
 }
+/* each step scrolls sideways on its own, so one wide step doesn't put a scrollbar on the others */
+.an-code-step { overflow-x: auto; }
+.an-code-step[data-on] { animation: an-in 0.35s 0.08s var(--ease-out) both; }
 .an-code .code-lines { font-size: 12.5px; line-height: 20px; }
 .an-code .code-src { padding: 0 14px; }
 @keyframes an-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
@@ -170,7 +180,7 @@
   .an-lane[data-on] i { left: 50%; animation-name: an-req-y; }
   .an-lane[data-dir='res'][data-on] i { animation-name: an-res-y; }
   .an-zone ul { justify-content: flex-start; }
-  .an-story { grid-template-columns: minmax(0, 1fr); gap: 14px; min-height: 0; }
+  .an-story { grid-template-columns: minmax(0, 1fr); gap: 14px; }
 }
 @keyframes an-req-y { from { top: 0; } to { top: calc(100% - 10px); } }
 @keyframes an-res-y { from { top: calc(100% - 10px); } to { top: 0; } }
@@ -183,7 +193,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .an-lane[data-on] i { animation: none; left: calc(50% - 5px); }
-  .an-story h3, .an-story p, .an-code { animation: none; }
+  .an-story-tx[data-on] h3, .an-story-tx[data-on] p, .an-code-step[data-on] { animation: none; }
   .an-node[data-on] { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) and (max-width: 960px) {

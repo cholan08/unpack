@@ -377,18 +377,30 @@ export function AppAnatomy() {
           </Zone>
         </div>
 
-        {/* the story of the current step */}
-        <div className="an-story" data-tone={step.where.tone} aria-live="polite">
+        {/* the story of the current step. Every step is laid out in the same grid cell and only the
+            current one is shown, so the box is always as tall as the tallest step and the page below
+            it never jumps when the step changes. */}
+        <div className="an-story" data-tone={step.where.tone}>
           <div className="an-story-copy">
             <span className="an-story-k">
               <i aria-hidden />
               Step {i + 1} of {STEPS.length} · {step.where.label}
             </span>
-            <h3 key={i}>{step.title}</h3>
-            <p key={`p${i}`}>{step.plain}</p>
+            <div className="an-stack" aria-live="polite">
+              {STEPS.map((s, n) => (
+                <div key={s.title} className="an-story-tx" data-on={n === i || undefined} aria-hidden={n !== i || undefined}>
+                  <h3>{s.title}</h3>
+                  <p>{s.plain}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="an-code" key={`c${i}`}>
-            <CodeLines code={step.code} lang={step.lang} numbers={false} />
+          <div className="an-code an-stack">
+            {STEPS.map((s, n) => (
+              <div key={s.title} className="an-code-step" data-on={n === i || undefined} aria-hidden={n !== i || undefined}>
+                <CodeLines code={s.code} lang={s.lang} numbers={false} />
+              </div>
+            ))}
           </div>
         </div>
 
