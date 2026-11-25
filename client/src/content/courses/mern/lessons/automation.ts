@@ -8,7 +8,7 @@ const sheet = box(820, 120, 'Spreadsheet', { sub: 'new row', icon: 'file', tone:
 const mail = box(820, 250, 'Email', { sub: 'reply to customer', icon: 'mail', tone: 'net', w: 210 });
 const chat = box(820, 380, 'Team chat', { sub: 'alert #sales', icon: 'inbox', tone: 'net', w: 210 });
 const crm = box(820, 510, 'CRM', { sub: 'new lead', icon: 'user', tone: 'neutral', w: 210 });
-const ai = box(470, 480, 'AI step', { sub: 'classify · draft reply', icon: 'cpu', tone: 'ai', w: 220 });
+const ai = box(470, 480, 'AI step', { sub: 'classify · draft reply', icon: 'cpu', tone: 'ai', w: 250 });
 const person = actor(160, 480, 'Ops person', { sub: 'copy & paste', icon: 'user' });
 
 const tools: Record<string, NodeSpec> = { sheet, mail, chat, crm };

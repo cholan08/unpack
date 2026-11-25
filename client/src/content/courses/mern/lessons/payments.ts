@@ -9,8 +9,8 @@ const thanks: ScreenLine[] = [{ t: 'h', text: 'Thank you!' }, { t: 'ok', text: '
 
 const web = browser(150, 300, { url: 'myshop.app/checkout', screen: cart, w: 240, h: 190 });
 const api = box(470, 300, 'Your server', { sub: 'orders · prices', icon: 'server', tone: 'server', w: 210 });
-const prov = box(820, 300, 'Payment provider', { sub: 'Stripe · Razorpay · PayPal', icon: 'lock', tone: 'auth', w: 250 });
-const bank = box(820, 490, 'Card network & bank', { sub: 'approve or decline', icon: 'shield', tone: 'neutral', w: 250 });
+const prov = box(820, 300, 'Payment provider', { sub: 'Stripe · Razorpay · PayPal', icon: 'lock', tone: 'auth', w: 280 });
+const bank = box(820, 490, 'Card network & bank', { sub: 'approve or decline', icon: 'shield', tone: 'neutral', w: 280 });
 const orders = db(470, 490, 'Orders', { items: ['orders'], tone: 'data' });
 
 const all: Record<string, NodeSpec> = { web, api, prov, bank, orders };
