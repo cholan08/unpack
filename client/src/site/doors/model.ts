@@ -4,6 +4,7 @@
  * the questions you have peeked at (Explore) and the product you are planning (Build).
  */
 import { useSyncExternalStore } from 'react';
+import { COURSES } from '@/content/registry';
 import { chapterNum, chapterStatus, getChapter, type Chapter, type ChapterStatus } from '@/content/manual';
 import { CORE, FEATURES, IDEAS, PATH, type Feature, type Idea, type PathStage } from '@/content/doors';
 import type { useProgress } from '@/lib/progress';
@@ -54,8 +55,12 @@ export interface ChapterView {
   pct: number;
   /** Its build is live: the learner saved the link (the first ship). */
   shipped: boolean;
-  /** Every written lesson in it is finished, or its build is shipped. */
+  /** The learner passed the chapter's gate: they tested out of it. */
+  testedOut: boolean;
+  /** Every written lesson in it is finished, or its build is shipped, or they tested out. */
   finished: boolean;
+  /** There is something to finish: lessons, a gate to test out with, or a build to ship. */
+  measurable: boolean;
   /** Something to open now: written, has lessons, or is a page of its own. */
   open: boolean;
   href: string;
@@ -65,6 +70,8 @@ export function viewOf(c: Chapter, progress: Store): ChapterView {
   const status = chapterStatus(c);
   const p = chapterProgress(c, progress);
   const shipped = !!progress.ships?.[c.id];
+  const course = COURSES[0];
+  const testedOut = !!(c.gate && course && progress.gates[`${course.id}/${c.gate}`]?.passed);
   return {
     chapter: c,
     status,
@@ -72,7 +79,9 @@ export function viewOf(c: Chapter, progress: Store): ChapterView {
     ready: p.ready,
     pct: p.pct,
     shipped,
-    finished: shipped || (p.ready > 0 && p.done === p.ready),
+    testedOut,
+    finished: shipped || testedOut || (p.ready > 0 && p.done === p.ready),
+    measurable: p.ready > 0 || !!c.gate || shipped,
     open: status !== 'planned',
     href: chapterHref(c),
   };

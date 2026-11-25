@@ -18,7 +18,7 @@
 | **M3 · Three doors** | Home becomes Explore / Build / Path. Explore = a feed of curiosity questions. Build = "I want to build ___" → the chapters it needs. Sidebar slims down: the Manual, your path, the shelf | ✅ Built, build and QA green (2026-11-26). The door content — 59 Explore questions, 9 Build ideas and 14 features, the Path's order — is an AI draft awaiting the owner's review |
 | **M4 · First ship in an hour** | Level 1: a guided first build (a personal page, put online, with AI as a pair). The new start of the Path door | ✅ Built, build and QA green (2026-11-26). *Your first ship* is written as a draft awaiting the owner's review |
 | **M5 · The builder's craft** | Part III chapters, starting with **Building with AI** (specify → generate → read → verify) and **Turn a problem into a plan** | |
-| **M6 · Levels as identity** | Levels 0–5 on the dashboard and sidebar ("You can now…"). Test out of a chapter. Progress counted by chapter | |
+| **M6 · Levels as identity** | Levels 0–5 on the dashboard and sidebar ("You can now…"). Test out of a chapter. Progress counted by chapter | ✅ Built, build and QA green (2026-11-26). Level wording and proofs are an AI draft awaiting the owner's review |
 | **M7 · New building blocks** | Lessons and chapters for the missing problems: Make it smart (LLM APIs, RAG, agents, evals), Do work later, Notify people, Take money, Automate workflows | |
 | **M8 · The FDE path** | Part IV briefs with fading support: guided → semi-guided → spec only → open. XOLA plays the client in a discovery interview; the learner scopes, builds, ships, demos, and defends the design | |
 | **Later** | Accounts and sync, community, more branches (hardware/IoT, games…), more languages | |
@@ -92,6 +92,13 @@ The phases split into two tracks that touch different files, so two Claude Code 
 - **Proof of a ship.** A chapter's build can end in `proof` (new optional field on `ChapterWriting.build`): the page asks for the live link (`ShipProof.tsx`), accepts only public `https://` addresses, and keeps it in progress (`ships` in `lib/progress.ts`: `saveShip`, `removeShip`, `useShips`, `shipUrl`). The first save gets confetti. A chapter whose build is shipped counts as finished on the Path. M6 (Level 1) and M8 (briefs) use the same proof.
 - **Links:** the chapter links *What Happens When You Visit a URL*, *How Browsers Render a Page* and *Deploying* (one entry in `chapters.ts`); the Build door's *personal page* idea points to it. It is the first lit step of the Path.
 - **QA:** the doors pass pastes a localhost link (must be refused) and a real one (must be kept).
+
+## M6 — what was built
+
+- **Levels** (`client/src/content/levels.ts`): 0 Curious (where everyone starts) · 1 First ship (a live link) · 2 Maker · 3 Builder (+ TaskFlow live) · 4 Product builder (+ a semi-guided brief) · 5 Independent builder (an open brief). Each says what you *can now* do. A level's chapters are its Path stage's chapters that have something to finish, so requirements grow with the Manual — but a level once earned is kept (`levels` in progress, `earnLevels`). The level you hold is the top of an unbroken climb from Level 0. Logic: `site/doors/levels.ts`.
+- **Finished, by chapter.** A chapter counts as finished when every written lesson is done, its build is shipped, or the learner **tested out** by passing the chapter's gate (`viewOf()` in `site/doors/model.ts`). Chapter pages offer "Know it already? Test out with the … gate" and show *Tested out*. Path, Build and levels all use it.
+- **Where it shows** (`site/doors/Levels.tsx`): the sidebar card ("Level 1 · First ship — You can put a page you made on the internet… Next: Maker · 0 of 7 chapters"); the dashboard's *Who you're becoming* ladder with exactly what the next level still needs; *Chapters* — every chapter as a square, part by part. `LevelWatcher` (in `App.tsx`) records a level the moment it is earned and says so once. The capstone's last milestone asks for the live TaskFlow link (Level 3). The mentor's profile carries the level (`server/app.mjs` prints it; tested).
+- **QA:** after the first ship, the dashboard ladder and the sidebar must both say Level 1.
 
 ## Writing a chapter (for M2 onwards)
 

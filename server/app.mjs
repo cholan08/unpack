@@ -74,6 +74,10 @@ function formatProfile(profile = {}) {
   }
   if (profile.next?.title) lines.push(`Up next in the course: "${clip(profile.next.title, 120)}".`);
   if (profile.placement) lines.push(`Placement check: ${num(profile.placement.score)}/${num(profile.placement.total)}.`);
+  if (profile.level?.name) {
+    const next = profile.level.next ? ` Next: ${clip(profile.level.next, 40)} (${clip(profile.level.nextNeeds, 80) || 'in progress'}).` : '';
+    lines.push(`Level ${num(profile.level.n)} · ${clip(profile.level.name, 40)}: "${clip(profile.level.canNow, 160)}"${next}`);
+  }
   const gates = Array.isArray(profile.gates) ? profile.gates.slice(0, 12) : [];
   if (gates.length) {
     lines.push('Part gates:');

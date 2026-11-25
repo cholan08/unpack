@@ -116,9 +116,11 @@ console.log('Running server tests...');
       current: { title: 'Promises', step: 3, total: 8 },
       gates: [{ part: 'JavaScript Under the Hood', passed: false, attempts: 2, bestScore: 60, weak: ['Closures'] }],
       lessons: [{ path: '/mern/promises', title: 'Promises', status: 'started' }],
+      level: { n: 1, name: 'First ship', canNow: 'You can put a page you made on the internet.', next: 'Maker', nextNeeds: '2 of 7 chapters' },
     },
     page: { path: '/mern/promises', kind: 'lesson', title: 'Promises', stepTitle: 'Microtasks' },
   });
+  assert(p.system.includes('Level 1 · First ship') && p.system.includes('Next: Maker (2 of 7 chapters)'), 'includes the level and what the next one needs');
   assert(p.system.startsWith(MENTOR_SYSTEM_PROMPT), 'mentor system prompt leads');
   assert(p.system.includes('Streak: 4 day(s)'), 'includes streak');
   assert(p.system.includes('weak on: Closures'), 'includes weak topics from gates');

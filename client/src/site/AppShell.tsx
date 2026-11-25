@@ -37,6 +37,7 @@ import { PILLAR_ICON } from './pillarIcons';
 import { Glide, Logo, Ring } from './ui';
 import { goHint, MOD_KEY } from './Hotkeys';
 import { MAKER } from './AboutPage';
+import { LevelCard } from './doors/Levels';
 
 // kept here too: pages import the topic icons from the shell
 export { PILLAR_ICON };
@@ -213,6 +214,9 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
           title="Course map, glossary, Techpack, Skill Pack, notebooks, common errors and the topic pages"
         />
       </nav>
+
+      {/* who you are now: levels as identity, not percentages */}
+      <LevelCard />
 
       <p className="side-foot">
         Your progress is saved in this browser only. <Link to="/about">Why Unpacked?</Link>

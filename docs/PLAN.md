@@ -278,6 +278,7 @@ The site's new shape: one chapter per *problem* every product meets, stacks seco
 - ✅ M1 — `/manual` contents (4 parts, 36 chapters, topic filter, honest status) and `/manual/:chapter` pages that assemble lessons, errors, gates, milestones and cheat sheets per chapter. "Know who the user is" is written in full as the model chapter. Content in `src/content/manual/`, pages in `src/site/manual/`. `npm run qa -- manual` checks every chapter at laptop and phone width.
 - ✅ M3 — the three doors: `/explore` (curiosity feed), `/build` ("I want to build ___" → the chapters it needs), `/path` (the guided route, next three steps lit); Home leads with them; the sidebar is nine items. Content in `src/content/doors/`, pages in `src/site/doors/`. `npm run qa -- doors`. Details: `docs/PLAN-MANUAL.md`.
 - ✅ M4 — *Your first ship* (`written/first-ship.ts`): a personal page built with AI as a pair and put online; the live link is kept as proof (`ships` in progress) and starts the Path.
+- ✅ M6 — levels as identity (`content/levels.ts`, `site/doors/Levels.tsx`): six levels earned with proof and kept; test out of a chapter with its gate; progress by chapter on the dashboard; the level in the sidebar and in the mentor's profile.
 
 ## 9. Quality bar
 

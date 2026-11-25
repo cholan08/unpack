@@ -61,6 +61,7 @@ import { Ring } from '../ui';
 import { chapterHref, chapterProgress, chapterStatus, chapterTone, StatusPill } from './shared';
 import { BuildTrail } from '../doors/BuildTrail';
 import { ShipProof } from '../doors/ShipProof';
+import '../doors/levels.css';
 import '../topic.css';
 import './manual.css';
 
@@ -346,6 +347,16 @@ function ChapterView({ ch }: { ch: Chapter }) {
                     <Ring pct={prog.pct} size={18} stroke={2.4} />
                     {prog.done}/{prog.ready} lessons
                   </span>
+                )}
+                {gatePart && course && gate?.passed && prog.done < prog.ready && (
+                  <span className="mn-fact mn-tested" title={`You passed the ${gatePart.title} gate`}>
+                    <Check size={13} strokeWidth={3} /> Tested out
+                  </span>
+                )}
+                {gatePart && course && !gate?.passed && prog.ready > 0 && prog.done < prog.ready && (
+                  <Link className="mn-fact mn-testout" to={`/${course.id}/gate/${gatePart.id}`}>
+                    Know it already? Test out with the {gatePart.title} gate
+                  </Link>
                 )}
                 {w && !w.reviewed && (
                   <span className="mn-fact mn-draft" title="Drafted with AI; the author's review is still to come">

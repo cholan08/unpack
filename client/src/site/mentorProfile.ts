@@ -6,6 +6,7 @@
 import { COURSES, getCourse, lessonEntries } from '@/content/registry';
 import type { useProgress } from '@/lib/progress';
 import { continueTarget } from './learner';
+import { levelsOf, nextStep } from './doors/levels';
 
 type Store = ReturnType<typeof useProgress>;
 
@@ -22,6 +23,8 @@ export interface MentorProfile {
   shaky: string[];
   /** Every written lesson: lets the mentor link to the right one. */
   lessons: { path: string; title: string; status: 'done' | 'started' | 'new' }[];
+  /** The level held (docs/VISION.md §5) and what the next one still needs. */
+  level?: { n: number; name: string; canNow: string; next?: string; nextNeeds?: string };
 }
 
 export function buildMentorProfile(progress: Store): MentorProfile {
@@ -60,6 +63,7 @@ export function buildMentorProfile(progress: Store): MentorProfile {
 
   const target = continueTarget(progress);
   const now = Date.now();
+  const lv = levelsOf(progress);
 
   return {
     streakDays: progress.dash.streakDays,
@@ -75,6 +79,7 @@ export function buildMentorProfile(progress: Store): MentorProfile {
     gates,
     shaky: [...shaky],
     lessons,
+    level: { n: lv.current.level.n, name: lv.current.level.name, canNow: lv.current.level.canNow, next: lv.next?.level.name, nextNeeds: nextStep(lv.next) },
   };
 }
 

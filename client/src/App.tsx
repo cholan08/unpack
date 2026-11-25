@@ -27,6 +27,7 @@ import { NotFound } from '@/site/NotFound';
 import { MentorDock } from '@/site/MentorDock';
 import { Hotkeys } from '@/site/Hotkeys';
 import { Toaster } from '@/site/Toaster';
+import { LevelWatcher } from '@/site/doors/Levels';
 import { installSpotlight } from '@/lib/spotlight';
 
 installSpotlight();
@@ -117,6 +118,8 @@ export function App() {
         {/* "G then …" page shortcuts and the "?" sheet, everywhere */}
         <Hotkeys />
         <Toaster />
+        {/* records a level the moment it is earned, on any page (lesson player included) */}
+        <LevelWatcher />
       </SearchProvider>
     </BrowserRouter>
   );

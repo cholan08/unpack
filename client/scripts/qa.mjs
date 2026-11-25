@@ -311,7 +311,7 @@ if (!onlyLessons && !manualOnly) {
       const wide = await page.evaluate(() => {
         const out = [];
         if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push(`page scrolls sideways (${document.documentElement.scrollWidth}px)`);
-        for (const el of document.querySelectorAll('.dr-head, .dr-toolbar, .dr-feed > *, .dr-ideas, .dr-build-grid > *, .dr-rows, .dr-next, .dr-stage, .dr-doors-grid > *, .dr-trail'))
+        for (const el of document.querySelectorAll('.dr-head, .dr-toolbar, .dr-feed > *, .dr-ideas, .dr-build-grid > *, .dr-rows, .dr-next, .dr-stage, .dr-doors-grid > *, .dr-trail, .dr-ship, .lv-ladder, .lv-bins'))
           if (el.getBoundingClientRect().right > window.innerWidth + 1) out.push(`${el.className.split(' ')[0]} runs off the screen`);
         return out;
       });
@@ -370,6 +370,15 @@ if (!onlyLessons && !manualOnly) {
       if (!(await page.locator('.dr-ship[data-state=shipped]').count())) {
         issues++;
         console.log(`✗ /manual/first-ship at ${width}px\n    a real https link was not kept as the first ship`);
+      }
+    });
+    // levels: the first ship earns Level 1 — on the dashboard ladder and in the sidebar
+    await door('/me', async () => {
+      const here = await page.locator('.lv-rung[data-state=current]').textContent();
+      const side = await page.evaluate(() => document.querySelector('.side-level-k')?.textContent ?? '');
+      if (!here?.includes('Level 1') || !side.includes('Level 1')) {
+        issues++;
+        console.log(`✗ /me at ${width}px\n    after the first ship, expected Level 1 (ladder: "${here?.slice(0, 40)}", sidebar: "${side.slice(0, 40)}")`);
       }
     });
     await page.evaluate(() => {

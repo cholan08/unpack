@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check, Copy, Layers, Terminal } from 'lucide-rea
 import { CAPSTONE_MILESTONES } from '@/content/courses/mern/capstone';
 import { TutorPanel } from '@/player/TutorPanel';
 import { useMentorPage } from '@/lib/mentor';
+import { ShipProof } from './doors/ShipProof';
 import './capstone.css';
 
 const CHECKLIST_KEY = 'unpacked:capstone:checks';
@@ -148,6 +149,16 @@ export function CapstonePage() {
               })}
             </div>
           </div>
+
+          {/* the last milestone ends in a live link: the proof for Level 3 */}
+          {!nextMilestone && (
+            <ShipProof
+              id="taskflow"
+              label="Paste your live TaskFlow link"
+              hint="The public https:// address of your deployed TaskFlow. It is kept in this browser as the proof that you shipped a whole product."
+              done="TaskFlow is live. You built and shipped a whole product."
+            />
+          )}
 
           {/* Socratic Tutor */}
           <div className="capstone-section">

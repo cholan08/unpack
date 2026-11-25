@@ -75,6 +75,8 @@ interface Store {
   known?: Record<string, number>;
   /** Live links the learner shipped, by what they built (a chapter id, or `brief:<id>`). Optional: older saves lack it. */
   ships?: Record<string, Ship>;
+  /** Levels earned (level number → when). Once earned, a level is kept even if its requirements grow. */
+  levels?: Record<string, number>;
 }
 
 const KEY = 'unpacked:progress:v2';
@@ -265,6 +267,15 @@ export function removeShip(id: string) {
   const ships = { ...state.ships };
   delete ships[id];
   save({ ...state, ships });
+}
+
+/** Record levels as earned (several at once for a learner who already met them). */
+export function earnLevels(ns: number[]) {
+  const fresh = ns.filter((n) => !state.levels?.[n]);
+  if (!fresh.length) return;
+  const levels = { ...state.levels };
+  for (const n of fresh) levels[n] = Date.now();
+  save({ ...state, levels });
 }
 
 /** Tick or untick a skill on a topic's skill plan. */
