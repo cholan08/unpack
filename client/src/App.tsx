@@ -34,6 +34,10 @@ installSpotlight();
 // The Manual: its own chunks, fetched the first time someone opens it.
 const ManualPage = lazy(() => import('@/site/manual/ManualPage').then((m) => ({ default: m.ManualPage })));
 const ChapterPage = lazy(() => import('@/site/manual/ChapterPage').then((m) => ({ default: m.ChapterPage })));
+// The three doors into the Manual (Explore, Build, Path): one chunk each.
+const ExplorePage = lazy(() => import('@/site/doors/ExplorePage').then((m) => ({ default: m.ExplorePage })));
+const BuildPage = lazy(() => import('@/site/doors/BuildPage').then((m) => ({ default: m.BuildPage })));
+const PathPage = lazy(() => import('@/site/doors/PathPage').then((m) => ({ default: m.PathPage })));
 
 /**
  * A new page starts at the top. A link with a #anchor (a Techpack sheet, a glossary term…) lands
@@ -71,6 +75,9 @@ export function App() {
             <Route path="/start" element={<StartPage />} />
             <Route path="/manual" element={<Suspense fallback={null}><ManualPage /></Suspense>} />
             <Route path="/manual/:chapterId" element={<Suspense fallback={null}><ChapterPage /></Suspense>} />
+            <Route path="/explore" element={<Suspense fallback={null}><ExplorePage /></Suspense>} />
+            <Route path="/build" element={<Suspense fallback={null}><BuildPage /></Suspense>} />
+            <Route path="/path" element={<Suspense fallback={null}><PathPage /></Suspense>} />
             <Route path="/me" element={<DashboardPage />} />
             <Route path="/capstone" element={<CapstonePage />} />
             <Route path="/capstone/:milestoneId" element={<CapstonePage />} />

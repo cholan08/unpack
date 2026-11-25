@@ -81,7 +81,10 @@ export function buildMentorProfile(progress: Store): MentorProfile {
 /* ---------------- where the learner is ---------------- */
 
 const STATIC_PAGES: Record<string, string> = {
-  '/': 'Home',
+  '/': 'Home (the three doors: Explore, Build, Path)',
+  '/explore': 'Explore (a feed of curiosity questions)',
+  '/build': 'Build (planning a product: the chapters it needs)',
+  '/path': 'Path (the guided route from zero)',
   '/start': 'Start Here (placement check)',
   '/me': 'Dashboard',
   '/review': 'Spaced review',

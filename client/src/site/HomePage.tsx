@@ -1,33 +1,27 @@
 /**
- * Home is two pages in one:
- *  - a new learner gets the pitch (a live diagram, how a lesson works, the main topics);
- *  - a returning learner gets a hub: the lesson to continue — drawn at the step they left —
- *    progress by topic, and what is due (reviews, gates).
+ * Home is the way into the Manual (docs/VISION.md §4):
+ *  - a new learner gets the pitch (the manual of technology for building products, a live diagram);
+ *  - a returning learner gets the lesson to continue — drawn at the step they left — and what is due;
+ *  - both get the three doors: Explore ("How does ___ work?"), Build ("I want to build ___") and
+ *    Path ("Teach me from zero"). Topics (Frontend, Backend…) are a filter now, not the way in.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, BookOpen, Clock, Code2, Flame, MousePointerClick, Orbit, Repeat, RotateCcw, Route, Trophy } from 'lucide-react';
+import { ArrowRight, Clock, Code2, Flame, MousePointerClick, Orbit, Repeat, RotateCcw, Route, Trophy } from 'lucide-react';
 import { Stage } from '@/engine/Stage';
 import { frameOf } from '@/engine/geometry';
 import { stepScene, stepScenes } from '@/engine/sandbox';
 import type { Course, Lesson, Scene } from '@/engine/types';
 import { COURSES, courseStats, loadLesson, peekLesson } from '@/content/registry';
-import { MAIN_PILLARS, getPillar, type Pillar } from '@/content/pillars';
-import { CAPSTONE_MILESTONES } from '@/content/courses/mern/capstone';
+import { CHAPTERS } from '@/content/manual';
 import { prefetchLessonPage } from './prefetch';
 import { useDash, useDueReviews, useGates, useProgress } from '@/lib/progress';
 import { usePrefersReducedMotion } from '@/lib/media';
-import { PILLAR_ICON } from './AppShell';
-import { continueTarget, courseDone, hasStarted, statsFor, type ContinueTarget } from './learner';
-import { Ring, fmtHours } from './ui';
+import { continueTarget, courseDone, hasStarted, type ContinueTarget } from './learner';
+import { Ring } from './ui';
 import { AppAnatomy } from './AppAnatomy';
 import { MAKER } from './AboutPage';
-
-const PLANNED = [
-  { title: 'System Design', blurb: 'From one server to millions of users.' },
-  { title: 'Git & GitHub', blurb: 'Snapshots, branches, merges and pull requests.' },
-  { title: 'Data Structures & Algorithms', blurb: 'Watch every algorithm run, step by step.' },
-];
+import { Doors } from './doors/Doors';
 
 /* ---------------- lesson content on demand ---------------- */
 
@@ -112,15 +106,16 @@ function Hero() {
       <div className="wrap hm-hero-in">
         <div className="hm-hero-copy">
           <span className="eyebrow hm-kicker">
-            <i aria-hidden /> A visual course in full-stack development
+            <i aria-hidden /> The manual of technology for building products
           </span>
           <h1 className="hm-hero-title">
-            Full-stack development, <em>unpacked.</em>
+            Technology, <em>unpacked.</em>
           </h1>
           <p className="hm-hero-lede">
-            Every concept is an animated diagram you step through — from the{' '}
+            Every product — a booking site, a chat app, an AI assistant — is built from the same few problems. See how each one works as a live
+            diagram, from the{' '}
             <span className="tone-text" data-tone="client">
-              browser
+              screen
             </span>
             , through the{' '}
             <span className="tone-text" data-tone="server">
@@ -128,38 +123,30 @@ function Hero() {
             </span>
             , to the{' '}
             <span className="tone-text" data-tone="data">
-              database
+              data
             </span>{' '}
-            and back. See the problem, watch the fix, read the real code.
+            and back. Then build it yourself, with AI as your pair.
           </p>
           <div className="hm-hero-cta">
-            <Link className="btn btn--primary btn--lg" to="/start">
-              Start here <ArrowRight size={16} />
+            <Link className="btn btn--primary btn--lg" to="/path">
+              Teach me from zero <ArrowRight size={16} />
             </Link>
-            {course && (
-              <Link className="btn btn--lg" to={`/${course.id}/roadmap`}>
-                <Route size={16} /> See the roadmap
-              </Link>
-            )}
+            <a className="btn btn--lg" href="#doors">
+              Or pick another way in
+            </a>
           </div>
           {stats && (
             <dl className="hm-hero-facts">
               <div>
-                <dt>lessons</dt>
+                <dt>chapters</dt>
                 <dd>
-                  <CountUp to={stats.ready} />
+                  <CountUp to={CHAPTERS.length} />
                 </dd>
               </div>
               <div>
-                <dt>of diagrams</dt>
+                <dt>visual lessons</dt>
                 <dd>
-                  {stats.minutes < 60 ? (
-                    fmtHours(stats.minutes)
-                  ) : (
-                    <>
-                      <CountUp to={Math.round(stats.minutes / 6) / 10} decimals={1} /> h
-                    </>
-                  )}
+                  <CountUp to={stats.ready} />
                 </dd>
               </div>
               <div>
@@ -354,93 +341,15 @@ function PracticeRow() {
           <span className="hm-prac-icon">
             <Route size={18} />
           </span>
-          <strong>See the whole path</strong>
-          <span>Every part and lesson on one map, with what builds on what.</span>
+          <strong>Every lesson on one map</strong>
+          <span>The roadmap: every part and lesson, with what builds on what.</span>
         </Link>
       </div>
     </section>
   );
 }
 
-/* ---------------- both: topics, visual language, courses ---------------- */
-
-function TopicCard({ p, n }: { p: Pillar; n: number }) {
-  const progress = useProgress();
-  const s = statsFor(p.id, progress);
-  const Icon = PILLAR_ICON[p.id];
-  const next = s.next;
-  return (
-    <Link to={`/${p.id}`} className="hm-topic spot" data-tone={p.tone}>
-      <span className="hm-topic-top">
-        <Ring pct={s.pct} size={42} stroke={3}>
-          <Icon size={18} strokeWidth={2.2} />
-        </Ring>
-        <span className="hm-topic-n mono">{String(n).padStart(2, '0')}</span>
-      </span>
-      <h3>{p.label}</h3>
-      <p>{p.blurb}</p>
-      <span className="hm-topic-meta">
-        {s.ready ? (
-          <>
-            {s.ready} lessons · {fmtHours(s.minutes)}
-            {s.done > 0 && <b> · {s.done} done</b>}
-          </>
-        ) : (
-          <span className="pill" data-tone={p.tone}>
-            Coming soon
-          </span>
-        )}
-      </span>
-      {!next?.e.meta && <span className="hm-topic-next hm-topic-next--soon">Lessons on the way</span>}
-      {next?.e.meta && (
-        <span className="hm-topic-next">
-          <span className="hm-topic-next-text">
-            <b>{s.started ? 'Continue' : s.done ? 'Next' : 'Start'}:</b> {next.e.meta.title}
-          </span>
-          <ArrowRight size={13} />
-        </span>
-      )}
-    </Link>
-  );
-}
-
-const COUNT = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'];
-
-function Topics() {
-  const progress = useProgress();
-  const projects = getPillar('projects')!;
-  const ps = statsFor('projects', progress);
-  return (
-    <section className="wrap hm-sec" id="topics">
-      <div className="sec-head">
-        <h2>{COUNT[MAIN_PILLARS.length] ?? MAIN_PILLARS.length} topics, one stack</h2>
-        <p>Follow the roadmap, or open any topic.</p>
-      </div>
-      <div className="hm-topics">
-        {MAIN_PILLARS.map((p, i) => (
-          <TopicCard key={p.id} p={p} n={i + 1} />
-        ))}
-      </div>
-      <Link to="/projects" className="hm-projects spot" data-tone={projects.tone}>
-        <Ring pct={ps.pct} size={42} stroke={3}>
-          {(() => {
-            const I = PILLAR_ICON.projects;
-            return <I size={18} strokeWidth={2.2} />;
-          })()}
-        </Ring>
-        <span className="hm-projects-text">
-          <strong>{projects.label}: put it all together</strong>
-          <span>
-            {ps.ready} design lessons, then the TaskFlow capstone — {CAPSTONE_MILESTONES.length} milestones from an empty folder to a deployed app.
-          </span>
-        </span>
-        <span className="hm-projects-go">
-          Open <ArrowRight size={15} />
-        </span>
-      </Link>
-    </section>
-  );
-}
+/* ---------------- both: the visual language, and who made it ---------------- */
 
 const ROLES = [
   { tone: 'client', name: 'Client', text: 'runs in the browser — React' },
@@ -474,66 +383,6 @@ function VisualLanguage() {
   );
 }
 
-function CourseCard({ course }: { course: Course }) {
-  const stats = courseStats(course);
-  const progress = useProgress();
-  const c = courseDone(course, progress);
-  return (
-    <Link to={`/${course.id}`} className="course-card spot" data-tone={course.tone}>
-      <span className="course-card-parts" aria-hidden>
-        {course.parts.map((p) => (
-          <i key={p.id} data-tone={p.tone} />
-        ))}
-      </span>
-      <span className="eyebrow">Course · {course.parts.length} parts</span>
-      <h3>{course.title}</h3>
-      <p>{course.description}</p>
-      <span className="course-card-meta">
-        <span className="pill">
-          <BookOpen size={13} /> {stats.ready} lessons
-        </span>
-        <span className="pill">
-          <Clock size={13} /> {fmtHours(stats.minutes)}
-        </span>
-        {c.done > 0 && (
-          <span className="pill" data-tone="ok">
-            {c.done} completed
-          </span>
-        )}
-      </span>
-      <span className="course-card-go">
-        Open the course map <ArrowRight size={15} />
-      </span>
-    </Link>
-  );
-}
-
-function Courses() {
-  return (
-    <section className="wrap hm-sec">
-      <div className="sec-head">
-        <h2>Courses</h2>
-      </div>
-      <div className="hm-courses">
-        {COURSES.map((c) => (
-          <CourseCard key={c.id} course={c} />
-        ))}
-        <div className="hm-planned">
-          <span className="eyebrow">Coming later</span>
-          <ul>
-            {PLANNED.map((p) => (
-              <li key={p.title}>
-                <strong>{p.title}</strong>
-                <span>{p.blurb}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /** The reason behind it all, and who made it — a short note that opens the About page. */
 function MadeBy() {
   return (
@@ -560,17 +409,16 @@ export function HomePage() {
   const t = continueTarget(progress);
   const returning = hasStarted(progress) && t && t.kind !== 'start';
   useEffect(() => {
-    document.title = 'Unpacked — full-stack development, one animated diagram at a time';
+    document.title = 'Unpacked — the manual of technology for building products';
   }, []);
   return (
     <main className="home">
       {returning ? <Welcome t={t} /> : <Hero />}
+      <Doors returning={!!returning} />
+      {returning && <PracticeRow />}
       {!returning && <HowItWorks />}
       <AppAnatomy />
-      <Topics />
-      {returning && <PracticeRow />}
       <VisualLanguage />
-      <Courses />
       <MadeBy />
     </main>
   );

@@ -1085,7 +1085,7 @@ router.delete('/todos/:id',
       scene: {
         nodes: {
           globalZ,
-          win: box(170, 300, 'window', { sub: 'scroll listeners', icon: 'globe', tone: 'neutral', w: 180 }),
+          win: box(170, 300, 'window', { sub: 'scroll listeners', icon: 'globe', tone: 'neutral', w: 200 }),
           memZ: zone(640, 300, 520, 300, 'attachLogger() — kept alive', { tone: 'client', icon: 'code', state: 'active' }),
           fn: box(500, 300, 'listener', { sub: 'uses bigData', icon: 'code', tone: 'client', w: 180 }),
           big: v(790, 300, 'bigData · 1M', { tone: 'warn', w: 150 }),

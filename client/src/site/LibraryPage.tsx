@@ -1,13 +1,20 @@
-/** /library — reference material for the whole stack, in one place. */
+/**
+ * /library — the shelf: reference material for the whole stack, in one place. The topic pages
+ * (Frontend, Backend…) live here too — topics are a filter now, not the way in (docs/VISION.md §3).
+ */
 import { useEffect } from 'react';
 import { Link } from 'react-router';
-import { AlertTriangle, ArrowRight, BookA, Code2, Layers, Map, NotebookPen, type LucideIcon } from 'lucide-react';
+import { AlertTriangle, ArrowRight, BookA, Code2, Layers, Map, NotebookPen, Route, type LucideIcon } from 'lucide-react';
 import type { Tone } from '@/engine/types';
 import { COURSES, lessonEntries } from '@/content/registry';
 import { NOTEBOOKS } from '@/content/notebooks/registry';
 import { COMMON_ERRORS } from '@/content/courses/mern/commonErrors';
+import { PILLARS } from '@/content/pillars';
+import { useProgress } from '@/lib/progress';
 import { SKILL_TRACKS } from './skillpack/data';
 import { TECH_SHEETS } from './techpack/data';
+import { PILLAR_ICON } from './pillarIcons';
+import { statsFor } from './learner';
 import { PageHead } from './ui';
 import './topic.css';
 
@@ -18,14 +25,28 @@ interface Shelf {
   sub: string;
   count: string;
   tone: Tone;
+  /** The course a course map belongs to (QA finds the courses by it). */
+  course?: string;
 }
 
-function shelves(): { title: string; items: Shelf[] }[] {
+function shelves(progress: ReturnType<typeof useProgress>): { title: string; items: Shelf[] }[] {
   const learn: Shelf[] = [];
   for (const c of COURSES) {
-    learn.push({ to: `/${c.id}`, icon: Map, title: 'Course map', sub: `${c.short}: every lesson, in course order.`, count: `${lessonEntries(c).length} lessons · ${c.parts.length} parts`, tone: 'client' });
+    learn.push({ to: `/${c.id}`, icon: Map, title: 'Course map', sub: `${c.short}: every lesson, in course order.`, count: `${lessonEntries(c).length} lessons · ${c.parts.length} parts`, tone: 'client', course: c.id });
+    learn.push({ to: `/${c.id}/roadmap`, icon: Route, title: 'Roadmap', sub: 'Every part and lesson on one map, with what builds on what.', count: `${c.parts.length} parts`, tone: 'ok' });
     learn.push({ to: `/${c.id}/glossary`, icon: BookA, title: 'Glossary', sub: 'Every term used in the lessons, A to Z.', count: `${Object.keys(c.glossary).length} terms`, tone: 'net' });
   }
+  const topics: Shelf[] = PILLARS.filter((p) => p.id !== 'start').map((p) => {
+    const st = statsFor(p.id, progress);
+    return {
+      to: `/${p.id}`,
+      icon: PILLAR_ICON[p.id],
+      title: p.label,
+      sub: p.blurb,
+      count: st.ready ? `${st.ready} lessons${st.done ? ` · ${st.done} done` : ''}` : 'coming soon',
+      tone: p.tone,
+    };
+  });
   const tools = SKILL_TRACKS.reduce((n, t) => n + t.groups.reduce((m, g) => m + g.tools.length, 0), 0);
   return [
     { title: 'Find your way', items: learn },
@@ -43,22 +64,28 @@ function shelves(): { title: string; items: Shelf[] }[] {
         { to: '/notebooks', icon: NotebookPen, title: 'Notebooks', sub: 'Handwritten, exam-style study notes with diagrams.', count: `${NOTEBOOKS.length} ${NOTEBOOKS.length === 1 ? 'notebook' : 'notebooks'}`, tone: 'warn' },
       ],
     },
+    { title: 'Lessons by topic', items: topics },
   ];
 }
 
 export function LibraryPage() {
+  const progress = useProgress();
   useEffect(() => {
     document.title = 'Library — Unpacked';
   }, []);
   return (
     <main className="wrap library">
-      <PageHead eyebrow="Reference" title="Library" lede="Look things up, copy a snippet, revise before an exam or an interview. Everything here works alongside the lessons." />
-      {shelves().map((s) => (
+      <PageHead
+        eyebrow="The shelf"
+        title="Library"
+        lede="Look things up, copy a snippet, revise before an exam or an interview, or browse the lessons by topic. Everything here works alongside the Manual."
+      />
+      {shelves(progress).map((s) => (
         <section key={s.title} className="lib-sec">
           <h2 className="lib-h">{s.title}</h2>
           <div className="lib-grid">
-            {s.items.map(({ to, icon: Icon, title, sub, count, tone }) => (
-              <Link key={to} to={to} className="lib-item card" data-tone={tone}>
+            {s.items.map(({ to, icon: Icon, title, sub, count, tone, course }) => (
+              <Link key={to} to={to} className="lib-item card" data-tone={tone} data-course={course}>
                 <span className="lib-icon">
                   <Icon size={20} strokeWidth={2.1} aria-hidden />
                 </span>

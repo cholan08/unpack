@@ -20,6 +20,7 @@ Unpacked is **the manual of technology for building products**: it takes a curio
 - `npm run build` — type-checks every lesson and chapter, then builds
 - `npm run qa` — with the dev server running: every lesson step, roadmaps, and every Manual page at laptop and phone width
 - `npm run qa -w client -- manual` — only the Manual
+- `npm run qa -w client -- doors` — only Home and the three doors (Explore, Build, Path)
 - If Playwright's browser can't be downloaded, prefix QA with `QA_CHANNEL=msedge` (uses installed Edge)
 
 A phase is done when `npm run build` and `npm run qa` are green and its row in `docs/PLAN-MANUAL.md` is updated.

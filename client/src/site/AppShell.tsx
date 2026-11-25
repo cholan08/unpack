@@ -1,7 +1,7 @@
 /**
  * The app shell around every page except the lesson player (which is full screen).
- *  - Wide screens: a sidebar that is always there — what to do next, the main topics with
- *    their progress, your own path, and the reference shelf.
+ *  - Wide screens: a sidebar that is always there, kept short on purpose (docs/VISION.md §2: three
+ *    doors, not fourteen) — what to do next, the Manual and its doors, your own path, and the shelf.
  *  - Narrow screens: a top bar; the same sidebar slides in as a drawer.
  * Routes render inside <AppLayout/> via <Outlet/>; pages only render their own content.
  */
@@ -9,34 +9,29 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, Outlet, useLocation } from 'react-router';
 import { motion } from 'motion/react';
 import {
-  AlertTriangle,
   ArrowRight,
-  BookA,
   BookOpen,
-  Code2,
-  Compass,
-  Heart,
+  Hammer,
   House,
-  Layers,
   LayoutDashboard,
-  Map as MapIcon,
+  Library,
   Menu,
-  NotebookPen,
   Repeat,
   Route,
   Search,
   StickyNote,
+  Telescope,
   X,
   type LucideIcon,
 } from 'lucide-react';
 import { COURSES } from '@/content/registry';
-import { MAIN_PILLARS, getPillar } from '@/content/pillars';
+import { PILLARS } from '@/content/pillars';
 import type { Tone } from '@/engine/types';
 import { useDueReviews, useProgress } from '@/lib/progress';
 import { useMediaQuery } from '@/lib/media';
 import { useSearch } from './Search';
 import { ThemeToggle } from './ThemeToggle';
-import { continueTarget, statsFor } from './learner';
+import { continueTarget } from './learner';
 import { prefetchLessonPage } from './prefetch';
 import { PILLAR_ICON } from './pillarIcons';
 import { Glide, Logo, Ring } from './ui';
@@ -112,11 +107,11 @@ function ContinueCard() {
   if (!t) return null;
   if (t.kind === 'start')
     return (
-      <Link to="/start" className="side-next" data-kind="start">
+      <Link to={t.href} className="side-next" data-kind="start">
         <span className="side-next-eyebrow">New here?</span>
-        <span className="side-next-title">Start with a 5-minute check</span>
+        <span className="side-next-title">Start from zero</span>
         <span className="side-next-sub">
-          Find where to begin <ArrowRight size={13} />
+          Follow the path <ArrowRight size={13} />
         </span>
       </Link>
     );
@@ -148,10 +143,9 @@ function ContinueCard() {
 
 function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void; drawer: boolean }) {
   const { pathname } = useLocation();
-  const progress = useProgress();
   const due = useDueReviews().length;
   const { open: openSearch } = useSearch();
-  const course = COURSES[0];
+  const c = COURSES[0]?.id ?? 'mern';
   const ref = useRef<HTMLElement>(null);
 
   // Drawer: move focus in when it opens; Escape closes it.
@@ -163,8 +157,9 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
     return () => window.removeEventListener('keydown', onKey);
   }, [drawer, open, onClose]);
 
-  const projects = getPillar('projects')!;
-  const p = statsFor('projects', progress);
+  // The shelf holds the reference pages and the topic pages (topics are a filter now, not the way in).
+  const topics = PILLARS.filter((p) => p.id !== 'start').map((p) => `/${p.id}`);
+  const onShelf = pathname === `/${c}` || under(pathname, '/library', '/techpack', '/skillpack', '/notebooks', '/errors', `/${c}/glossary`, ...topics);
 
   return (
     <motion.aside
@@ -197,60 +192,31 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
 
       <nav className="side-nav" aria-label="Main">
         <Item to="/" icon={House} label="Home" active={pathname === '/'} />
-        <Item to="/start" icon={Compass} label="Start Here" active={under(pathname, '/start')} />
-        <Item to="/manual" icon={BookOpen} label="The Manual" active={under(pathname, '/manual')} title="Every problem a product meets, one chapter each" />
 
-        <h2 className="side-h">Topics</h2>
-        {MAIN_PILLARS.map((t) => {
-          const s = statsFor(t.id, progress);
-          return (
-            <Item
-              key={t.id}
-              to={`/${t.id}`}
-              icon={PILLAR_ICON[t.id]}
-              label={t.label}
-              tone={t.tone}
-              ring={s.pct}
-              meta={s.ready ? `${s.done}/${s.ready}` : 'soon'}
-              active={under(pathname, `/${t.id}`)}
-              title={t.blurb}
-            />
-          );
-        })}
-        <Item
-          to="/projects"
-          icon={PILLAR_ICON.projects}
-          label={projects.label}
-          tone={projects.tone}
-          ring={p.pct}
-          meta={`${p.done}/${p.ready}`}
-          active={under(pathname, '/projects', '/capstone')}
-          title={projects.blurb}
-        />
+        <h2 className="side-h">The Manual</h2>
+        <Item to="/manual" icon={BookOpen} label="All chapters" active={under(pathname, '/manual', '/capstone')} title="Every problem a product meets, one chapter each" />
+        <Item to="/explore" icon={Telescope} label="Explore" tone="net" active={under(pathname, '/explore')} title="How does ___ work? A feed of curiosity questions" />
+        <Item to="/build" icon={Hammer} label="Build" tone="warn" active={under(pathname, '/build')} title="I want to build ___ — the chapters it needs" />
 
         <h2 className="side-h">Your path</h2>
-        {course && <Item to={`/${course.id}/roadmap`} icon={Route} label="Roadmap" active={under(pathname, `/${course.id}/roadmap`)} />}
+        <Item to="/path" icon={Route} label="Path" tone="ok" active={under(pathname, '/path', '/start', `/${c}/roadmap`)} title="Teach me from zero — the guided route" />
         <Item to="/me" icon={LayoutDashboard} label="Dashboard" active={under(pathname, '/me')} />
         <Item to="/review" icon={Repeat} label="Review" badge={due} active={under(pathname, '/review')} />
         <Item to="/handnote" icon={StickyNote} label="My notes" active={under(pathname, '/handnote')} />
 
-        <h2 className="side-h">
-          <Link to="/library" aria-current={pathname === '/library' ? 'page' : undefined}>
-            Library
-          </Link>
-        </h2>
-        {course && <Item to={`/${course.id}`} icon={MapIcon} label="Course map" active={pathname === `/${course.id}`} />}
-        {course && <Item to={`/${course.id}/glossary`} icon={BookA} label="Glossary" active={under(pathname, `/${course.id}/glossary`)} />}
-        <Item to="/techpack" icon={Code2} label="Techpack" active={under(pathname, '/techpack')} />
-        <Item to="/skillpack" icon={Layers} label="Skill Pack" active={under(pathname, '/skillpack')} />
-        <Item to="/notebooks" icon={NotebookPen} label="Notebooks" active={under(pathname, '/notebooks')} />
-        <Item to="/errors" icon={AlertTriangle} label="Common errors" active={under(pathname, '/errors')} />
-
-        <h2 className="side-h">Unpacked</h2>
-        <Item to="/about" icon={Heart} label="Why Unpacked" active={under(pathname, '/about')} title={`Why it exists — built by ${MAKER.name}`} />
+        <h2 className="side-h">The shelf</h2>
+        <Item
+          to="/library"
+          icon={Library}
+          label="Library"
+          active={onShelf}
+          title="Course map, glossary, Techpack, Skill Pack, notebooks, common errors and the topic pages"
+        />
       </nav>
 
-      <p className="side-foot">Your progress is saved in this browser only.</p>
+      <p className="side-foot">
+        Your progress is saved in this browser only. <Link to="/about">Why Unpacked?</Link>
+      </p>
     </motion.aside>
   );
 }

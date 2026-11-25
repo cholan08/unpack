@@ -1,0 +1,424 @@
+/**
+ * The Explore door: a feed of curiosity questions (docs/VISION.md §2 and §4).
+ *
+ * Each question is one a curious person can *almost* answer. The card reveals a little (the peek),
+ * then sends them to the chapter that answers it in full, to the lesson step where they can watch
+ * it happen, and on to building it. Written in the Manual's voice: plain words, no tool names first.
+ *
+ * The order is the feed's order: varied on purpose, so the first screen is not one topic.
+ * Planned chapters may have questions too — the chapter page says honestly that it is being written.
+ * AI drafted these; the owner reviews them (docs/PLAN-MANUAL.md, M3).
+ */
+import type { StepRef } from '@/content/manual';
+
+export interface Curiosity {
+  /** Stable id: remembered as "seen", and used in /explore?q=<id>. */
+  id: string;
+  q: string;
+  /** A little of the answer: one or two sentences, enough to make the chapter worth opening. */
+  peek: string;
+  /** The chapter that answers it. */
+  chapter: string;
+  /** The lesson step where you can watch it happen. */
+  see?: StepRef;
+}
+
+export const CURIOSITIES: Curiosity[] = [
+  {
+    id: 'press-enter',
+    q: 'What happens in the second between pressing Enter and seeing a page?',
+    peek: 'More than you would guess: a name lookup, a connection, an agreement on encryption, a request — and then the page asks for dozens more files before you see a thing.',
+    chapter: 'how-the-web-works',
+    see: ['url-to-page', 1],
+  },
+  {
+    id: 'chat-instant',
+    q: 'How does a chat message appear on your friend’s screen the instant you send it?',
+    peek: 'Ordinary web requests can only answer when asked. A chat keeps one connection open in both directions, so the server can push your message the moment it arrives.',
+    chapter: 'realtime',
+    see: ['websockets', 2],
+  },
+  {
+    id: 'phone-off',
+    q: 'How does a message reach a phone that was switched off?',
+    peek: 'Your app never talks to the phone directly. It hands the message to a push service run by the phone’s maker, which keeps it for a while and delivers it when the phone reconnects.',
+    chapter: 'notify',
+  },
+  {
+    id: 'password-leak',
+    q: 'A website’s database leaks. Why might your password still be safe?',
+    peek: 'Careful sites never store your password — only a slow, salted hash of it. A hash can’t be turned back; an attacker can only guess, and a slow hash makes every guess expensive.',
+    chapter: 'identity',
+    see: ['hashing', 3],
+  },
+  {
+    id: 'own-documents',
+    q: 'How does an app answer questions about your own documents, when the AI was never trained on them?',
+    peek: 'It first searches your documents for the passages that match the question, then puts them in the prompt — so the model answers from what it was just shown, not from memory.',
+    chapter: 'ai',
+  },
+  {
+    id: 'refresh-gone',
+    q: 'You build a to-do list in a web page. You refresh — and it’s gone. What has to change?',
+    peek: 'The list only lived in the browser tab’s memory. To keep it, the page has to send it to a server, which saves it somewhere that outlives the tab — and the server.',
+    chapter: 'how-the-web-works',
+    see: ['mern-map', 2],
+  },
+  {
+    id: 'last-lamp',
+    q: 'Two people buy the last lamp in the same second. Who gets it?',
+    peek: 'Whoever’s purchase lands first — but only if “is there one left?” and “take it” happen as one step. Do them separately, and you sell the same lamp twice.',
+    chapter: 'remember',
+    see: ['transactions', 4],
+  },
+  {
+    id: 'tap-pay',
+    q: 'What really happens in the two seconds after you tap Pay?',
+    peek: 'Your card goes to a payment provider, not to the shop. The provider asks your bank, then tells the shop’s server whether the money moved — with a message the server must check is genuine.',
+    chapter: 'payments',
+    see: ['design-cart', 6],
+  },
+  {
+    id: 'hidden-button',
+    q: 'The Delete button is hidden from normal users. Is that enough to stop them deleting?',
+    peek: 'No. Anyone can send the same request without the button. The server has to check what each person is allowed to do, on every request.',
+    chapter: 'protect',
+    see: ['authn-authz', 6],
+  },
+  {
+    id: 'one-thread',
+    q: 'JavaScript does one thing at a time. So how does a page keep responding while it waits for the network?',
+    peek: 'It hands the waiting to the browser and carries on. When the answer arrives, your code is queued to run as soon as nothing else is running.',
+    chapter: 'how-code-runs',
+    see: ['event-loop', 4],
+  },
+  {
+    id: 'opens-instantly',
+    q: 'Why does a page you visited before open instantly?',
+    peek: 'Something kept a copy. The browser, the network in between, the server and the database can each remember an answer, so the next request doesn’t travel as far.',
+    chapter: 'fast',
+    see: ['caching', 1],
+  },
+  {
+    id: 'names-numbers',
+    q: 'Computers find each other by numbers. So how does typing a name get you anywhere?',
+    peek: 'Before anything else, your device asks DNS — the internet’s address book — to turn the name into a number. Only then can it connect.',
+    chapter: 'how-the-internet-works',
+    see: ['url-to-page', 3],
+  },
+  {
+    id: 'screen-ignores',
+    q: 'You changed a variable, and the screen didn’t change. Why not?',
+    peek: 'The screen is drawn from state. Changing a plain variable tells nobody to draw again; changing state through its setter does.',
+    chapter: 'interact',
+    see: ['react-rendering', 4],
+  },
+  {
+    id: 'three-am',
+    q: 'Your app breaks at 3 a.m. for one user on the other side of the world. How would you even find out?',
+    peek: 'Not by looking. Apps report on themselves — logs, measurements and traces — and alerts fire on what users feel, like errors and slowness.',
+    chapter: 'observe',
+    see: ['observability', 5],
+  },
+  {
+    id: 'one-in-millions',
+    q: 'How does a database find one record among millions without reading them all?',
+    peek: 'The way you use the index at the back of a book: a sorted list of values with page numbers, so it can jump straight to the right place.',
+    chapter: 'how-data-is-stored',
+    see: ['indexes', 3],
+  },
+  {
+    id: 'ten-million',
+    q: 'What has to change when your app goes from ten users to ten million?',
+    peek: 'One server becomes many. Anything a server kept in its own memory — who is logged in, counters, chat rooms — has to move somewhere they all share.',
+    chapter: 'scale',
+    see: ['sessions-tokens', 5],
+  },
+  {
+    id: 'laptop-link',
+    q: 'How does code on your laptop become a link anyone in the world can open?',
+    peek: 'The screens are built into plain files and served from machines spread around the world; the server code runs on a computer that never sleeps; the data lives in a managed database.',
+    chapter: 'ship',
+    see: ['deploying', 1],
+  },
+  {
+    id: 'cors',
+    q: 'Your website and your API both work — but the browser refuses to let one talk to the other. Why?',
+    peek: 'A different port counts as a different origin. Browsers block one origin from reading another’s answers unless the server says it’s allowed.',
+    chapter: 'integrate',
+    see: ['cors', 2],
+  },
+  {
+    id: 'search-typing',
+    q: 'How does a search box find the right product among millions while you are still typing?',
+    peek: 'It never reads every product. Search keeps an index from words to the items that contain them, so each key press is a quick lookup — and only the first few results are fetched.',
+    chapter: 'search',
+  },
+  {
+    id: 'edit-token',
+    q: 'Anyone can read a login token. So why can’t you edit yours to become someone else?',
+    peek: 'It’s signed. The server checks the signature on every request, and changing even one character breaks it.',
+    chapter: 'identity',
+    see: ['jwt-auth', 6],
+  },
+  {
+    id: 'close-the-page',
+    q: 'When you upload a video, why can you close the page while it is still being processed?',
+    peek: 'The upload only saves the file and adds a job to a queue. A separate worker picks the job up and does the slow part, trying again if it fails.',
+    chapter: 'background',
+  },
+  {
+    id: 'padlock',
+    q: 'What does the padlock in the address bar actually protect?',
+    peek: 'The line, not the site. Your browser and the server agree on encryption first, so anyone in between sees only scrambled bytes — but the padlock says nothing about whether the site is honest.',
+    chapter: 'how-the-internet-works',
+    see: ['url-to-page', 5],
+  },
+  {
+    id: 'thousand-buttons',
+    q: 'Big apps have thousands of buttons. Why doesn’t anyone write each one by hand?',
+    peek: 'They write a component once — a reusable piece of screen — and use it everywhere with different inputs.',
+    chapter: 'show-it',
+    see: ['components-props', 2],
+  },
+  {
+    id: 'ai-books',
+    q: 'How can an AI book a meeting, when all it can do is write text?',
+    peek: 'The app offers it tools — functions like “check the calendar”. The model writes a request to use one; the app runs the real code and hands back the result.',
+    chapter: 'ai',
+  },
+  {
+    id: 'copy-changed',
+    q: 'You copied an object, changed the copy — and the original changed too. Why?',
+    peek: 'The variable never held the object, only an arrow pointing to it. Copying the variable copied the arrow.',
+    chapter: 'how-code-runs',
+    see: ['values-references', 3],
+  },
+  {
+    id: 'todo-runs-code',
+    q: 'How can a to-do item run code in someone else’s browser?',
+    peek: 'If the app puts what people typed onto the page as code instead of as text, a “to-do” that contains a script runs for everyone who sees it.',
+    chapter: 'protect',
+    see: ['web-attacks', 2],
+  },
+  {
+    id: 'page-500',
+    q: 'Why does page 500 of a long list load slower than page 1?',
+    peek: 'To reach page 500, the database still walks past every item on the 499 pages before it. Asking for “the ones after this item” skips the walk.',
+    chapter: 'search',
+    see: ['pagination', 3],
+  },
+  {
+    id: 'ten-people',
+    q: 'How do ten people change the same code at the same time without chaos?',
+    peek: 'Each works on their own branch — their own line of saved snapshots — and changes are joined back together after someone else has read them.',
+    chapter: 'collaborate',
+    see: ['git', 4],
+  },
+  {
+    id: 'pay-twice',
+    q: 'You click Pay twice by accident. Why aren’t you charged twice?',
+    peek: 'A careful checkout sends a unique key with each order. A second request with the same key gets the first answer back instead of creating a new order.',
+    chapter: 'payments',
+    see: ['design-cart', 5],
+  },
+  {
+    id: 'refresh-404',
+    q: 'An app’s links work fine — until you refresh on one of them and get “404 Not Found”. What happened?',
+    peek: 'In a single-page app, clicking a link changes the address without asking the server. Refreshing does ask — and the server has no file at that address.',
+    chapter: 'interact',
+    see: ['routing', 5],
+  },
+  {
+    id: 'while-nobody-clicks',
+    q: 'How do businesses connect forms, sheets, email and AI so that work gets done while nobody is clicking?',
+    peek: 'A trigger — a new form entry, a time of day, a message from another app — starts a workflow, and each step passes its result to the next.',
+    chapter: 'automate',
+  },
+  {
+    id: 'profile-photo',
+    q: 'Where does a profile photo go after you upload it — and why not into the database?',
+    peek: 'Into storage built for big files, while the database keeps only its name. Files inside database records make every read slower and every backup bigger.',
+    chapter: 'files',
+    see: ['uploads', 4],
+  },
+  {
+    id: 'not-200',
+    q: 'Why do good APIs sometimes answer “404” or “401” instead of always “200 OK”?',
+    peek: 'The status code tells the app what happened before it reads a word: done, not allowed, not found, or the server’s own fault.',
+    chapter: 'answer-requests',
+    see: ['rest-api', 4],
+  },
+  {
+    id: 'my-machine',
+    q: '“It works on my machine.” How do teams make sure it works on every machine?',
+    peek: 'They package the app with everything it needs into one image, and run that same image everywhere.',
+    chapter: 'ship',
+    see: ['containers', 2],
+  },
+  {
+    id: 'old-price',
+    q: 'A price changed, but the app keeps showing the old one. Why?',
+    peek: 'A cache remembered the old answer. Every copy needs a rule for when it stops being true.',
+    chapter: 'fast',
+    see: ['caching', 5],
+  },
+  {
+    id: 'went-wrong',
+    q: 'The app just says “something went wrong.” Where do you even start?',
+    peek: 'With the real error. The server’s log has the message and the line, and a good app shows the user a reference that leads you straight to it.',
+    chapter: 'debug',
+    see: ['errors', 6],
+  },
+  {
+    id: 'too-many',
+    q: 'How does an API stop one visitor from flooding it with requests?',
+    peek: 'Each visitor gets a bucket of tokens that slowly refills. Every request spends one; an empty bucket gets “429 Too Many Requests”.',
+    chapter: 'scale',
+    see: ['rate-limiting', 3],
+  },
+  {
+    id: 'same-chores',
+    q: 'Every request needs logging, reading the body and a login check. Why don’t servers repeat that code in every route?',
+    peek: 'They line up small functions, and every request passes down the line before it reaches the code that answers it.',
+    chapter: 'answer-requests',
+    see: ['middleware', 3],
+  },
+  {
+    id: 'half-saved',
+    q: 'An order was saved, but the stock never went down. How can half of a save happen?',
+    peek: 'An order is two writes. If the server crashes between them, only the first one lands — unless both are made all-or-nothing.',
+    chapter: 'remember',
+    see: ['transactions', 2],
+  },
+  {
+    id: 'change-daily',
+    q: 'How do teams change code every day without breaking what already works?',
+    peek: 'Thousands of small automatic checks run on every change: many quick ones for single pieces, and a few slow ones that click through the whole app.',
+    chapter: 'testing',
+    see: ['testing', 6],
+  },
+  {
+    id: 'few-files',
+    q: 'Your app is hundreds of files. Why does the browser download only a few?',
+    peek: 'A build tool follows every import, joins the files into a few bundles, drops the code nothing uses and shrinks the rest.',
+    chapter: 'how-code-ships',
+    see: ['modules', 4],
+  },
+  {
+    id: 'which-database',
+    q: 'The same code runs on your laptop and on a server. How does it know which database to use?',
+    peek: 'It is told. Settings and secrets come from the environment, set differently in each place and never written into the code.',
+    chapter: 'how-code-ships',
+    see: ['config', 3],
+  },
+  {
+    id: 'list-shuffles',
+    q: 'Why does adding an item to the top of a list sometimes scramble what is typed in the rows below?',
+    peek: 'Without a stable name for each row, the screen matches rows by position — so after an insert, everything is off by one.',
+    chapter: 'show-it',
+    see: ['lists-keys', 3],
+  },
+  {
+    id: 'wrong-profile',
+    q: 'You click quickly between two profiles, and the wrong person’s details appear. How?',
+    peek: 'Two requests raced, and the older, slower one arrived last and won. Each request has to be cancelled when you move on.',
+    chapter: 'interact',
+    see: ['use-effect', 6],
+  },
+  {
+    id: 'one-server-thousands',
+    q: 'How can one server handle thousands of people at once, doing one thing at a time?',
+    peek: 'Most of a request is waiting — for the database, for the network — and waiting is free: the operating system watches the connections while the code serves someone else.',
+    chapter: 'answer-requests',
+    see: ['node-runtime', 2],
+  },
+  {
+    id: 'ai-json',
+    q: 'AI replies in sentences. How do apps get answers they can save straight into a database?',
+    peek: 'They describe the exact shape they want, and the model is held to it. The app still checks every answer before trusting it.',
+    chapter: 'ai',
+  },
+  {
+    id: 'spam-folder',
+    q: 'Why do some apps’ emails land in spam while others reach your inbox?',
+    peek: 'Inboxes check that the sender has proved it is allowed to send for its domain, and watch how people treat its mail.',
+    chapter: 'notify',
+  },
+  {
+    id: 'comments-inside',
+    q: 'Should a blog post keep its comments inside it, or somewhere else?',
+    peek: 'Keep inside what belongs only to it and stays small; store separately what is shared, or grows without end.',
+    chapter: 'remember',
+    see: ['embed-reference', 7],
+  },
+  {
+    id: 'shop-builds-nothing',
+    q: 'How does a shop’s website take card payments, show a map and send text messages — without building any of it?',
+    peek: 'It calls other companies’ services through their APIs. Each gives you a key, a way to ask, and often a way to tell you when something happened.',
+    chapter: 'integrate',
+  },
+  {
+    id: 'where-time-goes',
+    q: 'A click takes about a tenth of a second to come back. Where does most of that time go?',
+    peek: 'Usually not into your code. Follow one click end to end and most of the time is spent travelling between machines.',
+    chapter: 'how-the-web-works',
+    see: ['request-journey', 10],
+  },
+  {
+    id: 'sketch-chat',
+    q: 'Before you build a chat app, how would you sketch where every message goes?',
+    peek: 'Start from what people do and how often — messages a second, how far back they scroll — then draw where each message is saved, sent and read.',
+    chapter: 'design',
+    see: ['design-chat', 1],
+  },
+  {
+    id: 'shop-app',
+    q: 'Someone says “I need an app for my shop.” What do you ask before writing a single line?',
+    peek: 'What goes wrong today, for whom, and what they do about it now. A first version fixes one of those things, not all of them.',
+    chapter: 'plan',
+  },
+  {
+    id: 'ai-writes-code',
+    q: 'If AI can write the code, what is left for you to know?',
+    peek: 'What to ask for, and whether what came back is right. AI writes fast and sounds sure even when it is wrong — checking it is your job.',
+    chapter: 'build-with-ai',
+  },
+  {
+    id: 'ten-thousand-files',
+    q: 'How do you find your way around ten thousand files you didn’t write?',
+    peek: 'You don’t read them all. Start where one feature begins — a button, a route — and follow that single path through the code.',
+    chapter: 'read-code',
+  },
+  {
+    id: 'nobody-signed-up',
+    q: 'You launched. Nobody signed up. Now what?',
+    peek: 'Find out why before you build more: watch a few real people try it and ask what they expected. Then change one thing and look again.',
+    chapter: 'iterate',
+  },
+  {
+    id: 'ship-today',
+    q: 'Could you put something you made on the internet — today?',
+    peek: 'Yes. A single page, written with AI as your pair, can be online at a public link within the hour.',
+    chapter: 'first-ship',
+  },
+  {
+    id: 'three-designs',
+    q: 'Why would a to-do app, a shopping cart and a chat app be designed so differently?',
+    peek: 'Each has a different worst case: a to-do app must keep people’s lists private, a cart handles money and the last item in stock, and a chat must reach many people at once.',
+    chapter: 'design-studies',
+    see: ['design-todo', 1],
+  },
+  {
+    id: 'empty-folder',
+    q: 'Can you build a full app with accounts, data and live updates, starting from an empty folder?',
+    peek: 'Yes — one milestone at a time, each small enough to finish in a sitting.',
+    chapter: 'taskflow',
+  },
+  {
+    id: 'real-client',
+    q: 'A clinic, a shop and a school each have a problem. Could you be the one who solves it?',
+    peek: 'That is where this whole manual leads: hear a vague problem, find the real one, and ship what fixes it.',
+    chapter: 'briefs',
+  },
+];

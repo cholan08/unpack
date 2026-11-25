@@ -157,7 +157,7 @@ export function AboutPage() {
       </section>
 
       <div className="page-actions about-cta">
-        <Link to="/start" className="btn btn--primary btn--lg">
+        <Link to="/path" className="btn btn--primary btn--lg">
           Start learning <ArrowRight size={16} />
         </Link>
         {course && (

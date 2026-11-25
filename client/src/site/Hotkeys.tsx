@@ -28,6 +28,9 @@ function goTable(): Record<string, string> {
     h: '/',
     s: '/start',
     b: '/manual',
+    x: '/explore',
+    i: '/build',
+    p: '/path',
     d: '/me',
     r: `/${c}/roadmap`,
     v: '/review',
@@ -50,6 +53,9 @@ export const GO_LIST: { key: string; label: string }[] = [
   { key: 'c', label: 'Continue your lesson' },
   { key: 'h', label: 'Home' },
   { key: 'b', label: 'The Manual' },
+  { key: 'x', label: 'Explore' },
+  { key: 'i', label: 'Build' },
+  { key: 'p', label: 'Path' },
   { key: 'd', label: 'Dashboard' },
   { key: 'r', label: 'Roadmap' },
   { key: 'v', label: 'Review' },
@@ -87,7 +93,7 @@ export function Hotkeys() {
   /** Go to the target of `key`; false when the key isn't one. */
   const go = useCallback(
     (key: string) => {
-      const to = key === 'c' ? (continueTarget(progressRef.current)?.href ?? '/start') : TABLE[key];
+      const to = key === 'c' ? (continueTarget(progressRef.current)?.href ?? '/path') : TABLE[key];
       if (!to) return false;
       setSheet(false);
       navigate(to);

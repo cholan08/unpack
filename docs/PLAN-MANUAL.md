@@ -15,7 +15,7 @@
 | **M0 · Vision** | `VISION.md`: the goal, learner psychology, the manual's shape, decisions | ✅ |
 | **M1 · The spine + one model chapter** | `/manual` (four parts, every chapter, topic filter, honest status) and `/manual/:chapter`. Every chapter links what already exists. **"Know who the user is"** is written in full as the model for the rest | ✅ |
 | **M2 · Assemble every chapter** | Write the full chapter (same sections as the model) for every chapter that already has lessons — 23 of them, a few at a time. Reviewed by the owner | 🚧 3 of 23 drafted, awaiting review: *How a web page reaches you*, *Answer requests*, *Remember things* |
-| **M3 · Three doors** | Home becomes Explore / Build / Path. Explore = a feed of curiosity questions. Build = "I want to build ___" → the chapters it needs. Sidebar slims down: the Manual, your path, the shelf | |
+| **M3 · Three doors** | Home becomes Explore / Build / Path. Explore = a feed of curiosity questions. Build = "I want to build ___" → the chapters it needs. Sidebar slims down: the Manual, your path, the shelf | ✅ Built, build and QA green (2026-11-26). The door content — 59 Explore questions, 9 Build ideas and 14 features, the Path's order — is an AI draft awaiting the owner's review |
 | **M4 · First ship in an hour** | Level 1: a guided first build (a personal page, put online, with AI as a pair). The new start of the Path door | |
 | **M5 · The builder's craft** | Part III chapters, starting with **Building with AI** (specify → generate → read → verify) and **Turn a problem into a plan** | |
 | **M6 · Levels as identity** | Levels 0–5 on the dashboard and sidebar ("You can now…"). Test out of a chapter. Progress counted by chapter | |
@@ -64,6 +64,27 @@ The phases split into two tracks that touch different files, so two Claude Code 
 **Wiring:** routes in `App.tsx` (lazy chunks), "The Manual" at the top of the sidebar (`G` then `B`), the Manual and every chapter in the command palette (its own "The Manual" group). The rich-text styles (`.ic`, `.term`, `.term-tip`) moved from `player.css` to `base.css` so chapters can use glossary tooltips.
 
 **QA:** `npm run qa -- manual` opens the contents and every chapter at 1440px and 390px, clicks through the predict, break-it reveals, the AI tab and a Go-deeper answer, and fails on sideways overflow or any console warning (unknown glossary terms, broken chapter links). `QA_CHANNEL=msedge` runs QA in an installed Edge when Playwright's own browser isn't downloaded.
+
+## M3 — what was built
+
+**Content (`client/src/content/doors/`)** — AI drafts, for the owner to review like a chapter.
+- `explore.ts`: the curiosity feed. Each question links its chapter, a *peek* (one or two sentences — a hint, not the answer) and, where a lesson shows it, the exact step (`see: [lesson, step]`). Every chapter has at least one question, planned ones too.
+- `build.ts`: *features* in the learner's words ("Each person has their own account"), each pulling in chapters with the reason ("so nobody can see or change someone else's things"); *ideas* (a shop, a chat app…) with the features they usually have and the words that recognise them; `CORE` (every product) and `CRAFT` (how you'll work on any build).
+- `path.ts`: the guided route in six stages — ship something today → see how it all works → make a small app → build and ship a whole product → add product powers → solve real problems. Every chapter is on it exactly once.
+- `index.ts`: dev checks (so QA fails) for unknown chapters or lessons, duplicate ids, a chapter with no question, a chapter missing from the path. **Track A:** a new chapter needs one line in `path.ts` and one question in `explore.ts`.
+
+**Pages (`client/src/site/doors/`)**
+- `/explore`: the feed, filterable by topic. Each card asks for a guess, then *Peek* reveals the hint, *See it move* (the lesson step), the chapter, and a way to build it (the chapter's *Build it* section if written, else the Build door with that feature on). *Surprise me*; peeked questions are remembered; `?q=<id>` opens one.
+- `/build`: "I want to build ___" — type an idea or pick one. Words switch features on ("log in, pay, get a reminder email"); features can be switched by hand. The chapters it needs appear in reading order with the reason, status and progress, the first one to open, the craft chapters, a design study when one exists, and *Ask XOLA to cut it down* (hidden in No-AI mode). Saved in the browser; `?idea=`, `?q=`, `?add=` start one from a link.
+- `/path`: the whole route, with only the next three open chapters lit (a chapter is finished when every written lesson in it is). Links to the 5-minute check and the roadmap.
+- Home: the pitch (new) or the continue card (returning), then the three doors — a question to peek at, your build or ideas to start one, the next three steps. The topic grid and course cards left Home.
+- Chapter pages: when the learner's build needs the chapter, a *Your build* line says where it sits and links the next chapter for that build (`BuildTrail.tsx`).
+
+**Shell:** the sidebar is nine items — Home · *The Manual* (All chapters, Explore, Build) · *Your path* (Path, Dashboard, Review, My notes) · *The shelf* (Library). Topic pages, the course map, roadmap, glossary, Techpack, Skill Pack, notebooks and errors live on the Library page (which gained the roadmap and *Lessons by topic*) and stay in the palette; old URLs work. A new learner's "next thing" is now the Path, not the placement check. Shortcuts: `G X` Explore, `G I` Build, `G P` Path.
+
+**QA:** `npm run qa -- doors` drives Home and each door at 1440px and 390px (peek, filter, surprise; pick an idea, switch a feature, type an idea; the chapter trail). Courses are now discovered from the Library (`a[data-course]`), not Home. The full run starts a fresh browser for the Manual and doors passes (hundreds of page loads in one browser ended in `net::ERR_INSUFFICIENT_RESOURCES`).
+
+**For M6 (levels):** the path's stages line up with VISION §5's levels; `pathOf()` in `site/doors/model.ts` already gives finished/open per stage and chapter.
 
 ## Writing a chapter (for M2 onwards)
 

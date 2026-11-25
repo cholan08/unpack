@@ -59,6 +59,7 @@ import { LessonCard } from '../CoursePage';
 import { NotFound } from '../NotFound';
 import { Ring } from '../ui';
 import { chapterHref, chapterProgress, chapterStatus, chapterTone, StatusPill } from './shared';
+import { BuildTrail } from '../doors/BuildTrail';
 import '../topic.css';
 import './manual.css';
 
@@ -353,6 +354,8 @@ function ChapterView({ ch }: { ch: Chapter }) {
               </div>
             </div>
           </header>
+          {/* when this chapter is one the learner's build needs: where it sits, and what comes next */}
+          <BuildTrail chapterId={ch.id} />
 
           <div className="mn-ch-body">
             <aside className="mn-toc" aria-label="In this chapter">

@@ -90,7 +90,7 @@ export interface ContinueTarget {
 
 /**
  * The one thing to do next: resume the last lesson if it isn't finished, else the lesson after it,
- * else (a new learner) the Start Here page.
+ * else (a new learner) the Path door — the guided route from zero.
  */
 export function continueTarget(progress: Store): ContinueTarget | undefined {
   const course = COURSES[0];
@@ -115,7 +115,7 @@ export function continueTarget(progress: Store): ContinueTarget | undefined {
     if (nxt?.meta)
       return { kind: 'next', course: lastCourse, lesson: nxt.meta, part: nxt.part, href: `/${lastCourse.id}/${nxt.stub.id}` };
   }
-  return { kind: 'start', course, href: '/start' };
+  return { kind: 'start', course, href: '/path' };
 }
 
 /** Lessons done across a course. */
