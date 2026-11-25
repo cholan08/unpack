@@ -276,9 +276,12 @@ Fewer clicks between "I wonder…" and the answer, and small moments that reward
 ### Phase M — The Manual · 🚧 in progress
 The site's new shape: one chapter per *problem* every product meets, stacks second (`docs/VISION.md`). Plan and status: `docs/PLAN-MANUAL.md`.
 - ✅ M1 — `/manual` contents (4 parts, 36 chapters, topic filter, honest status) and `/manual/:chapter` pages that assemble lessons, errors, gates, milestones and cheat sheets per chapter. "Know who the user is" is written in full as the model chapter. Content in `src/content/manual/`, pages in `src/site/manual/`. `npm run qa -- manual` checks every chapter at laptop and phone width.
+- ✅ M2 — all 23 chapters that have lessons written in the model chapter’s shape (draft until the owner reviews).
 - ✅ M3 — the three doors: `/explore` (curiosity feed), `/build` ("I want to build ___" → the chapters it needs), `/path` (the guided route, next three steps lit); Home leads with them; the sidebar is nine items. Content in `src/content/doors/`, pages in `src/site/doors/`. `npm run qa -- doors`. Details: `docs/PLAN-MANUAL.md`.
 - ✅ M4 — *Your first ship* (`written/first-ship.ts`): a personal page built with AI as a pair and put online; the live link is kept as proof (`ships` in progress) and starts the Path.
+- ✅ M5 — the builder’s craft: *Turn a problem into a plan*, *Build with AI*, *Read docs and other people’s code*, *Ship, listen, improve*.
 - ✅ M6 — levels as identity (`content/levels.ts`, `site/doors/Levels.tsx`): six levels earned with proof and kept; test out of a chapter with its gate; progress by chapter on the dashboard; the level in the sidebar and in the mentor's profile.
+- ✅ M7 — Part 11 “Real-World Building Blocks” in the course (lessons `llm-apps`, `background-jobs`, `notifications`, `payments`, `automation`, gate `extend`, 10 glossary terms) and the chapters *Make it smart*, *Do work later*, *Reach people*, *Take money*, *Automate the busywork*. The AI/ML topic now has lessons.
 - ✅ M8 — the FDE path: four problem briefs (`content/briefs.ts`, `/briefs`) with fading support; XOLA plays the client in discovery (`mode: "client"`); notes become the build spec; ship a live link, demo, defend the design; briefs prove Levels 4–5.
 
 ## 9. Quality bar
