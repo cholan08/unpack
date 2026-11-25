@@ -6,6 +6,7 @@
  * Usage:  npm run dev           (in another terminal)
  *         npm run qa            → all courses
  *         npm run qa -- mern event-loop,cors   → some lessons of one course
+ *         npm run qa -- manual                 → only the Manual (contents + every chapter)
  * Env:    QA_BASE=http://localhost:5280
  *         QA_CHANNEL=msedge   (use an installed Edge/Chrome when Playwright's own browser isn't downloaded)
  */
@@ -13,6 +14,8 @@ import { chromium } from 'playwright';
 
 const base = process.env.QA_BASE ?? 'http://localhost:5280';
 const [onlyCourse, onlyLessons] = process.argv.slice(2);
+/** `npm run qa -- manual`: only the Manual's contents and chapters. */
+const manualOnly = onlyCourse === 'manual';
 
 const browser = await chromium.launch(process.env.QA_CHANNEL ? { channel: process.env.QA_CHANNEL } : {});
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -170,7 +173,7 @@ async function exercisePractice(where) {
 
 // Discover courses from the home page, lessons from each course page.
 await page.goto(base, { waitUntil: 'networkidle' });
-const courses = onlyCourse ? [onlyCourse] : await page.$$eval('.course-card', (as) => as.map((a) => new URL(a.href).pathname.slice(1)));
+const courses = manualOnly ? [] : onlyCourse ? [onlyCourse] : await page.$$eval('.course-card', (as) => as.map((a) => new URL(a.href).pathname.slice(1)));
 let issues = 0;
 let steps = 0;
 
@@ -232,9 +235,11 @@ if (!onlyLessons) {
 // and a written chapter's interactive pieces (predict, break-it reveals, the AI tab) must open cleanly.
 let chapters = 0;
 if (!onlyLessons) {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const [width, height] of [[1440, 900], [390, 844]]) {
-    await page.setViewportSize({ width, height });
+    // a fresh tab per screen size: hundreds of dev-server page loads in one tab can exhaust the browser
+    const page = await browser.newPage({ viewport: { width, height }, reducedMotion: 'reduce' });
+    page.on('pageerror', (e) => errors.add('pageerror: ' + e.message));
+    page.on('console', (m) => (m.type() === 'error' || m.type() === 'warning') && errors.add(`${m.type()}: ${m.text().slice(0, 240)}`));
     await page.goto(`${base}/manual`, { waitUntil: 'networkidle' });
     const hrefs = await page.$$eval('a.mn-row', (as) => as.map((a) => new URL(a.href).pathname).filter((p) => p.startsWith('/manual/')));
     for (const path of ['/manual', ...hrefs]) {
@@ -243,7 +248,8 @@ if (!onlyLessons) {
       const where = `${path} at ${width}px`;
       if (await page.locator('.mn-predict').count()) {
         await page.locator('.mn-opt').first().click();
-        for (const b of await page.locator('.mn-break-btn').all()) await b.click();
+        // each reveal removes its button, so always click the first one left
+        while (await page.locator('.mn-break-btn').count()) await page.locator('.mn-break-btn').first().click();
         await page.locator('.mn-tabs [role=tab]').nth(1).click();
         await page.locator('.mn-deep summary').first().click();
       }
@@ -259,6 +265,7 @@ if (!onlyLessons) {
         console.log(`✗ ${where}\n    ` + wide.join('\n    '));
       }
     }
+    await page.close();
   }
 }
 

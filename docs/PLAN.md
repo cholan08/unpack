@@ -272,6 +272,10 @@ Fewer clicks between "I wonder…" and the answer, and small moments that reward
 - ✅ Deep links with `#anchor` land on the anchor on every page; toasts for quiet confirmations (`toast()` in `src/lib/toast.ts`).
 - ✅ Accessibility: tertiary text (`--muted-2`) now passes WCAG AA (≥ 4.5:1) in both themes; 44px touch targets on coarse pointers; the keyboard-shortcuts button is hidden on touch screens.
 
+### Phase M — The Manual · 🚧 in progress
+The site's new shape: one chapter per *problem* every product meets, stacks second (`docs/VISION.md`). Plan and status: `docs/PLAN-MANUAL.md`.
+- ✅ M1 — `/manual` contents (4 parts, 36 chapters, topic filter, honest status) and `/manual/:chapter` pages that assemble lessons, errors, gates, milestones and cheat sheets per chapter. "Know who the user is" is written in full as the model chapter. Content in `src/content/manual/`, pages in `src/site/manual/`. `npm run qa -- manual` checks every chapter at laptop and phone width.
+
 ## 9. Quality bar
 
 - 60 fps animations; no layout jank between steps
