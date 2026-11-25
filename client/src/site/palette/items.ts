@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   BookA,
   BookOpen,
+  Briefcase,
   Bug,
   Code2,
   Compass,
@@ -139,6 +140,7 @@ export function pageItems(course: Course | undefined): Item[] {
     page('errors', 'Common errors', '/errors', AlertTriangle, 'troubleshooting debug bugs error messages fix stack trace', 'Real error messages, what they mean, and the lesson that explains each.', 'e'),
     page('about', 'Why Unpacked', '/about', Heart, 'about why story mission maker author creator cholan built by who made', 'Why Unpacked exists, what it stands for, and who built it.', 'a'),
     page('capstone', 'Capstone: TaskFlow', '/capstone', Trophy, 'project build milestones final taskflow portfolio', 'Build and deploy a full MERN app, one milestone at a time.'),
+    page('briefs', 'Problem briefs', '/briefs', Briefcase, 'brief briefs client fde forward deployed engineer real problem interview discovery scope ship demo independent', 'Four clients, less help each time: interview the client, scope, design, build, ship and defend it.'),
   ];
 }
 

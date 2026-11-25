@@ -90,7 +90,12 @@ console.log('Running server tests...');
 
 // 4. Mentor prompt building + message sanitising
 {
-  const { buildMentorPrompt, sanitizeMessages, MENTOR_SYSTEM_PROMPT } = await import('./app.mjs');
+  const { buildMentorPrompt, buildClientPrompt, sanitizeMessages, MENTOR_SYSTEM_PROMPT, CLIENT_SYSTEM_PROMPT } = await import('./app.mjs');
+  const cp = buildClientPrompt({ messages: [{ role: 'user', content: 'hi' }], client: { name: 'Sam <b>', knows: ['x'.repeat(500)], onlyIfAsked: 'not a list' } });
+  assert(cp.system.startsWith(CLIENT_SYSTEM_PROMPT), 'client system prompt leads');
+  assert(cp.system.includes('x'.repeat(300)) && !cp.system.includes('x'.repeat(301)), 'client facts are clipped');
+  assert(cp.system.includes('<ONLY_IF_ASKED>\n(none)'), 'a malformed fact list becomes (none)');
+  assert(buildClientPrompt({ messages: [{ role: 'user', content: 'hi' }] }).system.includes('Name: The client'), 'works with no client');
 
   const clean = sanitizeMessages([
     { role: 'assistant', content: 'stale greeting' }, // must not lead the conversation
@@ -159,6 +164,19 @@ console.log('Running server tests...');
   assert.strictEqual((await ok.json()).reply, 'Try re-reading the microtask step.');
   assert.strictEqual(seen.messages.length, 3, 'full history reaches the provider');
   assert(seen.system.includes('Lessons done: 1 of 54'));
+
+  // the client in a problem brief: the persona and its facts reach the provider, with the history
+  const asClient = await post({
+    mode: 'client',
+    messages: [{ role: 'user', content: 'What goes wrong on a Saturday?' }],
+    client: { name: 'Rosa', role: 'owner', org: 'a bakery', knows: ['Sourdough sells out first.'], onlyIfAsked: ['No online card payments yet.'] },
+  });
+  assert.strictEqual(asClient.status, 200, 'a client interview turn is answered');
+  assert(seen.system.includes('role-playing a CLIENT') && seen.system.includes('Name: Rosa'), 'the client prompt and persona reach the provider');
+  assert(seen.system.includes('<ONLY_IF_ASKED>\n- No online card payments yet.'), 'hidden facts are in their own block');
+  assert.strictEqual(seen.messages.length, 1);
+  const clientNoUser = await post({ mode: 'client', messages: [] });
+  assert.strictEqual(clientNoUser.status, 400, 'a client interview needs a learner message');
 
   const noUser = await post({ mode: 'mentor', messages: [{ role: 'assistant', content: 'hello' }] });
   assert.strictEqual(noUser.status, 400, 'a mentor request needs a learner message');

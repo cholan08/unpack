@@ -100,6 +100,7 @@ const STATIC_PAGES: Record<string, string> = {
   '/skillpack': 'Skill Pack',
   '/notebooks': 'Notebooks',
   '/capstone': 'Capstone project',
+  '/briefs': 'Problem briefs (Part IV)',
 };
 
 /** A plain description of the current route, for pages that do not publish their own context. */

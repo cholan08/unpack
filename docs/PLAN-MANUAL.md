@@ -20,7 +20,7 @@
 | **M5 · The builder's craft** | Part III chapters, starting with **Building with AI** (specify → generate → read → verify) and **Turn a problem into a plan** | |
 | **M6 · Levels as identity** | Levels 0–5 on the dashboard and sidebar ("You can now…"). Test out of a chapter. Progress counted by chapter | ✅ Built, build and QA green (2026-11-26). Level wording and proofs are an AI draft awaiting the owner's review |
 | **M7 · New building blocks** | Lessons and chapters for the missing problems: Make it smart (LLM APIs, RAG, agents, evals), Do work later, Notify people, Take money, Automate workflows | |
-| **M8 · The FDE path** | Part IV briefs with fading support: guided → semi-guided → spec only → open. XOLA plays the client in a discovery interview; the learner scopes, builds, ships, demos, and defends the design | |
+| **M8 · The FDE path** | Part IV briefs with fading support: guided → semi-guided → spec only → open. XOLA plays the client in a discovery interview; the learner scopes, builds, ships, demos, and defends the design | ✅ Built, build, QA and server tests green (2026-11-26). The four briefs and the client persona prompt are an AI draft awaiting the owner's review |
 | **Later** | Accounts and sync, community, more branches (hardware/IoT, games…), more languages | |
 
 ## Who works on what (two machines in parallel)
@@ -99,6 +99,14 @@ The phases split into two tracks that touch different files, so two Claude Code 
 - **Finished, by chapter.** A chapter counts as finished when every written lesson is done, its build is shipped, or the learner **tested out** by passing the chapter's gate (`viewOf()` in `site/doors/model.ts`). Chapter pages offer "Know it already? Test out with the … gate" and show *Tested out*. Path, Build and levels all use it.
 - **Where it shows** (`site/doors/Levels.tsx`): the sidebar card ("Level 1 · First ship — You can put a page you made on the internet… Next: Maker · 0 of 7 chapters"); the dashboard's *Who you're becoming* ladder with exactly what the next level still needs; *Chapters* — every chapter as a square, part by part. `LevelWatcher` (in `App.tsx`) records a level the moment it is earned and says so once. The capstone's last milestone asks for the live TaskFlow link (Level 3). The mentor's profile carries the level (`server/app.mjs` prints it; tested).
 - **QA:** after the first ship, the dashboard ladder and the sidebar must both say Level 1.
+
+## M8 — what was built
+
+- **Briefs** (`client/src/content/briefs.ts`): four made-up clients, less help each time — *Saturday pre-orders for a bakery* (guided: every stage written out), *Fewer missed appointments at a clinic* (semi-guided: a hint or two per stage), *A lost-and-found board for a school* (spec only), *A football club run from a group chat* (open). Each has the client's first, vague ask, what they `knows`, what they share `onlyIfAsked`, constraints and the chapters it draws on. Seven stages for every brief: discover → scope → design → build → ship → demo and defend → iterate (`STAGES`).
+- **Pages** (`client/src/site/briefs/`): `/briefs` (the four, with progress) and `/briefs/:id` — per stage the goal, the guide (fading), a note the learner writes, and "Done" with what done looks like. **Discover**: an interview with the client, played by XOLA (`mode: "client"` on `POST /api/tutor`, `buildClientPrompt` in `server/app.mjs`: stays in character, plain words, hidden facts only for good questions, "(out of character)" gives feedback; tested). No key or No-AI mode: "read the client's notes instead". **Build**: the learner's own notes become a copyable spec for an AI assistant. **Ship**: the live link (`ships['brief:<id>']`). **Demo and defend**: "Defend it to XOLA" (a sceptical-engineer prompt) and "I answered the hard questions".
+- **Levels:** Level 4 needs a semi-guided (or harder) brief shipped; Level 5 needs the open brief shipped and defended (`site/doors/briefProof.ts`). Stages and "defended" live in progress (`briefs`); notes and the interview transcript in `unpacked:brief:<id>`.
+- **Wiring:** the *Solve a real client's problem* chapter opens `/briefs` (one entry in `chapters.ts`), so the Path, Explore and the Manual reach it; palette page; the mentor knows the page. The server's offline mock answers in client mode too.
+- **QA:** the doors pass opens the list, works the guided brief (tick a stage; notes become the spec; the no-key message shows), and the open brief, at laptop and phone width.
 
 ## Writing a chapter (for M2 onwards)
 

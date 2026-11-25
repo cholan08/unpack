@@ -39,6 +39,9 @@ const ChapterPage = lazy(() => import('@/site/manual/ChapterPage').then((m) => (
 const ExplorePage = lazy(() => import('@/site/doors/ExplorePage').then((m) => ({ default: m.ExplorePage })));
 const BuildPage = lazy(() => import('@/site/doors/BuildPage').then((m) => ({ default: m.BuildPage })));
 const PathPage = lazy(() => import('@/site/doors/PathPage').then((m) => ({ default: m.PathPage })));
+// Part IV's problem briefs: the forward-deployed engineer's path.
+const BriefsPage = lazy(() => import('@/site/briefs/BriefsPage').then((m) => ({ default: m.BriefsPage })));
+const BriefPage = lazy(() => import('@/site/briefs/BriefsPage').then((m) => ({ default: m.BriefPage })));
 
 /**
  * A new page starts at the top. A link with a #anchor (a Techpack sheet, a glossary term…) lands
@@ -79,6 +82,8 @@ export function App() {
             <Route path="/explore" element={<Suspense fallback={null}><ExplorePage /></Suspense>} />
             <Route path="/build" element={<Suspense fallback={null}><BuildPage /></Suspense>} />
             <Route path="/path" element={<Suspense fallback={null}><PathPage /></Suspense>} />
+            <Route path="/briefs" element={<Suspense fallback={null}><BriefsPage /></Suspense>} />
+            <Route path="/briefs/:briefId" element={<Suspense fallback={null}><BriefPage /></Suspense>} />
             <Route path="/me" element={<DashboardPage />} />
             <Route path="/capstone" element={<CapstonePage />} />
             <Route path="/capstone/:milestoneId" element={<CapstonePage />} />

@@ -386,6 +386,43 @@ if (!onlyLessons && !manualOnly) {
       localStorage.removeItem('unpacked:explore:seen');
     });
     await page.close();
+
+    // Problem briefs, in a fresh tab: the list, a guided brief worked through, and the open one.
+    const tab = await openTab(width, height);
+    const brief = async (path, act) => {
+      await tab.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+      await tab.waitForTimeout(200);
+      if (act) await act();
+      doorPages++;
+      const wide = await tab.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push(`page scrolls sideways (${document.documentElement.scrollWidth}px)`);
+        for (const el of document.querySelectorAll('.dr-head, .br-flow, .br-list > *, .br-head > *, .br-stage, .br-chat-log'))
+          if (el.getBoundingClientRect().right > window.innerWidth + 1) out.push(`${el.className.split(' ')[0]} runs off the screen`);
+        return out;
+      });
+      if (wide.length) {
+        issues += wide.length;
+        console.log(`✗ ${path} at ${width}px\n    ` + wide.join('\n    '));
+      }
+    };
+    await brief('/briefs');
+    await brief('/briefs/bakery', async () => {
+      await tab.locator('#stage-discover .br-done').click();
+      await tab.locator('#stage-discover textarea').fill('Rosa runs out of the breads people want by nine on Saturdays.');
+      await tab.locator('#stage-scope textarea').fill('Does: Saturday pre-orders.');
+      await tab.locator('#stage-design textarea').fill('An order form, a list for Rosa.');
+      await tab.locator('.br-notes summary').click();
+      const spec = (await tab.locator('.br-prompt pre').textContent()) ?? '';
+      const ticked = await tab.locator('#stage-discover[data-done]').count();
+      const noKey = await tab.locator('.br-chat-off').count();
+      if (!spec.includes('Rosa runs out') || !ticked || !noKey) {
+        issues++;
+        console.log(`✗ /briefs/bakery at ${width}px\n    notes → spec: ${spec.includes('Rosa runs out')}, stage ticked: ${!!ticked}, no-key message: ${!!noKey}`);
+      }
+    });
+    await brief('/briefs/club');
+    await tab.close();
   }
 }
 

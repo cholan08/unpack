@@ -527,5 +527,6 @@ export const CHAPTERS: Chapter[] = [
     covers: 'Real problem briefs with less help each time: discover, scope, design, build, ship, demo and improve.',
     glyph: Briefcase,
     lens: ['projects'],
+    href: '/briefs',
   },
 ];

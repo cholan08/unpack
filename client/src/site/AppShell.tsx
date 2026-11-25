@@ -195,7 +195,7 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
         <Item to="/" icon={House} label="Home" active={pathname === '/'} />
 
         <h2 className="side-h">The Manual</h2>
-        <Item to="/manual" icon={BookOpen} label="All chapters" active={under(pathname, '/manual', '/capstone')} title="Every problem a product meets, one chapter each" />
+        <Item to="/manual" icon={BookOpen} label="All chapters" active={under(pathname, '/manual', '/capstone', '/briefs')} title="Every problem a product meets, one chapter each" />
         <Item to="/explore" icon={Telescope} label="Explore" tone="net" active={under(pathname, '/explore')} title="How does ___ work? A feed of curiosity questions" />
         <Item to="/build" icon={Hammer} label="Build" tone="warn" active={under(pathname, '/build')} title="I want to build ___ — the chapters it needs" />
 

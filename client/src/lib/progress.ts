@@ -77,6 +77,13 @@ interface Store {
   ships?: Record<string, Ship>;
   /** Levels earned (level number → when). Once earned, a level is kept even if its requirements grow. */
   levels?: Record<string, number>;
+  /** Problem briefs: the stages ticked, and when the design was defended. Notes and interviews live apart. */
+  briefs?: Record<string, BriefProgress>;
+}
+
+export interface BriefProgress {
+  stages: string[];
+  defended?: number;
 }
 
 const KEY = 'unpacked:progress:v2';
@@ -276,6 +283,19 @@ export function earnLevels(ns: number[]) {
   const levels = { ...state.levels };
   for (const n of fresh) levels[n] = Date.now();
   save({ ...state, levels });
+}
+
+/** Tick or untick one stage of a problem brief. */
+export function toggleBriefStage(id: string, stage: string) {
+  const prev = state.briefs?.[id] ?? { stages: [] };
+  const stages = prev.stages.includes(stage) ? prev.stages.filter((x) => x !== stage) : [...prev.stages, stage];
+  save({ ...state, briefs: { ...state.briefs, [id]: { ...prev, stages } } });
+}
+
+/** Mark a brief's design as defended (or not). */
+export function setBriefDefended(id: string, defended: boolean) {
+  const prev = state.briefs?.[id] ?? { stages: [] };
+  save({ ...state, briefs: { ...state.briefs, [id]: { ...prev, defended: defended ? Date.now() : undefined } } });
 }
 
 /** Tick or untick a skill on a topic's skill plan. */
