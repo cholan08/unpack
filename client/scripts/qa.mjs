@@ -355,6 +355,23 @@ if (!onlyLessons && !manualOnly) {
       }
     });
     await door('/library');
+    // the first ship: a link that isn't public is refused; a real one is kept as proof
+    await door('/manual/first-ship', async () => {
+      const field = page.locator('#ship-first-ship');
+      await field.fill('http://localhost:5173');
+      await field.press('Enter');
+      if (!(await page.locator('.dr-ship-bad').count())) {
+        issues++;
+        console.log(`✗ /manual/first-ship at ${width}px\n    a localhost link was accepted as a shipped page`);
+      }
+      await field.fill('ana-silva.netlify.app');
+      await field.press('Enter');
+      await page.waitForTimeout(150);
+      if (!(await page.locator('.dr-ship[data-state=shipped]').count())) {
+        issues++;
+        console.log(`✗ /manual/first-ship at ${width}px\n    a real https link was not kept as the first ship`);
+      }
+    });
     await page.evaluate(() => {
       localStorage.removeItem('unpacked:build:v1');
       localStorage.removeItem('unpacked:explore:seen');

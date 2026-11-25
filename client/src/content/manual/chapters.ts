@@ -491,6 +491,9 @@ export const CHAPTERS: Chapter[] = [
     covers: 'A personal page built with AI as your pair and put online in about an hour. Your first real link.',
     glyph: Footprints,
     lens: ['projects'],
+    lessons: ['url-to-page', 'rendering', 'deploying'],
+    notebooks: ['html', 'css'],
+    tools: ['html', 'css'],
   },
   {
     id: 'design-studies',

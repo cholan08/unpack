@@ -52,7 +52,9 @@ export interface ChapterView {
   done: number;
   ready: number;
   pct: number;
-  /** Every written lesson in it is finished. */
+  /** Its build is live: the learner saved the link (the first ship). */
+  shipped: boolean;
+  /** Every written lesson in it is finished, or its build is shipped. */
   finished: boolean;
   /** Something to open now: written, has lessons, or is a page of its own. */
   open: boolean;
@@ -62,13 +64,15 @@ export interface ChapterView {
 export function viewOf(c: Chapter, progress: Store): ChapterView {
   const status = chapterStatus(c);
   const p = chapterProgress(c, progress);
+  const shipped = !!progress.ships?.[c.id];
   return {
     chapter: c,
     status,
     done: p.done,
     ready: p.ready,
     pct: p.pct,
-    finished: p.ready > 0 && p.done === p.ready,
+    shipped,
+    finished: shipped || (p.ready > 0 && p.done === p.ready),
     open: status !== 'planned',
     href: chapterHref(c),
   };

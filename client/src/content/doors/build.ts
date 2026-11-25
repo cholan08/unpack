@@ -207,6 +207,7 @@ export const IDEAS: Idea[] = [
     icon: FileText,
     features: [],
     words: ['personal', 'portfolio', 'page', 'landing', 'resume', 'cv', 'about me', 'homepage', 'website', 'site'],
+    study: { href: '/manual/first-ship', label: 'Your first ship — this exact build, guided, in about an hour' },
   },
   {
     id: 'todo',

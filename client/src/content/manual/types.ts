@@ -118,6 +118,11 @@ export interface ChapterWriting {
     withAI: { lede: string; prompt: string };
     /** Checks the learner runs on the result, whoever wrote the code. */
     verify: string[];
+    /**
+     * The build ends with something live: the page asks for its public link and keeps it as proof
+     * (a level needs it — docs/VISION.md §5). Shown under the checks.
+     */
+    proof?: { label: string; hint: string; /** Said once, when the link is first saved. */ done?: string };
   };
   /** "What's wrong with this code?" cards. */
   breakIt: BreakIt[];

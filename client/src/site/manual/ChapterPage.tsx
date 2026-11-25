@@ -60,6 +60,7 @@ import { NotFound } from '../NotFound';
 import { Ring } from '../ui';
 import { chapterHref, chapterProgress, chapterStatus, chapterTone, StatusPill } from './shared';
 import { BuildTrail } from '../doors/BuildTrail';
+import { ShipProof } from '../doors/ShipProof';
 import '../topic.css';
 import './manual.css';
 
@@ -740,6 +741,7 @@ function BuildSec({ ch, w }: { ch: Chapter; w: ChapterWriting }) {
         </div>
       )}
       <VerifyList id={ch.id} items={b.verify} />
+      {b.proof && <ShipProof id={ch.id} label={b.proof.label} hint={b.proof.hint} done={b.proof.done} />}
     </>
   );
 }

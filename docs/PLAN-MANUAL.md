@@ -16,7 +16,7 @@
 | **M1 · The spine + one model chapter** | `/manual` (four parts, every chapter, topic filter, honest status) and `/manual/:chapter`. Every chapter links what already exists. **"Know who the user is"** is written in full as the model for the rest | ✅ |
 | **M2 · Assemble every chapter** | Write the full chapter (same sections as the model) for every chapter that already has lessons — 23 of them, a few at a time. Reviewed by the owner | 🚧 3 of 23 drafted, awaiting review: *How a web page reaches you*, *Answer requests*, *Remember things* |
 | **M3 · Three doors** | Home becomes Explore / Build / Path. Explore = a feed of curiosity questions. Build = "I want to build ___" → the chapters it needs. Sidebar slims down: the Manual, your path, the shelf | ✅ Built, build and QA green (2026-11-26). The door content — 59 Explore questions, 9 Build ideas and 14 features, the Path's order — is an AI draft awaiting the owner's review |
-| **M4 · First ship in an hour** | Level 1: a guided first build (a personal page, put online, with AI as a pair). The new start of the Path door | |
+| **M4 · First ship in an hour** | Level 1: a guided first build (a personal page, put online, with AI as a pair). The new start of the Path door | ✅ Built, build and QA green (2026-11-26). *Your first ship* is written as a draft awaiting the owner's review |
 | **M5 · The builder's craft** | Part III chapters, starting with **Building with AI** (specify → generate → read → verify) and **Turn a problem into a plan** | |
 | **M6 · Levels as identity** | Levels 0–5 on the dashboard and sidebar ("You can now…"). Test out of a chapter. Progress counted by chapter | |
 | **M7 · New building blocks** | Lessons and chapters for the missing problems: Make it smart (LLM APIs, RAG, agents, evals), Do work later, Notify people, Take money, Automate workflows | |
@@ -85,6 +85,13 @@ The phases split into two tracks that touch different files, so two Claude Code 
 **QA:** `npm run qa -- doors` drives Home and each door at 1440px and 390px (peek, filter, surprise; pick an idea, switch a feature, type an idea; the chapter trail). Courses are now discovered from the Library (`a[data-course]`), not Home. The full run starts a fresh browser for the Manual and doors passes (hundreds of page loads in one browser ended in `net::ERR_INSUFFICIENT_RESOURCES`).
 
 **For M6 (levels):** the path's stages line up with VISION §5's levels; `pathOf()` in `site/doors/model.ts` already gives finished/open per stage and chapter.
+
+## M4 — what was built
+
+- **The chapter** `written/first-ship.ts` (*Your first ship*, Part IV): the full model-chapter order. The build is a one-page site about you, written by hand once and with an AI prompt that is a spec ("use only these facts", one file, viewport line, no placeholders), checked on a phone, and put online with Netlify Drop. The options compare drag-and-drop hosts, Git + Pages, deploy platforms and website builders; *the modern way* lists what AI gets wrong on a first page (invented facts, placeholders, local paths, frameworks for one page, missing viewport, secrets in the page). Draft until the owner sets `reviewed`.
+- **Proof of a ship.** A chapter's build can end in `proof` (new optional field on `ChapterWriting.build`): the page asks for the live link (`ShipProof.tsx`), accepts only public `https://` addresses, and keeps it in progress (`ships` in `lib/progress.ts`: `saveShip`, `removeShip`, `useShips`, `shipUrl`). The first save gets confetti. A chapter whose build is shipped counts as finished on the Path. M6 (Level 1) and M8 (briefs) use the same proof.
+- **Links:** the chapter links *What Happens When You Visit a URL*, *How Browsers Render a Page* and *Deploying* (one entry in `chapters.ts`); the Build door's *personal page* idea points to it. It is the first lit step of the Path.
+- **QA:** the doors pass pastes a localhost link (must be refused) and a real one (must be kept).
 
 ## Writing a chapter (for M2 onwards)
 
