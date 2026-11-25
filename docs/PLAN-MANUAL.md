@@ -27,6 +27,11 @@
 
 The phases split into two tracks that touch different files, so two Claude Code sessions can run at once.
 
+**Who does which track:**
+- **Track A — the Windows machine** (`D:\Games\development\unpack`), working on branch `m2-chapters` and later phase branches.
+- **Track B — the Linux machine** (`chola-B550M-DS3H`), working on branch `m3-doors` and later phase branches.
+- **The owner** reviews chapters, answers questions, and says when a branch can be merged into `main` (the live site).
+
 | Track | Phases, in order | Owns these files |
 |---|---|---|
 | **A · Content** — what the learner reads and builds | M2 → M5 → M7 | `client/src/content/manual/written/*`, new lessons in `client/src/content/courses/mern/lessons/` (M7), notebook pages, link fixes in `chapters.ts` |
