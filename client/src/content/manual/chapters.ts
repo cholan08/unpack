@@ -178,7 +178,7 @@ export const CHAPTERS: Chapter[] = [
     covers: 'Choosing a database, shaping your data, and reading and writing it safely.',
     glyph: Database,
     lens: ['database'],
-    lessons: ['documents', 'crud', 'embed-reference', 'mongoose', 'transactions'],
+    lessons: ['documents', 'crud', 'indexes', 'embed-reference', 'mongoose', 'transactions'],
     notebooks: ['dbms', 'mongodb'],
     tools: ['mongodb', 'postgresql', 'mysql', 'redis'],
     sheets: ['mongodb'],

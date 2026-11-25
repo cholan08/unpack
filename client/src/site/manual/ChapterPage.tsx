@@ -7,7 +7,7 @@
  * yet still assembles what the site already has (lessons, errors, the gate, cheat sheets…) and
  * says plainly that the rest is being written.
  */
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
 import {
   AlertTriangle,
@@ -539,7 +539,8 @@ function IdeaSec({ w }: { w: ChapterWriting }) {
       <p className="mn-lede">
         <Rich text={w.idea.lede} />
       </p>
-      <ol className="mn-jobs">
+      {/* up to 4 cards in one row; 5 or 6 as rows of 3, so no card is left alone */}
+      <ol className="mn-jobs" style={{ '--cols': w.idea.jobs.length <= 4 ? w.idea.jobs.length : 3 } as CSSProperties}>
         {w.idea.jobs.map((j, i) => (
           <li key={j.title} className="card">
             <span className="mn-job-n mono">{i + 1}</span>
