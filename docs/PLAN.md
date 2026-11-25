@@ -275,6 +275,9 @@ Fewer clicks between "I wonder…" and the answer, and small moments that reward
 ### Phase M — The Manual · 🚧 in progress
 The site's new shape: one chapter per *problem* every product meets, stacks second (`docs/VISION.md`). Plan and status: `docs/PLAN-MANUAL.md`.
 - ✅ M1 — `/manual` contents (4 parts, 36 chapters, topic filter, honest status) and `/manual/:chapter` pages that assemble lessons, errors, gates, milestones and cheat sheets per chapter. "Know who the user is" is written in full as the model chapter. Content in `src/content/manual/`, pages in `src/site/manual/`. `npm run qa -- manual` checks every chapter at laptop and phone width.
+- ✅ M2 — all 23 chapters that have lessons written in the model chapter’s shape (draft until the owner reviews).
+- ✅ M5 — the builder’s craft: *Turn a problem into a plan*, *Build with AI*, *Read docs and other people’s code*, *Ship, listen, improve*.
+- ✅ M7 — Part 11 “Real-World Building Blocks” in the course (lessons `llm-apps`, `background-jobs`, `notifications`, `payments`, `automation`, gate `extend`, 10 glossary terms) and the chapters *Make it smart*, *Do work later*, *Reach people*, *Take money*, *Automate the busywork*. The AI/ML topic now has lessons.
 
 ## 9. Quality bar
 

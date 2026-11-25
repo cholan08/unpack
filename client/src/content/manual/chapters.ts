@@ -288,6 +288,8 @@ export const CHAPTERS: Chapter[] = [
     covers: 'Background jobs, queues, retries and schedules: slow work done outside the request.',
     glyph: Clock,
     lens: ['backend'],
+    lessons: ['background-jobs'],
+    gate: 'extend',
     tools: ['rabbitmq', 'kafka', 'amazon-sqs', 'redis'],
   },
   {
@@ -299,6 +301,8 @@ export const CHAPTERS: Chapter[] = [
     covers: 'Email, push notifications, SMS and in-app messages — and how not to annoy people.',
     glyph: Bell,
     lens: ['backend'],
+    lessons: ['notifications'],
+    gate: 'extend',
   },
   {
     id: 'payments',
@@ -309,6 +313,8 @@ export const CHAPTERS: Chapter[] = [
     covers: 'Checkout, payment providers, webhooks, subscriptions and refunds — without ever touching card numbers yourself.',
     glyph: CreditCard,
     lens: ['backend'],
+    lessons: ['payments', 'design-cart'],
+    gate: 'extend',
   },
   {
     id: 'ai',
@@ -319,6 +325,8 @@ export const CHAPTERS: Chapter[] = [
     covers: 'LLM APIs, prompts and structured output, embeddings and RAG, tool use and agents, and testing what AI produces.',
     glyph: Sparkles,
     lens: ['aiml'],
+    lessons: ['llm-apps'],
+    gate: 'extend',
     notebooks: ['ai-fundamentals'],
     tools: ['python'],
   },
@@ -331,6 +339,8 @@ export const CHAPTERS: Chapter[] = [
     covers: 'Triggers, workflows, webhooks and tools like n8n — and when to write code instead.',
     glyph: Workflow,
     lens: ['aiml', 'backend'],
+    lessons: ['automation', 'llm-apps'],
+    gate: 'extend',
     notebooks: ['n8n'],
   },
   {

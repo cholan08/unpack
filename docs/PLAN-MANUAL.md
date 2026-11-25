@@ -19,7 +19,7 @@
 | **M4 · First ship in an hour** | Level 1: a guided first build (a personal page, put online, with AI as a pair). The new start of the Path door | |
 | **M5 · The builder's craft** | Part III chapters, starting with **Building with AI** (specify → generate → read → verify) and **Turn a problem into a plan** | ✅ All 7 craft chapters written: the 4 without lessons (*Turn a problem into a plan*, *Build with AI*, *Read docs and other people’s code*, *Ship, listen, improve*) plus the 3 with lessons (in M2) |
 | **M6 · Levels as identity** | Levels 0–5 on the dashboard and sidebar ("You can now…"). Test out of a chapter. Progress counted by chapter | |
-| **M7 · New building blocks** | Lessons and chapters for the missing problems: Make it smart (LLM APIs, RAG, agents, evals), Do work later, Notify people, Take money, Automate workflows | |
+| **M7 · New building blocks** | Lessons and chapters for the missing problems: Make it smart (LLM APIs, RAG, agents, evals), Do work later, Notify people, Take money, Automate workflows | ✅ Part 11 “Real-World Building Blocks” (5 visual lessons: AI in your app, background jobs, notifications, payments, automation + a gate) and 5 full chapters: *Make it smart*, *Do work later*, *Reach people*, *Take money*, *Automate the busywork* |
 | **M8 · The FDE path** | Part IV briefs with fading support: guided → semi-guided → spec only → open. XOLA plays the client in a discovery interview; the learner scopes, builds, ships, demos, and defends the design | |
 | **Later** | Accounts and sync, community, more branches (hardware/IoT, games…), more languages | |
 

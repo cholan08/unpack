@@ -1,0 +1,92 @@
+import type { PartGate } from '@/engine/types';
+
+export default {
+  partId: 'extend',
+  passMark: 0.7,
+  questions: [
+    {
+      id: 'extend-q1',
+      kind: 'mcq',
+      q: 'Where should the code that calls a language model’s API (with your API key) run?',
+      options: [
+        'In the React app, with the key in a VITE_ variable',
+        'On your server, which the browser calls — the key never leaves the server',
+        'In a browser extension',
+        'Anywhere, as long as the key is base64-encoded',
+      ],
+      answer: 1,
+      explain: 'Anything in the browser bundle is public. The browser asks your API; only your server holds the key, checks the user, and calls the provider.',
+      teachAt: { lessonId: 'llm-apps', step: 2 },
+    },
+    {
+      id: 'extend-q2',
+      kind: 'mcq',
+      q: 'Your help assistant invents a return policy. What fixes this most directly?',
+      options: [
+        'A longer system prompt asking it to be accurate',
+        'Retrieval: search your own policy documents and give the matching passages to the model to answer from',
+        'A bigger model',
+        'Turning the temperature to zero',
+      ],
+      answer: 1,
+      explain: 'The model never saw your policy. RAG puts your facts in the prompt every time, so it reads instead of guessing — and can cite its source.',
+      teachAt: { lessonId: 'llm-apps', step: 5 },
+    },
+    {
+      id: 'extend-q3',
+      kind: 'mcq',
+      q: 'Transcoding an uploaded video takes two minutes. What should the upload request do?',
+      options: [
+        'Transcode, then answer 200 when done',
+        'Save the record, put a job on a queue, and answer 202 Accepted at once',
+        'Start transcoding in a setTimeout and answer immediately',
+        'Ask the browser to keep the tab open',
+      ],
+      answer: 1,
+      explain: 'The queue keeps the job safe through restarts and lets workers do it at their own pace; a setTimeout in the web process is lost on any restart.',
+      teachAt: { lessonId: 'background-jobs', step: 3 },
+    },
+    {
+      id: 'extend-q4',
+      kind: 'mcq',
+      q: 'A worker sends an email, then crashes before the job is marked done. The job is retried. How do you avoid a second email?',
+      options: [
+        'Turn off retries',
+        'Make the job check first — e.g. skip if emailSentAt is set — and record it after sending',
+        'Use a faster email provider',
+        'Run only one worker',
+      ],
+      answer: 1,
+      explain: 'Queues deliver at least once. Jobs must be safe to run twice: check before acting, and record what was done.',
+      teachAt: { lessonId: 'background-jobs', step: 6 },
+    },
+    {
+      id: 'extend-q5',
+      kind: 'mcq',
+      q: 'How should your shop decide that an order has been paid?',
+      options: [
+        'When the browser loads the /thanks page',
+        'When the customer clicks Pay',
+        'When a webhook from the payment provider arrives and its signature checks out',
+        'When the payment provider’s page closes',
+      ],
+      answer: 2,
+      explain: 'The browser can be faked or closed. A signed webhook comes straight from the provider; verify it, then update the order only if it is still pending.',
+      teachAt: { lessonId: 'payments', step: 6 },
+    },
+    {
+      id: 'extend-q6',
+      kind: 'mcq',
+      q: 'Your app sends a push notification for every like, and a post gets 50 likes in ten minutes. What is the better design?',
+      options: [
+        'Send all 50 — people want to know',
+        'Group them (“Ana and 49 others liked your post”), rate-limit per person and respect quiet hours',
+        'Send them by SMS instead',
+        'Only notify on weekends',
+      ],
+      answer: 1,
+      explain: 'Notification storms make people switch your notifications off for good. Batch, summarise and rate-limit before sending.',
+      teachAt: { lessonId: 'notifications', step: 6 },
+    },
+  ],
+} satisfies PartGate;
