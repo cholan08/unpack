@@ -43,6 +43,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'How does a message reach a phone that was switched off?',
     peek: 'Your app never talks to the phone directly. It hands the message to a push service run by the phone’s maker, which keeps it for a while and delivers it when the phone reconnects.',
     chapter: 'notify',
+    see: ['notifications', 4],
   },
   {
     id: 'password-leak',
@@ -56,6 +57,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'How does an app answer questions about your own documents, when the AI was never trained on them?',
     peek: 'It first searches your documents for the passages that match the question, then puts them in the prompt — so the model answers from what it was just shown, not from memory.',
     chapter: 'ai',
+    see: ['llm-apps', 5],
   },
   {
     id: 'refresh-gone',
@@ -76,7 +78,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'What really happens in the two seconds after you tap Pay?',
     peek: 'Your card goes to a payment provider, not to the shop. The provider asks your bank, then tells the shop’s server whether the money moved — with a message the server must check is genuine.',
     chapter: 'payments',
-    see: ['design-cart', 6],
+    see: ['payments', 1],
   },
   {
     id: 'hidden-button',
@@ -166,6 +168,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'When you upload a video, why can you close the page while it is still being processed?',
     peek: 'The upload only saves the file and adds a job to a queue. A separate worker picks the job up and does the slow part, trying again if it fails.',
     chapter: 'background',
+    see: ['background-jobs', 3],
   },
   {
     id: 'padlock',
@@ -186,6 +189,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'How can an AI book a meeting, when all it can do is write text?',
     peek: 'The app offers it tools — functions like “check the calendar”. The model writes a request to use one; the app runs the real code and hands back the result.',
     chapter: 'ai',
+    see: ['llm-apps', 8],
   },
   {
     id: 'copy-changed',
@@ -220,7 +224,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'You click Pay twice by accident. Why aren’t you charged twice?',
     peek: 'A careful checkout sends a unique key with each order. A second request with the same key gets the first answer back instead of creating a new order.',
     chapter: 'payments',
-    see: ['design-cart', 5],
+    see: ['payments', 7],
   },
   {
     id: 'refresh-404',
@@ -234,6 +238,7 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'How do businesses connect forms, sheets, email and AI so that work gets done while nobody is clicking?',
     peek: 'A trigger — a new form entry, a time of day, a message from another app — starts a workflow, and each step passes its result to the next.',
     chapter: 'automate',
+    see: ['automation', 3],
   },
   {
     id: 'profile-photo',
@@ -338,12 +343,14 @@ export const CURIOSITIES: Curiosity[] = [
     q: 'AI replies in sentences. How do apps get answers they can save straight into a database?',
     peek: 'They describe the exact shape they want, and the model is held to it. The app still checks every answer before trusting it.',
     chapter: 'ai',
+    see: ['llm-apps', 7],
   },
   {
     id: 'spam-folder',
     q: 'Why do some apps’ emails land in spam while others reach your inbox?',
     peek: 'Inboxes check that the sender has proved it is allowed to send for its domain, and watch how people treat its mail.',
     chapter: 'notify',
+    see: ['notifications', 2],
   },
   {
     id: 'comments-inside',
