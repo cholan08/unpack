@@ -7,13 +7,14 @@
  *         npm run qa            → all courses
  *         npm run qa -- mern event-loop,cors   → some lessons of one course
  * Env:    QA_BASE=http://localhost:5280
+ *         QA_CHANNEL=msedge   (use an installed Edge/Chrome when Playwright's own browser isn't downloaded)
  */
 import { chromium } from 'playwright';
 
 const base = process.env.QA_BASE ?? 'http://localhost:5280';
 const [onlyCourse, onlyLessons] = process.argv.slice(2);
 
-const browser = await chromium.launch();
+const browser = await chromium.launch(process.env.QA_CHANNEL ? { channel: process.env.QA_CHANNEL } : {});
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = new Set();
 page.on('pageerror', (e) => errors.add('pageerror: ' + e.message));
@@ -227,7 +228,41 @@ if (!onlyLessons) {
     }
 }
 
+// The Manual: the contents and every chapter, on a laptop and a phone. Nothing may scroll sideways,
+// and a written chapter's interactive pieces (predict, break-it reveals, the AI tab) must open cleanly.
+let chapters = 0;
+if (!onlyLessons) {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const [width, height] of [[1440, 900], [390, 844]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(`${base}/manual`, { waitUntil: 'networkidle' });
+    const hrefs = await page.$$eval('a.mn-row', (as) => as.map((a) => new URL(a.href).pathname).filter((p) => p.startsWith('/manual/')));
+    for (const path of ['/manual', ...hrefs]) {
+      await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+      chapters++;
+      const where = `${path} at ${width}px`;
+      if (await page.locator('.mn-predict').count()) {
+        await page.locator('.mn-opt').first().click();
+        for (const b of await page.locator('.mn-break-btn').all()) await b.click();
+        await page.locator('.mn-tabs [role=tab]').nth(1).click();
+        await page.locator('.mn-deep summary').first().click();
+      }
+      const wide = await page.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push(`page scrolls sideways (${document.documentElement.scrollWidth}px)`);
+        for (const el of document.querySelectorAll('.mn-ch-main > *, .mn-rows, .mn-hero'))
+          if (el.getBoundingClientRect().right > window.innerWidth + 1) out.push(`${el.className.split(' ')[0]} runs off the screen`);
+        return out;
+      });
+      if (wide.length) {
+        issues += wide.length;
+        console.log(`✗ ${where}\n    ` + wide.join('\n    '));
+      }
+    }
+  }
+}
+
 if (errors.size) console.log('\nConsole:\n    ' + [...errors].join('\n    '));
-console.log(`\n${issues || errors.size ? '✗' : '✓'} ${steps} steps checked (+${sandboxStates} sandbox states, ${roadmaps} roadmap layouts) · ${issues} layout issues · ${errors.size} console messages`);
+console.log(`\n${issues || errors.size ? '✗' : '✓'} ${steps} steps checked (+${sandboxStates} sandbox states, ${roadmaps} roadmap layouts, ${chapters} manual pages) · ${issues} layout issues · ${errors.size} console messages`);
 await browser.close();
 process.exit(issues || errors.size ? 1 : 0);

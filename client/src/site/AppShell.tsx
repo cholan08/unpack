@@ -12,8 +12,10 @@ import {
   AlertTriangle,
   ArrowRight,
   BookA,
+  BookOpen,
   Code2,
   Compass,
+  Heart,
   House,
   Layers,
   LayoutDashboard,
@@ -39,6 +41,7 @@ import { prefetchLessonPage } from './prefetch';
 import { PILLAR_ICON } from './pillarIcons';
 import { Glide, Logo, Ring } from './ui';
 import { goHint, MOD_KEY } from './Hotkeys';
+import { MAKER } from './AboutPage';
 
 // kept here too: pages import the topic icons from the shell
 export { PILLAR_ICON };
@@ -195,6 +198,7 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
       <nav className="side-nav" aria-label="Main">
         <Item to="/" icon={House} label="Home" active={pathname === '/'} />
         <Item to="/start" icon={Compass} label="Start Here" active={under(pathname, '/start')} />
+        <Item to="/manual" icon={BookOpen} label="The Manual" active={under(pathname, '/manual')} title="Every problem a product meets, one chapter each" />
 
         <h2 className="side-h">Topics</h2>
         {MAIN_PILLARS.map((t) => {
@@ -241,6 +245,9 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
         <Item to="/skillpack" icon={Layers} label="Skill Pack" active={under(pathname, '/skillpack')} />
         <Item to="/notebooks" icon={NotebookPen} label="Notebooks" active={under(pathname, '/notebooks')} />
         <Item to="/errors" icon={AlertTriangle} label="Common errors" active={under(pathname, '/errors')} />
+
+        <h2 className="side-h">Unpacked</h2>
+        <Item to="/about" icon={Heart} label="Why Unpacked" active={under(pathname, '/about')} title={`Why it exists — built by ${MAKER.name}`} />
       </nav>
 
       <p className="side-foot">Your progress is saved in this browser only.</p>
@@ -292,7 +299,12 @@ export function AppFrame({ children }: { children: ReactNode }) {
         <div className="app-content">{children}</div>
         <footer className="app-foot">
           <div className="wrap app-foot-in">
-            <span>Unpacked — full-stack development, one animated diagram at a time.</span>
+            <span>
+              Unpacked — full-stack development, one animated diagram at a time.{' '}
+              <span className="made-by">
+                Built by&nbsp;<Link to="/about">{MAKER.name}</Link>
+              </span>
+            </span>
             <span>
               Press <kbd>/</kbd> to search or jump anywhere · <kbd>?</kbd> for shortcuts
             </span>

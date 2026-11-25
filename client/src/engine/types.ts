@@ -180,6 +180,30 @@ export interface Callout {
   text: string;
 }
 
+/**
+ * One piece of a step's structured explanation (see `StepBase.detail`). All text is rich text.
+ * Build them with the helpers in content/dsl.ts: h, p, ul, ol, walk, table, snippet, callout, keys, qa.
+ */
+export type Block =
+  /** A sub-heading inside the step. */
+  | { kind: 'h'; text: string }
+  | { kind: 'p'; text: string }
+  /** Bullet points. */
+  | { kind: 'ul'; items: string[] }
+  /** Numbered steps that happen in order. */
+  | { kind: 'ol'; items: string[] }
+  /** A code walk-through: [line label such as "L4" or "L9–10", what happens there]. */
+  | { kind: 'walk'; items: [string, string][] }
+  /** A compact comparison table. Keep it to 2–4 short columns: the narrative column is narrow. */
+  | { kind: 'table'; head: string[]; rows: string[][] }
+  /** A second (third…) code sample. */
+  | { kind: 'code'; code: CodeSpec }
+  | { kind: 'callout'; callout: Callout }
+  /** "Key takeaways": the 2–4 sentences to remember from the step. */
+  | { kind: 'keys'; items: string[] }
+  /** Questions whose answers open on click (self-test / interview practice). */
+  | { kind: 'qa'; items: { q: string; a: string }[] };
+
 export interface Check {
   q: string;
   options: string[];
@@ -247,6 +271,11 @@ interface StepBase {
   code?: CodeSpec;
   /** Lines starting with "+" added, "~" changed, "-" removed. */
   changes?: string[];
+  /**
+   * The full explanation, shown under the code: sub-headings, lists, tables, more code,
+   * callouts and key takeaways. `body` stays the short lead; `detail` is the depth.
+   */
+  detail?: Block[];
   metrics?: Record<string, MetricValue>;
   check?: Check;
   practice?: TrySpec;

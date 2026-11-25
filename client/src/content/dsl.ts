@@ -4,7 +4,10 @@
  */
 import type {
   ActorNode,
+  Block,
   BoxNode,
+  Callout,
+  CodeSpec,
   BrowserNode,
   ChipNode,
   CodeNode,
@@ -121,6 +124,23 @@ export const practice = (
   hints: string[] = [],
   language: 'js' = 'js',
 ): TrySpec => ({ prompt, starter, solution, tests, hints, language });
+
+/* ---------------- step detail: the structured explanation under the code ---------------- */
+
+export const h = (text: string): Block => ({ kind: 'h', text });
+export const p = (text: string): Block => ({ kind: 'p', text });
+export const ul = (...items: string[]): Block => ({ kind: 'ul', items });
+export const ol = (...items: string[]): Block => ({ kind: 'ol', items });
+/** Code walk-through rows: walk(['L4', 'count is created'], ['L6', '…']) */
+export const walk = (...items: [string, string][]): Block => ({ kind: 'walk', items });
+export const table = (head: string[], ...rows: string[][]): Block => ({ kind: 'table', head, rows });
+export const snippet = (file: string, src: string, o: Omit<CodeSpec, 'code' | 'file'> = {}): Block => ({
+  kind: 'code',
+  code: { file, code: src, lang: 'js', ...o },
+});
+export const callout = (kind: Callout['kind'], text: string): Block => ({ kind: 'callout', callout: { kind, text } });
+export const keys = (...items: string[]): Block => ({ kind: 'keys', items });
+export const qa = (...items: [string, string][]): Block => ({ kind: 'qa', items: items.map(([q, a]) => ({ q, a })) });
 
 /** 1234567 → "1,234,567" */
 export const fmt = (n: number) => Math.round(n).toLocaleString('en-US');

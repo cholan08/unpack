@@ -21,6 +21,7 @@ import { PILLAR_ICON } from './AppShell';
 import { continueTarget, courseDone, hasStarted, statsFor, type ContinueTarget } from './learner';
 import { Ring, fmtHours } from './ui';
 import { AppAnatomy } from './AppAnatomy';
+import { MAKER } from './AboutPage';
 
 const PLANNED = [
   { title: 'System Design', blurb: 'From one server to millions of users.' },
@@ -533,6 +534,27 @@ function Courses() {
   );
 }
 
+/** The reason behind it all, and who made it — a short note that opens the About page. */
+function MadeBy() {
+  return (
+    <section className="wrap hm-sec">
+      <Link to="/about" className="hm-maker card spot" data-tone="client">
+        <span className="hm-maker-mark" aria-hidden>
+          {MAKER.name.charAt(0)}
+        </span>
+        <span className="hm-maker-text">
+          <span className="eyebrow">Why this exists</span>
+          <strong>Built by {MAKER.name}, so you can see what tutorials only describe.</strong>
+          <span>The story behind Unpacked, what it stands for, and the person who made it.</span>
+        </span>
+        <span className="hm-maker-go">
+          Read the story <ArrowRight size={15} />
+        </span>
+      </Link>
+    </section>
+  );
+}
+
 export function HomePage() {
   const progress = useProgress();
   const t = continueTarget(progress);
@@ -549,6 +571,7 @@ export function HomePage() {
       {returning && <PracticeRow />}
       <VisualLanguage />
       <Courses />
+      <MadeBy />
     </main>
   );
 }

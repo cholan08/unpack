@@ -27,6 +27,7 @@ function goTable(): Record<string, string> {
   return {
     h: '/',
     s: '/start',
+    b: '/manual',
     d: '/me',
     r: `/${c}/roadmap`,
     v: '/review',
@@ -34,6 +35,7 @@ function goTable(): Record<string, string> {
     l: '/library',
     m: `/${c}`,
     e: '/errors',
+    a: '/about',
   };
 }
 
@@ -47,6 +49,7 @@ export const goHint = (to: string): string | undefined => BY_PATH.get(to);
 export const GO_LIST: { key: string; label: string }[] = [
   { key: 'c', label: 'Continue your lesson' },
   { key: 'h', label: 'Home' },
+  { key: 'b', label: 'The Manual' },
   { key: 'd', label: 'Dashboard' },
   { key: 'r', label: 'Roadmap' },
   { key: 'v', label: 'Review' },
@@ -55,6 +58,7 @@ export const GO_LIST: { key: string; label: string }[] = [
   { key: 'n', label: 'My notes' },
   { key: 'e', label: 'Common errors' },
   { key: 's', label: 'Start Here' },
+  { key: 'a', label: 'About & maker' },
 ];
 
 /** Ask the shortcut sheet to open (the command palette uses this). */

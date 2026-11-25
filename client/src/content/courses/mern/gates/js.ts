@@ -30,7 +30,7 @@ export default {
       ],
       answer: 1,
       explain: 'Functions in JS maintain a hidden reference to their lexical environment (scope chain), preventing garbage collection.',
-      teachAt: { lessonId: 'closures', step: 3 },
+      teachAt: { lessonId: 'closures', step: 5 },
     },
     {
       id: 'js-q3',

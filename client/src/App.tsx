@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { HomePage } from '@/site/HomePage';
 import { CoursePage, GlossaryPage } from '@/site/CoursePage';
@@ -17,6 +17,7 @@ import { NotebooksPage } from '@/site/notebooks/NotebooksPage';
 import { NotebookReader } from '@/site/notebooks/NotebookReader';
 import { TopicPage } from '@/site/TopicPage';
 import { LibraryPage } from '@/site/LibraryPage';
+import { AboutPage } from '@/site/AboutPage';
 import { PILLARS } from '@/content/pillars';
 import { AppLayout } from '@/site/AppShell';
 import { LessonShell } from '@/site/LessonShell';
@@ -29,6 +30,10 @@ import { Toaster } from '@/site/Toaster';
 import { installSpotlight } from '@/lib/spotlight';
 
 installSpotlight();
+
+// The Manual: its own chunks, fetched the first time someone opens it.
+const ManualPage = lazy(() => import('@/site/manual/ManualPage').then((m) => ({ default: m.ManualPage })));
+const ChapterPage = lazy(() => import('@/site/manual/ChapterPage').then((m) => ({ default: m.ChapterPage })));
 
 /**
  * A new page starts at the top. A link with a #anchor (a Techpack sheet, a glossary term…) lands
@@ -64,6 +69,8 @@ export function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/start" element={<StartPage />} />
+            <Route path="/manual" element={<Suspense fallback={null}><ManualPage /></Suspense>} />
+            <Route path="/manual/:chapterId" element={<Suspense fallback={null}><ChapterPage /></Suspense>} />
             <Route path="/me" element={<DashboardPage />} />
             <Route path="/capstone" element={<CapstonePage />} />
             <Route path="/capstone/:milestoneId" element={<CapstonePage />} />
@@ -81,6 +88,7 @@ export function App() {
               <Route key={p.id} path={`/${p.id}`} element={<TopicPage id={p.id} />} />
             ))}
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/:courseId" element={<CoursePage />} />
             <Route path="/:courseId/roadmap" element={<RoadmapPage />} />
             <Route path="/:courseId/gate/:partId" element={<GatePage />} />
