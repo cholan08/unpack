@@ -21,7 +21,7 @@ import { MentorButton } from '@/site/MentorDock';
 import { courseDone } from '@/site/learner';
 import { GlossaryProvider, Rich } from './RichText';
 import { Glide, Ring } from '@/site/ui';
-import { Callout, Changes, Check as CheckBlock, CodeBlock, Legend, Metrics } from './parts';
+import { Callout, Changes, Check as CheckBlock, CodeBlock, Detail, Legend, Metrics } from './parts';
 import './player.css';
 
 const BEAT_LABEL: Record<Step['beat'], string> = {
@@ -242,6 +242,7 @@ export function LessonPlayer({ course, lesson }: { course: Course; lesson: Lesso
                 {step.callout && <Callout c={step.callout} />}
                 {step.code && <CodeBlock c={step.code} />}
                 {step.changes && <Changes lines={step.changes} />}
+                {step.detail && <Detail blocks={step.detail} />}
                 {step.check && <CheckBlock c={step.check} key={`check-${s}`} />}
                 <TutorPanel
                   lessonTitle={lesson.title}

@@ -5,6 +5,7 @@ import { COURSES } from '@/content/registry';
 import { MAIN_PILLARS, type Pillar } from '@/content/pillars';
 import { useProgress, useGates, useDash, useDueReviews, useSettings, saveTutorKey, setNoAiMode } from '@/lib/progress';
 import { PILLAR_ICON } from './AppShell';
+import { LevelLadder, ChapterBins } from './doors/Levels';
 import { continueTarget, courseDone, topicGroups, topicStats } from './learner';
 import { PageHead, Ring, fmtHours } from './ui';
 import './dashboard.css';
@@ -127,6 +128,8 @@ export function DashboardPage() {
         }
       />
 
+      <LevelLadder />
+
       {/* at a glance */}
       <div className="dash-stats">
         <div className="card dash-stat" data-tone="ok">
@@ -211,6 +214,9 @@ export function DashboardPage() {
             </Link>
           )}
         </section>
+
+      {/* progress counted by chapter — the Manual's way of counting */}
+      <ChapterBins />
 
       {/* by topic: one bin per lesson */}
       <section className="dash-sec">

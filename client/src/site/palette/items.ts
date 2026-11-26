@@ -8,27 +8,33 @@ import {
   AlertTriangle,
   BookA,
   BookOpen,
+  Briefcase,
   Bug,
   Code2,
   Compass,
   GitBranch,
+  Hammer,
   House,
   Layers,
   LayoutDashboard,
   Library,
+  Heart,
   Lock,
   Map as MapIcon,
+  MapPinned,
   NotebookPen,
   Repeat,
   Route,
   ShieldCheck,
   StickyNote,
+  Telescope,
   Text,
   Trophy,
 } from 'lucide-react';
 import type { Course, Tone } from '@/engine/types';
 import { COURSES, lessonEntries, type LessonEntry } from '@/content/registry';
 import { PILLARS, getPillar } from '@/content/pillars';
+import { CHAPTERS, chapterNum, getPart, statusLabel } from '@/content/manual';
 import { COMMON_ERRORS } from '@/content/courses/mern/commonErrors';
 import { NOTEBOOKS, COVER_ID } from '@/content/notebooks/registry';
 import { TECH_SHEETS } from '../techpack/data';
@@ -37,7 +43,7 @@ import { SKILL_ICONS } from '../skillpack/icons';
 import { PILLAR_ICON } from '../pillarIcons';
 import { prepare, type Prepared } from './match';
 
-export type Kind = 'command' | 'page' | 'lesson' | 'gate' | 'term' | 'error' | 'snippet' | 'tool' | 'notebook' | 'ask';
+export type Kind = 'command' | 'page' | 'chapter' | 'lesson' | 'gate' | 'term' | 'error' | 'snippet' | 'tool' | 'notebook' | 'ask';
 
 /** What the preview pane shows for an item (lessons draw their own, richer preview). */
 export interface Info {
@@ -86,6 +92,7 @@ export interface Entry {
 export const GROUPS: { kind: Kind; label: string; limit: number }[] = [
   { kind: 'command', label: 'Commands', limit: 5 },
   { kind: 'page', label: 'Pages & topics', limit: 5 },
+  { kind: 'chapter', label: 'The Manual', limit: 4 },
   { kind: 'lesson', label: 'Lessons', limit: 7 },
   { kind: 'gate', label: 'Gates', limit: 3 },
   { kind: 'term', label: 'Glossary', limit: 5 },
@@ -114,10 +121,14 @@ export function pageItems(course: Course | undefined): Item[] {
     cta: `Go to ${title}`,
   });
   return [
-    page('home', 'Home', '/', House, 'start hub welcome main', 'Your hub: the lesson to continue, progress by topic and what is due.', 'h'),
+    page('home', 'Home', '/', House, 'start hub welcome main doors', 'The way in: the three doors — Explore, Build, Path — and the lesson to continue.', 'h'),
+    page('manual', 'The Manual', '/manual', BookOpen, 'manual book chapters contents table problems building blocks how things work craft products', 'Every problem a product meets, one chapter each: how it works, the ways to solve it, the modern way, and a build of your own.', 'b'),
+    page('explore', 'Explore', '/explore', Telescope, 'explore curious curiosity questions how does it work feed wonder why surprise', 'How does ___ work? A feed of questions you can almost answer — guess, peek, then watch it happen.', 'x'),
+    page('build', 'Build', '/build', Hammer, 'build i want to build idea app product plan make create project features what do i need', 'I want to build ___: describe an idea and see the chapters it needs, in order, and where to start.', 'i'),
+    page('path', 'Path', '/path', Route, 'path teach me from zero beginner guided route journey levels stages next steps', 'Teach me from zero: one guided route through every chapter, with only the next three steps lit.', 'p'),
     page('start', 'Start Here', '/start', Compass, 'placement check quiz beginner new prerequisites where to begin', 'A 5-minute check that tells you where to begin.', 's'),
     page('me', 'Dashboard', '/me', LayoutDashboard, 'me progress stats streak profile settings ai tutor key no-ai mode', 'Everything you have done so far: streak, gates, topics, and the AI tutor settings.', 'd'),
-    page('roadmap', 'Roadmap', `/${c}/roadmap`, Route, 'path map plan journey graph what to learn order', 'Every part and lesson on one map, with what builds on what.', 'r'),
+    page('roadmap', 'Roadmap', `/${c}/roadmap`, MapPinned, 'path map plan journey graph what to learn order', 'Every part and lesson on one map, with what builds on what.', 'r'),
     page('review', 'Review', '/review', Repeat, 'spaced repetition cards flashcards revise practice due remember', 'Short spaced-repetition cards from the lessons you finished.', 'v'),
     page('notes', 'My notes', '/handnote', StickyNote, 'handnote notepad notes write scribble', 'Your own handwritten notepad, saved in this browser.', 'n'),
     page('library', 'Library', '/library', Library, 'reference shelf resources everything', 'The reference shelf: course map, glossary, Techpack, Skill Pack, notebooks and errors.', 'l'),
@@ -127,8 +138,32 @@ export function pageItems(course: Course | undefined): Item[] {
     page('skillpack', 'Skill Pack', '/skillpack', Layers, 'tools tech stack map frameworks libraries ecosystem', 'The full-stack tool map: what each tool is for and where it fits.'),
     page('notebooks', 'Notebooks', '/notebooks', NotebookPen, 'handwritten notes books shelf', 'Hand-drawn notebooks, one per subject.'),
     page('errors', 'Common errors', '/errors', AlertTriangle, 'troubleshooting debug bugs error messages fix stack trace', 'Real error messages, what they mean, and the lesson that explains each.', 'e'),
+    page('about', 'Why Unpacked', '/about', Heart, 'about why story mission maker author creator cholan built by who made', 'Why Unpacked exists, what it stands for, and who built it.', 'a'),
     page('capstone', 'Capstone: TaskFlow', '/capstone', Trophy, 'project build milestones final taskflow portfolio', 'Build and deploy a full MERN app, one milestone at a time.'),
+    page('briefs', 'Problem briefs', '/briefs', Briefcase, 'brief briefs client fde forward deployed engineer real problem interview discovery scope ship demo independent', 'Four clients, less help each time: interview the client, scope, design, build, ship and defend it.'),
   ];
+}
+
+/** Every chapter of the Manual: the problem it solves, found by its usual name too ("auth" → Know who the user is). */
+function chapterItems(): Item[] {
+  return CHAPTERS.map((c) => {
+    const n = chapterNum(c.id);
+    const pillar = getPillar(c.lens[0]);
+    return {
+      key: `chapter:${c.id}`,
+      kind: 'chapter' as const,
+      title: c.title,
+      sub: `Chapter ${n} · ${c.short} · ${statusLabel(c)}`,
+      href: c.href ?? `/manual/${c.id}`,
+      icon: c.glyph,
+      tone: pillar?.tone ?? 'neutral',
+      hay: `${c.short} ${c.question} ${c.covers} chapter manual`,
+      boost: 44,
+      hayWeight: 0.6,
+      info: { eyebrow: `The Manual · Part ${getPart(c.part).num} · Chapter ${n}`, body: c.question, rows: [{ label: 'Covers', text: c.covers }] },
+      cta: c.href ? 'Open it' : 'Open the chapter',
+    };
+  });
 }
 
 function topicItems(course: Course | undefined): Item[] {
@@ -364,6 +399,7 @@ export function staticEntries(): Entry[] {
   const items: Item[] = [
     ...pageItems(course),
     ...topicItems(course),
+    ...chapterItems(),
     ...COURSES.flatMap((c) => [...partItems(c), ...lessonItems(c), ...gateItems(c), ...termItems(c)]),
     ...(course ? errorItems(course) : []),
     ...techpackItems(),

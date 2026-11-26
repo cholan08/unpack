@@ -6,14 +6,44 @@
  * Usage:  npm run dev           (in another terminal)
  *         npm run qa            → all courses
  *         npm run qa -- mern event-loop,cors   → some lessons of one course
+ *         npm run qa -- manual                 → only the Manual (contents + every chapter)
+ *         npm run qa -- doors                  → only Home and the three doors (Explore, Build, Path)
  * Env:    QA_BASE=http://localhost:5280
+ *         QA_CHANNEL=msedge   (use an installed Edge/Chrome when Playwright's own browser isn't downloaded)
  */
 import { chromium } from 'playwright';
 
 const base = process.env.QA_BASE ?? 'http://localhost:5280';
 const [onlyCourse, onlyLessons] = process.argv.slice(2);
+/** `npm run qa -- manual`: only the Manual's contents and chapters. `-- doors`: only Home and the three doors. */
+const manualOnly = onlyCourse === 'manual';
+const doorsOnly = onlyCourse === 'doors';
+const partOnly = manualOnly || doorsOnly;
 
-const browser = await chromium.launch();
+const launch = () => chromium.launch(process.env.QA_CHANNEL ? { channel: process.env.QA_CHANNEL } : {});
+let browser = await launch();
+/**
+ * A clean browser for the next pass. Hundreds of dev-server page loads in one browser can exhaust it
+ * (net::ERR_INSUFFICIENT_RESOURCES), so the Manual and the doors each start fresh.
+ */
+async function freshBrowser() {
+  await browser.close();
+  browser = await launch();
+}
+
+/** A new tab (its own context, so its own renderer) that reports console warnings and page errors. */
+async function openTab(width, height) {
+  const tab = await browser.newPage({ viewport: { width, height }, reducedMotion: 'reduce' });
+  tab.on('pageerror', (e) => errors.add('pageerror: ' + e.message));
+  tab.on('console', (m) => (m.type() === 'error' || m.type() === 'warning') && errors.add(`${m.type()}: ${m.text().slice(0, 240)}`));
+  return tab;
+}
+/**
+ * Full page loads one tab makes before it is swapped for a fresh one. Every load of the dev server
+ * fetches hundreds of modules, and a tab that has made a few dozen loads starts failing with
+ * net::ERR_INSUFFICIENT_RESOURCES (seen on Linux with Playwright's Chromium).
+ */
+const LOADS_PER_TAB = 8;
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = new Set();
 page.on('pageerror', (e) => errors.add('pageerror: ' + e.message));
@@ -167,9 +197,9 @@ async function exercisePractice(where) {
   }
 }
 
-// Discover courses from the home page, lessons from each course page.
-await page.goto(base, { waitUntil: 'networkidle' });
-const courses = onlyCourse ? [onlyCourse] : await page.$$eval('.course-card', (as) => as.map((a) => new URL(a.href).pathname.slice(1)));
+// Discover courses from the Library (each course map is marked with data-course), lessons from each course page.
+await page.goto(`${base}/library`, { waitUntil: 'networkidle' });
+const courses = partOnly ? [] : onlyCourse ? [onlyCourse] : await page.$$eval('a[data-course]', (as) => as.map((a) => a.dataset.course));
 let issues = 0;
 let steps = 0;
 
@@ -193,7 +223,7 @@ for (const course of courses) {
 // Roadmap graph: its layout is computed from course.ts and changes shape with the screen
 // (4, 3 or 2 parts per row). No label may sit on another label, bubble, hub or gate.
 let roadmaps = 0;
-if (!onlyLessons) {
+if (!onlyLessons && !partOnly) {
   await page.emulateMedia({ reducedMotion: 'reduce' }); // skip the intro fly-in
   for (const course of courses)
     for (const [width, height] of [[1440, 900], [1000, 1050], [420, 900]]) {
@@ -227,7 +257,176 @@ if (!onlyLessons) {
     }
 }
 
+// The Manual: the contents and every chapter, on a laptop and a phone. Nothing may scroll sideways,
+// and a written chapter's interactive pieces (predict, break-it reveals, the AI tab) must open cleanly.
+let chapters = 0;
+if (!onlyLessons && !doorsOnly) {
+  if (!manualOnly) await freshBrowser();
+  for (const [width, height] of [[1440, 900], [390, 844]]) {
+    let page = await openTab(width, height);
+    await page.goto(`${base}/manual`, { waitUntil: 'networkidle' });
+    const hrefs = await page.$$eval('a.mn-row', (as) => as.map((a) => new URL(a.href).pathname).filter((p) => p.startsWith('/manual/')));
+    let loads = 1;
+    for (const path of ['/manual', ...hrefs]) {
+      if (loads++ % LOADS_PER_TAB === 0) {
+        await page.close();
+        page = await openTab(width, height);
+      }
+      await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+      chapters++;
+      const where = `${path} at ${width}px`;
+      if (await page.locator('.mn-predict').count()) {
+        await page.locator('.mn-opt').first().click();
+        // each reveal removes its button, so always click the first one left
+        while (await page.locator('.mn-break-btn').count()) await page.locator('.mn-break-btn').first().click();
+        await page.locator('.mn-tabs [role=tab]').nth(1).click();
+        await page.locator('.mn-deep summary').first().click();
+      }
+      const wide = await page.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push(`page scrolls sideways (${document.documentElement.scrollWidth}px)`);
+        for (const el of document.querySelectorAll('.mn-ch-main > *, .mn-rows, .mn-hero'))
+          if (el.getBoundingClientRect().right > window.innerWidth + 1) out.push(`${el.className.split(' ')[0]} runs off the screen`);
+        return out;
+      });
+      if (wide.length) {
+        issues += wide.length;
+        console.log(`✗ ${where}\n    ` + wide.join('\n    '));
+      }
+    }
+    await page.close();
+  }
+}
+
+// Home and the three doors: each page on a laptop and a phone, driven the way a learner would —
+// peek at a question, filter, "surprise me"; pick an idea, switch a feature, type an idea of your own;
+// then a chapter page showing that build's trail. Nothing may scroll sideways or run off the screen.
+let doorPages = 0;
+if (!onlyLessons && !manualOnly) {
+  if (!doorsOnly) await freshBrowser();
+  for (const [width, height] of [[1440, 900], [390, 844]]) {
+    const page = await openTab(width, height);
+    const fits = async (where) => {
+      doorPages++;
+      const wide = await page.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push(`page scrolls sideways (${document.documentElement.scrollWidth}px)`);
+        for (const el of document.querySelectorAll('.dr-head, .dr-toolbar, .dr-feed > *, .dr-ideas, .dr-build-grid > *, .dr-rows, .dr-next, .dr-stage, .dr-doors-grid > *, .dr-trail, .dr-ship, .lv-ladder, .lv-bins'))
+          if (el.getBoundingClientRect().right > window.innerWidth + 1) out.push(`${el.className.split(' ')[0]} runs off the screen`);
+        return out;
+      });
+      if (wide.length) {
+        issues += wide.length;
+        console.log(`✗ ${where} at ${width}px\n    ` + wide.join('\n    '));
+      }
+    };
+    const door = async (path, act) => {
+      await page.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(200);
+      if (act) await act();
+      await fits(path);
+    };
+    await page.goto(`${base}/`, { waitUntil: 'networkidle' });
+    await page.evaluate(() => localStorage.removeItem('unpacked:build:v1'));
+    await door('/');
+    await door('/explore', async () => {
+      await page.locator('.dr-q button:has-text("Peek")').first().click();
+      await page.locator('.dr-surprise').click();
+      await page.locator('.dr-filter .mn-chip:not(:disabled)').last().click();
+      await page.locator('.dr-q button:has-text("Peek")').first().click();
+    });
+    await door('/build', async () => {
+      await page.locator('.dr-idea').nth(3).click();
+      await page.locator('.dr-feat').first().click();
+      await page.locator('#build-what').fill('a booking site for my salon where people log in, pay, and get a reminder email');
+      await page.waitForTimeout(150);
+    });
+    await door('/path');
+    await door('/', async () => {
+      if (!(await page.locator('.dr-door-mine').count())) {
+        issues++;
+        console.log(`✗ / at ${width}px\n    the Build door doesn't show the build that was just planned`);
+      }
+    });
+    await door('/manual/identity', async () => {
+      if (!(await page.locator('.dr-trail').count())) {
+        issues++;
+        console.log(`✗ /manual/identity at ${width}px\n    no "your build" trail, though the build needs this chapter`);
+      }
+    });
+    await door('/library');
+    // the first ship: a link that isn't public is refused; a real one is kept as proof
+    await door('/manual/first-ship', async () => {
+      const field = page.locator('#ship-first-ship');
+      await field.fill('http://localhost:5173');
+      await field.press('Enter');
+      if (!(await page.locator('.dr-ship-bad').count())) {
+        issues++;
+        console.log(`✗ /manual/first-ship at ${width}px\n    a localhost link was accepted as a shipped page`);
+      }
+      await field.fill('ana-silva.netlify.app');
+      await field.press('Enter');
+      await page.waitForTimeout(150);
+      if (!(await page.locator('.dr-ship[data-state=shipped]').count())) {
+        issues++;
+        console.log(`✗ /manual/first-ship at ${width}px\n    a real https link was not kept as the first ship`);
+      }
+    });
+    // levels: the first ship earns Level 1 — on the dashboard ladder and in the sidebar
+    await door('/me', async () => {
+      const here = await page.locator('.lv-rung[data-state=current]').textContent();
+      const side = await page.evaluate(() => document.querySelector('.side-level-k')?.textContent ?? '');
+      if (!here?.includes('Level 1') || !side.includes('Level 1')) {
+        issues++;
+        console.log(`✗ /me at ${width}px\n    after the first ship, expected Level 1 (ladder: "${here?.slice(0, 40)}", sidebar: "${side.slice(0, 40)}")`);
+      }
+    });
+    await page.evaluate(() => {
+      localStorage.removeItem('unpacked:build:v1');
+      localStorage.removeItem('unpacked:explore:seen');
+    });
+    await page.close();
+
+    // Problem briefs, in a fresh tab: the list, a guided brief worked through, and the open one.
+    const tab = await openTab(width, height);
+    const brief = async (path, act) => {
+      await tab.goto(`${base}${path}`, { waitUntil: 'networkidle' });
+      await tab.waitForTimeout(200);
+      if (act) await act();
+      doorPages++;
+      const wide = await tab.evaluate(() => {
+        const out = [];
+        if (document.documentElement.scrollWidth > window.innerWidth + 1) out.push(`page scrolls sideways (${document.documentElement.scrollWidth}px)`);
+        for (const el of document.querySelectorAll('.dr-head, .br-flow, .br-list > *, .br-head > *, .br-stage, .br-chat-log'))
+          if (el.getBoundingClientRect().right > window.innerWidth + 1) out.push(`${el.className.split(' ')[0]} runs off the screen`);
+        return out;
+      });
+      if (wide.length) {
+        issues += wide.length;
+        console.log(`✗ ${path} at ${width}px\n    ` + wide.join('\n    '));
+      }
+    };
+    await brief('/briefs');
+    await brief('/briefs/bakery', async () => {
+      await tab.locator('#stage-discover .br-done').click();
+      await tab.locator('#stage-discover textarea').fill('Rosa runs out of the breads people want by nine on Saturdays.');
+      await tab.locator('#stage-scope textarea').fill('Does: Saturday pre-orders.');
+      await tab.locator('#stage-design textarea').fill('An order form, a list for Rosa.');
+      await tab.locator('.br-notes summary').click();
+      const spec = (await tab.locator('.br-prompt pre').textContent()) ?? '';
+      const ticked = await tab.locator('#stage-discover[data-done]').count();
+      const noKey = await tab.locator('.br-chat-off').count();
+      if (!spec.includes('Rosa runs out') || !ticked || !noKey) {
+        issues++;
+        console.log(`✗ /briefs/bakery at ${width}px\n    notes → spec: ${spec.includes('Rosa runs out')}, stage ticked: ${!!ticked}, no-key message: ${!!noKey}`);
+      }
+    });
+    await brief('/briefs/club');
+    await tab.close();
+  }
+}
+
 if (errors.size) console.log('\nConsole:\n    ' + [...errors].join('\n    '));
-console.log(`\n${issues || errors.size ? '✗' : '✓'} ${steps} steps checked (+${sandboxStates} sandbox states, ${roadmaps} roadmap layouts) · ${issues} layout issues · ${errors.size} console messages`);
+console.log(`\n${issues || errors.size ? '✗' : '✓'} ${steps} steps checked (+${sandboxStates} sandbox states, ${roadmaps} roadmap layouts, ${chapters} manual pages, ${doorPages} door pages) · ${issues} layout issues · ${errors.size} console messages`);
 await browser.close();
 process.exit(issues || errors.size ? 1 : 0);

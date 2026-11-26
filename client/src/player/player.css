@@ -140,47 +140,6 @@
 .narr-step > .narr-meta + .narr-title { margin-top: 0; }
 .narr-step > .narr-title + .narr-body { margin-top: 0; }
 
-.ic {
-  font-size: 0.86em;
-  padding: 1.5px 5px;
-  border-radius: 5px;
-  background: var(--surface-3);
-  border: 1px solid var(--line-soft);
-  color: var(--ink);
-  /* short tokens stay on one line; long expressions may wrap rather than overflow the panel */
-  overflow-wrap: anywhere;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-.term {
-  text-decoration: underline dotted;
-  text-decoration-color: var(--net);
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 3.5px;
-  cursor: help;
-  border-radius: 3px;
-  transition: background-color 0.15s;
-}
-.term:hover, .term:focus-visible { background: var(--net-soft); }
-.term-tip {
-  position: fixed;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 11px 13px;
-  border-radius: 10px;
-  background: var(--ink);
-  color: var(--bg);
-  font-size: 13px;
-  line-height: 1.5;
-  box-shadow: var(--shadow-3);
-  pointer-events: none;
-  animation: tip-in 0.14s var(--ease) both;
-}
-.term-tip strong { font-size: 13.5px; }
-.term-tip span { opacity: 0.85; }
-@keyframes tip-in { from { opacity: 0; transform: translateY(3px); } }
 .tone-text { color: var(--tone); font-weight: 650; }
 
 /* callout */
@@ -250,6 +209,107 @@
 .codeblock-copy:hover { background: var(--surface); color: var(--ink); }
 .codeblock pre { margin: 0; padding: 10px 0; overflow-x: auto; scrollbar-width: thin; }
 .codeblock .code-src { padding-right: 16px; }
+
+/* ---------- detail: the structured explanation under the code ---------- */
+.detail { display: flex; flex-direction: column; gap: 12px; font-size: 15px; line-height: 1.65; color: var(--ink-2); }
+.detail strong { color: var(--ink); font-weight: 650; }
+.detail > * { margin: 0; min-width: 0; }
+/* a section heading: a short bar in the step's beat colour, then the words */
+.dt-h {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 14px !important;
+  font: 700 17px/1.3 var(--font-display);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+.detail > .dt-h:first-child { margin-top: 2px !important; }
+.dt-h::before { content: ''; flex: none; width: 4px; height: 1.05em; border-radius: 2px; background: var(--beat, var(--ink-2)); }
+.dt-ul, .dt-ol, .dt-walk { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.dt-ul li { position: relative; padding-left: 19px; }
+.dt-ul li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 0.66em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--beat, var(--ink-2));
+}
+.dt-ol { counter-reset: dt; }
+.dt-ol li { counter-increment: dt; position: relative; padding-left: 33px; }
+.dt-ol li::before {
+  content: counter(dt);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font: 700 11.5px/1 var(--font-mono);
+  color: var(--beat, var(--ink-2));
+  background: color-mix(in srgb, var(--beat, var(--ink-2)) 13%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--beat, var(--ink-2)) 32%, transparent);
+}
+/* code walk-through: a line badge styled like a highlighted code line, then what happens */
+.dt-walk li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 11px; align-items: start; }
+.dt-walk-ln {
+  min-width: 46px;
+  margin-top: 2px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  text-align: center;
+  white-space: nowrap;
+  font: 650 11.5px/1.2 var(--font-mono);
+  color: var(--ink);
+  background: var(--warn-soft);
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+.dt-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); scrollbar-width: thin; }
+.dt-table { width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.45; }
+.dt-table th {
+  text-align: left;
+  vertical-align: bottom;
+  padding: 9px 10px;
+  font: 700 11px/1.25 var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--line);
+}
+.dt-table td { padding: 8px 10px; vertical-align: top; color: var(--ink-2); border-top: 1px solid var(--line-soft); }
+.dt-table tbody tr:first-child td { border-top: 0; }
+.dt-table td:first-child { color: var(--ink); font-weight: 600; }
+.dt-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 70%, transparent); }
+.dt-table .ic { font-size: 0.9em; }
+.dt-keys { padding: 14px 16px 15px; border-radius: var(--radius); background: var(--ok-soft); border: 1px solid var(--ok-line); }
+.dt-keys .eyebrow { color: var(--ok); }
+.dt-keys ul { list-style: none; padding: 0; margin-top: 9px; display: flex; flex-direction: column; gap: 7px; }
+.dt-keys li { display: flex; gap: 9px; font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+.dt-keys li > svg { flex: none; margin-top: 3px; color: var(--ok); }
+.dt-qa { display: flex; flex-direction: column; gap: 8px; }
+.dt-qa details { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); transition: border-color 0.2s; }
+.dt-qa details[open] { border-color: var(--line-strong); }
+.dt-qa summary {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.dt-qa summary::-webkit-details-marker { display: none; }
+.dt-qa summary:hover { background: var(--surface-2); border-radius: 10px; }
+.dt-qa-n { flex: none; margin-top: 1px; padding: 2px 6px; height: fit-content; border-radius: 6px; font: 700 11px/1.3 var(--font-mono); color: var(--net); background: var(--net-soft); }
+.dt-qa details p { padding: 2px 12px 12px 48px; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
 
 /* changes */
 .changes ul { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }

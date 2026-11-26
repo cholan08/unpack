@@ -115,6 +115,11 @@ export function autoProvider() {
 
 /** Offline stand-in for local development: `TUTOR_MOCK=1 npm run dev:server`. Needs no key. */
 export async function mockProvider({ system, user, messages }) {
+  if (system.includes('role-playing a CLIENT')) {
+    const name = system.match(/Name: (.+)/)?.[1] ?? 'the client';
+    const last = messages?.[messages.length - 1]?.content ?? '';
+    return `(demo client — ${name}) Good question: "${last.slice(0, 120)}". Set \`TUTOR_MOCK\` off and add an API key to interview me for real.`;
+  }
   if (system.includes('MENTOR')) {
     const last = messages?.[messages.length - 1]?.content ?? '';
     return `(demo mentor) You asked: "${last.slice(0, 120)}".\n\nSet \`TUTOR_MOCK\` off and add an API key to get real answers.`;

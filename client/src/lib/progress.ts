@@ -45,6 +45,13 @@ export interface ExplainBackResult {
   ts: number;
 }
 
+/** Something the learner built and put online: the proof for a build (docs/VISION.md §5). */
+export interface Ship {
+  /** The public link, as the learner pasted it (https only). */
+  url: string;
+  at: number;
+}
+
 export interface DashStats {
   streakDays: number;
   lastActiveDate: string;
@@ -66,6 +73,17 @@ interface Store {
   dash: DashStats;
   /** Skill-plan skills the learner ticked as "I know this" (id → when). Optional: older saves lack it. */
   known?: Record<string, number>;
+  /** Live links the learner shipped, by what they built (a chapter id, or `brief:<id>`). Optional: older saves lack it. */
+  ships?: Record<string, Ship>;
+  /** Levels earned (level number → when). Once earned, a level is kept even if its requirements grow. */
+  levels?: Record<string, number>;
+  /** Problem briefs: the stages ticked, and when the design was defended. Notes and interviews live apart. */
+  briefs?: Record<string, BriefProgress>;
+}
+
+export interface BriefProgress {
+  stages: string[];
+  defended?: number;
 }
 
 const KEY = 'unpacked:progress:v2';
@@ -229,6 +247,57 @@ export function saveExplainBack(result: ExplainBackResult) {
   });
 }
 
+/** A link is worth keeping as proof only if it is a public https address (not localhost, not a file). */
+export function shipUrl(raw: string): string | undefined {
+  const text = raw.trim();
+  if (!text) return undefined;
+  try {
+    const u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(text) ? text : `https://${text}`);
+    if (u.protocol !== 'https:') return undefined;
+    if (!u.hostname.includes('.') || /^(localhost|127\.|0\.0\.0\.0|192\.168\.|10\.)/.test(u.hostname)) return undefined;
+    return u.href;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Keep a shipped link as the proof for `id`. Returns false when the link isn't a public https address. */
+export function saveShip(id: string, raw: string): boolean {
+  const url = shipUrl(raw);
+  if (!url) return false;
+  save({ ...state, ships: { ...state.ships, [id]: { url, at: Date.now() } } });
+  return true;
+}
+
+export function removeShip(id: string) {
+  if (!state.ships?.[id]) return;
+  const ships = { ...state.ships };
+  delete ships[id];
+  save({ ...state, ships });
+}
+
+/** Record levels as earned (several at once for a learner who already met them). */
+export function earnLevels(ns: number[]) {
+  const fresh = ns.filter((n) => !state.levels?.[n]);
+  if (!fresh.length) return;
+  const levels = { ...state.levels };
+  for (const n of fresh) levels[n] = Date.now();
+  save({ ...state, levels });
+}
+
+/** Tick or untick one stage of a problem brief. */
+export function toggleBriefStage(id: string, stage: string) {
+  const prev = state.briefs?.[id] ?? { stages: [] };
+  const stages = prev.stages.includes(stage) ? prev.stages.filter((x) => x !== stage) : [...prev.stages, stage];
+  save({ ...state, briefs: { ...state.briefs, [id]: { ...prev, stages } } });
+}
+
+/** Mark a brief's design as defended (or not). */
+export function setBriefDefended(id: string, defended: boolean) {
+  const prev = state.briefs?.[id] ?? { stages: [] };
+  save({ ...state, briefs: { ...state.briefs, [id]: { ...prev, defended: defended ? Date.now() : undefined } } });
+}
+
 /** Tick or untick a skill on a topic's skill plan. */
 export function toggleKnown(id: string) {
   const known = { ...state.known };
@@ -283,6 +352,12 @@ export function useSettings() {
   const s = useSyncExternalStore(subscribe, getSnapshot);
   return s.settings;
 }
+
+export function useShips(): Record<string, Ship> {
+  const s = useSyncExternalStore(subscribe, getSnapshot);
+  return s.ships ?? NO_SHIPS;
+}
+const NO_SHIPS: Record<string, Ship> = {};
 
 export function useDash() {
   const s = useSyncExternalStore(subscribe, getSnapshot);

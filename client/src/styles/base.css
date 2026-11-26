@@ -240,3 +240,46 @@ a.card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-2); tr
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ---------------- rich text (lesson player, the Manual, anywhere <Rich> is used) ---------------- */
+.ic {
+  font-size: 0.86em;
+  padding: 1.5px 5px;
+  border-radius: 5px;
+  background: var(--surface-3);
+  border: 1px solid var(--line-soft);
+  color: var(--ink);
+  /* short tokens stay on one line; long expressions may wrap rather than overflow the panel */
+  overflow-wrap: anywhere;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.term {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--net);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3.5px;
+  cursor: help;
+  border-radius: 3px;
+  transition: background-color 0.15s;
+}
+.term:hover, .term:focus-visible { background: var(--net-soft); }
+.term-tip {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: var(--shadow-3);
+  pointer-events: none;
+  animation: tip-in 0.14s var(--ease) both;
+}
+.term-tip strong { font-size: 13.5px; }
+.term-tip span { opacity: 0.85; }
+@keyframes tip-in { from { opacity: 0; transform: translateY(3px); } }

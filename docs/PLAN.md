@@ -32,8 +32,9 @@ Our visual identity is our own (see §4). We do not copy their palette, isometri
 ## 3. Information architecture
 
 ```
-/                         Home: new learners get the pitch (live diagram, how a lesson works, the four topics);
-                          returning learners get a hub (continue — drawn at the step they left — progress by topic, what's due)
+/                         Home: the pitch (new learners) or the continue card (returning), then the three doors
+                          into the Manual — Explore, Build, Path (docs/VISION.md §4)
+/explore /build /path     The three doors: a curiosity feed · "I want to build ___" → its chapters · the guided route
 /:course                  Course map: parts → lessons, progress, time
 /:course/:lesson?s=N      Lesson player (step N, shareable)
 /:course/glossary         All terms for the course
@@ -45,7 +46,7 @@ Hierarchy: **Course → Part (numbered, colour) → Lesson → Step**.
 
 Every page except the lesson player sits in one shell (`src/site/AppShell.tsx`, a layout route in `App.tsx`; pages render only their own `<main>`):
 
-- **Wide screens (≥1080px): a sidebar**, always visible. From the top: search · the *one thing to do next* (Continue / Up next / "New here?") · Home, Start Here · **Topics** (Frontend, Backend, Database, DevOps, AI/ML, Projects — each with a progress ring and done/total, or “soon” while a topic has no lessons) · **Your path** (Roadmap, Dashboard, Review with a due badge, My notes) · **Library** (Course map, Glossary, Techpack, Skill Pack, Notebooks, Common errors).
+- **Wide screens (≥1080px): a sidebar**, always visible and short on purpose. From the top: search · the *one thing to do next* (Continue / Up next / "New here? Start from zero" → the Path) · Home · **The Manual** (All chapters, Explore, Build) · **Your path** (Path, Dashboard, Review with a due badge, My notes) · **The shelf** (Library — course map, roadmap, glossary, Techpack, Skill Pack, notebooks, common errors and the topic pages). *(Until M3 the topics had their own sidebar group; they are a filter now — docs/VISION.md §7.)*
 - **Narrow screens: a top bar** (menu, logo, search, theme); the same sidebar slides in as a drawer.
 - The lesson player stays full screen: it is where attention belongs.
 - Shared progress views (topic stats, "continue" target) live in `src/site/learner.ts`; small shared pieces (logo, progress ring, page header) in `src/site/ui.tsx`.
@@ -272,6 +273,17 @@ Fewer clicks between "I wonder…" and the answer, and small moments that reward
 - ✅ **404** suggests what the link probably meant, using the palette's matcher and the URL's section (`/skillpack/raect` → React).
 - ✅ Deep links with `#anchor` land on the anchor on every page; toasts for quiet confirmations (`toast()` in `src/lib/toast.ts`).
 - ✅ Accessibility: tertiary text (`--muted-2`) now passes WCAG AA (≥ 4.5:1) in both themes; 44px touch targets on coarse pointers; the keyboard-shortcuts button is hidden on touch screens.
+
+### Phase M — The Manual · 🚧 in progress
+The site's new shape: one chapter per *problem* every product meets, stacks second (`docs/VISION.md`). Plan and status: `docs/PLAN-MANUAL.md`.
+- ✅ M1 — `/manual` contents (4 parts, 36 chapters, topic filter, honest status) and `/manual/:chapter` pages that assemble lessons, errors, gates, milestones and cheat sheets per chapter. "Know who the user is" is written in full as the model chapter. Content in `src/content/manual/`, pages in `src/site/manual/`. `npm run qa -- manual` checks every chapter at laptop and phone width.
+- ✅ M2 — all 23 chapters that have lessons written in the model chapter’s shape (draft until the owner reviews).
+- ✅ M3 — the three doors: `/explore` (curiosity feed), `/build` ("I want to build ___" → the chapters it needs), `/path` (the guided route, next three steps lit); Home leads with them; the sidebar is nine items. Content in `src/content/doors/`, pages in `src/site/doors/`. `npm run qa -- doors`. Details: `docs/PLAN-MANUAL.md`.
+- ✅ M4 — *Your first ship* (`written/first-ship.ts`): a personal page built with AI as a pair and put online; the live link is kept as proof (`ships` in progress) and starts the Path.
+- ✅ M5 — the builder’s craft: *Turn a problem into a plan*, *Build with AI*, *Read docs and other people’s code*, *Ship, listen, improve*.
+- ✅ M6 — levels as identity (`content/levels.ts`, `site/doors/Levels.tsx`): six levels earned with proof and kept; test out of a chapter with its gate; progress by chapter on the dashboard; the level in the sidebar and in the mentor's profile.
+- ✅ M7 — Part 11 “Real-World Building Blocks” in the course (lessons `llm-apps`, `background-jobs`, `notifications`, `payments`, `automation`, gate `extend`, 10 glossary terms) and the chapters *Make it smart*, *Do work later*, *Reach people*, *Take money*, *Automate the busywork*. The AI/ML topic now has lessons.
+- ✅ M8 — the FDE path: four problem briefs (`content/briefs.ts`, `/briefs`) with fading support; XOLA plays the client in discovery (`mode: "client"`); notes become the build spec; ship a live link, demo, defend the design; briefs prove Levels 4–5.
 
 ## 9. Quality bar
 

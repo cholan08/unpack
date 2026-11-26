@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { ArrowDownRight, ArrowUpRight, Check as CheckIcon, Copy, Eye, Lightbulb, Sparkles, TriangleAlert, OctagonX, HelpCircle } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Check as CheckIcon, CircleCheckBig, Copy, Eye, Lightbulb, Sparkles, TriangleAlert, OctagonX, HelpCircle } from 'lucide-react';
 import { CodeLines } from '@/lib/highlight';
-import type { Callout as CalloutT, Check as CheckT, CodeSpec, Lesson, MetricValue, PacketKind } from '@/engine/types';
+import type { Block, Callout as CalloutT, Check as CheckT, CodeSpec, Lesson, MetricValue, PacketKind } from '@/engine/types';
 import { Rich } from './RichText';
 import { stepScenes } from '@/engine/sandbox';
 
@@ -72,6 +72,125 @@ export function CodeBlock({ c }: { c: CodeSpec }) {
         <CodeLines code={c.code} lang={c.lang} hl={c.hl} err={c.err} />
       </pre>
     </figure>
+  );
+}
+
+/* ---------------- detail: the structured explanation ---------------- */
+function DetailBlock({ b }: { b: Block }) {
+  switch (b.kind) {
+    case 'h':
+      return (
+        <h3 className="dt-h">
+          <Rich text={b.text} />
+        </h3>
+      );
+    case 'p':
+      return (
+        <p className="dt-p">
+          <Rich text={b.text} />
+        </p>
+      );
+    case 'ul':
+    case 'ol': {
+      const L = b.kind;
+      return (
+        <L className={`dt-${b.kind}`}>
+          {b.items.map((t, i) => (
+            <li key={i}>
+              <Rich text={t} />
+            </li>
+          ))}
+        </L>
+      );
+    }
+    case 'walk':
+      return (
+        <ol className="dt-walk">
+          {b.items.map(([ln, t], i) => (
+            <li key={i}>
+              <span className="dt-walk-ln">{ln}</span>
+              <span>
+                <Rich text={t} />
+              </span>
+            </li>
+          ))}
+        </ol>
+      );
+    case 'table':
+      return (
+        <div className="dt-table-wrap">
+          <table className="dt-table">
+            <thead>
+              <tr>
+                {b.head.map((c, i) => (
+                  <th key={i}>
+                    <Rich text={c} />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {b.rows.map((r, i) => (
+                <tr key={i}>
+                  {r.map((c, j) => (
+                    <td key={j}>
+                      <Rich text={c} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    case 'code':
+      return <CodeBlock c={b.code} />;
+    case 'callout':
+      return <Callout c={b.callout} />;
+    case 'keys':
+      return (
+        <aside className="dt-keys">
+          <span className="eyebrow">Key takeaways</span>
+          <ul>
+            {b.items.map((t, i) => (
+              <li key={i}>
+                <CircleCheckBig size={15} aria-hidden />
+                <span>
+                  <Rich text={t} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      );
+    case 'qa':
+      return (
+        <div className="dt-qa">
+          {b.items.map((x, i) => (
+            <details key={i}>
+              <summary>
+                <span className="dt-qa-n">Q{i + 1}</span>
+                <span>
+                  <Rich text={x.q} />
+                </span>
+              </summary>
+              <p>
+                <Rich text={x.a} />
+              </p>
+            </details>
+          ))}
+        </div>
+      );
+  }
+}
+
+export function Detail({ blocks }: { blocks: Block[] }) {
+  return (
+    <div className="detail">
+      {blocks.map((b, i) => (
+        <DetailBlock key={i} b={b} />
+      ))}
+    </div>
   );
 }
 

@@ -66,9 +66,28 @@ export default defineLesson({
     [{ label: 'returns true', run: 'starter() === true' }],
     ['Hint 1', 'Hint 2']
   ),
+  detail: [ /* the full explanation, shown under the code — see below */ ],
   scene: { nodes, links, flows },          // …or `sandbox` instead (see below)
 }
 ```
+
+### Detail: the structured explanation
+
+`body` is the short lead (1–2 paragraphs). `detail` is the depth, shown under the code and before the `check`, built from these blocks (all from `@/content/dsl`, all rich text):
+
+| Builder | Shows |
+|---|---|
+| `h('How lookup works')` | a section heading (coloured by the step's beat) |
+| `p('…')` | a paragraph |
+| `ul('…', '…')` / `ol('…', '…')` | bullet points / numbered steps in order |
+| `walk(['L4', 'what happens'], ['L6', '…'])` | a line-by-line code walk-through; label the lines the step's `code` highlights |
+| `table(['Head', …], ['cell', …], …)` | a compact comparison — 2–4 short columns, the column is narrow |
+| `snippet('file.js', src, { lang, hl, err })` | another code sample; keep lines under ~44 characters |
+| `callout('picture' \| 'tip' \| 'warn' \| 'mistake' \| 'insight', '…')` | as many callouts as the step needs |
+| `keys('…', '…')` | "Key takeaways" — end every detailed step with 2–4 |
+| `qa(['question', 'answer'], …)` | click-to-open questions (self-test, interview practice) |
+
+A good shape: what happens (walk/ol) → why it matters → a comparison table → a common mistake → key takeaways. `lessons/closures.ts` uses every block.
 
 ### Rich text
 

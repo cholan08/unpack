@@ -27,6 +27,10 @@ function goTable(): Record<string, string> {
   return {
     h: '/',
     s: '/start',
+    b: '/manual',
+    x: '/explore',
+    i: '/build',
+    p: '/path',
     d: '/me',
     r: `/${c}/roadmap`,
     v: '/review',
@@ -34,6 +38,7 @@ function goTable(): Record<string, string> {
     l: '/library',
     m: `/${c}`,
     e: '/errors',
+    a: '/about',
   };
 }
 
@@ -47,6 +52,10 @@ export const goHint = (to: string): string | undefined => BY_PATH.get(to);
 export const GO_LIST: { key: string; label: string }[] = [
   { key: 'c', label: 'Continue your lesson' },
   { key: 'h', label: 'Home' },
+  { key: 'b', label: 'The Manual' },
+  { key: 'x', label: 'Explore' },
+  { key: 'i', label: 'Build' },
+  { key: 'p', label: 'Path' },
   { key: 'd', label: 'Dashboard' },
   { key: 'r', label: 'Roadmap' },
   { key: 'v', label: 'Review' },
@@ -55,6 +64,7 @@ export const GO_LIST: { key: string; label: string }[] = [
   { key: 'n', label: 'My notes' },
   { key: 'e', label: 'Common errors' },
   { key: 's', label: 'Start Here' },
+  { key: 'a', label: 'About & maker' },
 ];
 
 /** Ask the shortcut sheet to open (the command palette uses this). */
@@ -83,7 +93,7 @@ export function Hotkeys() {
   /** Go to the target of `key`; false when the key isn't one. */
   const go = useCallback(
     (key: string) => {
-      const to = key === 'c' ? (continueTarget(progressRef.current)?.href ?? '/start') : TABLE[key];
+      const to = key === 'c' ? (continueTarget(progressRef.current)?.href ?? '/path') : TABLE[key];
       if (!to) return false;
       setSheet(false);
       navigate(to);

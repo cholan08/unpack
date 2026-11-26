@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router';
 import { HomePage } from '@/site/HomePage';
 import { CoursePage, GlossaryPage } from '@/site/CoursePage';
@@ -17,6 +17,7 @@ import { NotebooksPage } from '@/site/notebooks/NotebooksPage';
 import { NotebookReader } from '@/site/notebooks/NotebookReader';
 import { TopicPage } from '@/site/TopicPage';
 import { LibraryPage } from '@/site/LibraryPage';
+import { AboutPage } from '@/site/AboutPage';
 import { PILLARS } from '@/content/pillars';
 import { AppLayout } from '@/site/AppShell';
 import { LessonShell } from '@/site/LessonShell';
@@ -26,9 +27,21 @@ import { NotFound } from '@/site/NotFound';
 import { MentorDock } from '@/site/MentorDock';
 import { Hotkeys } from '@/site/Hotkeys';
 import { Toaster } from '@/site/Toaster';
+import { LevelWatcher } from '@/site/doors/Levels';
 import { installSpotlight } from '@/lib/spotlight';
 
 installSpotlight();
+
+// The Manual: its own chunks, fetched the first time someone opens it.
+const ManualPage = lazy(() => import('@/site/manual/ManualPage').then((m) => ({ default: m.ManualPage })));
+const ChapterPage = lazy(() => import('@/site/manual/ChapterPage').then((m) => ({ default: m.ChapterPage })));
+// The three doors into the Manual (Explore, Build, Path): one chunk each.
+const ExplorePage = lazy(() => import('@/site/doors/ExplorePage').then((m) => ({ default: m.ExplorePage })));
+const BuildPage = lazy(() => import('@/site/doors/BuildPage').then((m) => ({ default: m.BuildPage })));
+const PathPage = lazy(() => import('@/site/doors/PathPage').then((m) => ({ default: m.PathPage })));
+// Part IV's problem briefs: the forward-deployed engineer's path.
+const BriefsPage = lazy(() => import('@/site/briefs/BriefsPage').then((m) => ({ default: m.BriefsPage })));
+const BriefPage = lazy(() => import('@/site/briefs/BriefsPage').then((m) => ({ default: m.BriefPage })));
 
 /**
  * A new page starts at the top. A link with a #anchor (a Techpack sheet, a glossary term…) lands
@@ -64,6 +77,13 @@ export function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/start" element={<StartPage />} />
+            <Route path="/manual" element={<Suspense fallback={null}><ManualPage /></Suspense>} />
+            <Route path="/manual/:chapterId" element={<Suspense fallback={null}><ChapterPage /></Suspense>} />
+            <Route path="/explore" element={<Suspense fallback={null}><ExplorePage /></Suspense>} />
+            <Route path="/build" element={<Suspense fallback={null}><BuildPage /></Suspense>} />
+            <Route path="/path" element={<Suspense fallback={null}><PathPage /></Suspense>} />
+            <Route path="/briefs" element={<Suspense fallback={null}><BriefsPage /></Suspense>} />
+            <Route path="/briefs/:briefId" element={<Suspense fallback={null}><BriefPage /></Suspense>} />
             <Route path="/me" element={<DashboardPage />} />
             <Route path="/capstone" element={<CapstonePage />} />
             <Route path="/capstone/:milestoneId" element={<CapstonePage />} />
@@ -81,6 +101,7 @@ export function App() {
               <Route key={p.id} path={`/${p.id}`} element={<TopicPage id={p.id} />} />
             ))}
             <Route path="/library" element={<LibraryPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/:courseId" element={<CoursePage />} />
             <Route path="/:courseId/roadmap" element={<RoadmapPage />} />
             <Route path="/:courseId/gate/:partId" element={<GatePage />} />
@@ -102,6 +123,8 @@ export function App() {
         {/* "G then …" page shortcuts and the "?" sheet, everywhere */}
         <Hotkeys />
         <Toaster />
+        {/* records a level the moment it is earned, on any page (lesson player included) */}
+        <LevelWatcher />
       </SearchProvider>
     </BrowserRouter>
   );

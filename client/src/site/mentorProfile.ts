@@ -6,6 +6,7 @@
 import { COURSES, getCourse, lessonEntries } from '@/content/registry';
 import type { useProgress } from '@/lib/progress';
 import { continueTarget } from './learner';
+import { levelsOf, nextStep } from './doors/levels';
 
 type Store = ReturnType<typeof useProgress>;
 
@@ -22,6 +23,8 @@ export interface MentorProfile {
   shaky: string[];
   /** Every written lesson: lets the mentor link to the right one. */
   lessons: { path: string; title: string; status: 'done' | 'started' | 'new' }[];
+  /** The level held (docs/VISION.md §5) and what the next one still needs. */
+  level?: { n: number; name: string; canNow: string; next?: string; nextNeeds?: string };
 }
 
 export function buildMentorProfile(progress: Store): MentorProfile {
@@ -60,6 +63,7 @@ export function buildMentorProfile(progress: Store): MentorProfile {
 
   const target = continueTarget(progress);
   const now = Date.now();
+  const lv = levelsOf(progress);
 
   return {
     streakDays: progress.dash.streakDays,
@@ -75,13 +79,17 @@ export function buildMentorProfile(progress: Store): MentorProfile {
     gates,
     shaky: [...shaky],
     lessons,
+    level: { n: lv.current.level.n, name: lv.current.level.name, canNow: lv.current.level.canNow, next: lv.next?.level.name, nextNeeds: nextStep(lv.next) },
   };
 }
 
 /* ---------------- where the learner is ---------------- */
 
 const STATIC_PAGES: Record<string, string> = {
-  '/': 'Home',
+  '/': 'Home (the three doors: Explore, Build, Path)',
+  '/explore': 'Explore (a feed of curiosity questions)',
+  '/build': 'Build (planning a product: the chapters it needs)',
+  '/path': 'Path (the guided route from zero)',
   '/start': 'Start Here (placement check)',
   '/me': 'Dashboard',
   '/review': 'Spaced review',
@@ -92,6 +100,7 @@ const STATIC_PAGES: Record<string, string> = {
   '/skillpack': 'Skill Pack',
   '/notebooks': 'Notebooks',
   '/capstone': 'Capstone project',
+  '/briefs': 'Problem briefs (Part IV)',
 };
 
 /** A plain description of the current route, for pages that do not publish their own context. */
