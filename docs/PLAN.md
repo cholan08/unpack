@@ -260,6 +260,7 @@ The concepts were all there but the diagrams read as wireframes (dark cards on a
 - ✅ V1 — Engine-wide look, so all 54 lessons change with no content edits: paper blocks with extruded hatched sides, platforms for zones, isometric desk, ink wires, bigger packets, physical states (see §4, Stage objects)
 - ✅ V2 — "In this lesson" timeline under the stage (labelled, beat-coloured, auto-centred); replaces the top segment bar on wide screens
 - ✅ V3 — `picture` callout kind ("Picture it")
+- ✅ V4 — Home "How one app works" (`src/site/AppAnatomy.tsx`) redrawn on the desk: platforms for Frontend / Backend / Database with paper blocks inside (screen with a DevTools Network row, fetch, state · router, middleware, logic, model · a MongoDB cylinder holding the documents). One click travels 9 numbered steps out and back; every wire carries its step number, two-way wires have a request lane and a response lane, and each step says what happens, **why that tool is used**, and the real code. Below it: "MERN, letter by letter" (job + why for each tool, jumps to its step) and "Around the app" (build, ship, AI). Laid out with CSS (wide row → tall column via container queries), then measured; wires, numbers and packets reuse the engine (`linkPoints`, `Extrusion`, `PacketLayer`)
 - Next: write one "Picture it" analogy per lesson; home/continue-card stage backgrounds on the desk grid; per-lesson emblem on the cover; optional isometric hero mode for data-structure courses (DSA)
 
 ### Phase U — A site that anticipates · ✅ shipped
