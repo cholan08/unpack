@@ -11,6 +11,7 @@ import { motion } from 'motion/react';
 import {
   ArrowRight,
   BookOpen,
+  ChevronDown,
   Hammer,
   House,
   LayoutDashboard,
@@ -97,6 +98,67 @@ function Item({
         </span>
       ) : null}
     </Link>
+  );
+}
+
+/* ---------------- production stack (menu only for now) ---------------- */
+
+/** The 13 layers a production-ready app stands on. Pages come later, so these are labels, not links. */
+const STACK_LAYERS = [
+  'Frontend Foundations',
+  'APIs & Backend Logic',
+  'Database & Storage',
+  'Auth & Permissions',
+  'Hosting & Deployment',
+  'Cloud & Compute',
+  'CI/CD & Version Control',
+  'Security & RLS',
+  'Rate Limiting',
+  'Caching & CDN',
+  'Load Balancing & Scaling',
+  'Error Tracking & Logs',
+  'Availability & Recovery',
+];
+
+const STACK_OPEN_KEY = 'unpacked:side-stack-open';
+
+function StackMenu() {
+  const [open, setOpen] = useState(() => {
+    try {
+      return localStorage.getItem(STACK_OPEN_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const toggle = () => {
+    setOpen((o) => {
+      try {
+        localStorage.setItem(STACK_OPEN_KEY, o ? '0' : '1');
+      } catch {
+        /* storage blocked: the toggle still works for this visit */
+      }
+      return !o;
+    });
+  };
+  return (
+    <>
+      <h2 className="side-h">
+        <button className="side-h-toggle" onClick={toggle} aria-expanded={open} aria-controls="side-stack">
+          Production stack
+          <ChevronDown size={12} strokeWidth={2.6} className="side-h-chev" data-open={open || undefined} />
+        </button>
+      </h2>
+      {open && (
+        <ol id="side-stack" className="side-stack" aria-label="Production stack — pages coming soon">
+          {STACK_LAYERS.map((label, i) => (
+            <li key={label} className="side-item side-item--static" title={`${label} — coming soon`}>
+              <span className="side-ico side-num">{String(i + 1).padStart(2, '0')}</span>
+              <span className="side-label">{label}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </>
   );
 }
 
@@ -198,6 +260,8 @@ function Sidebar({ open, onClose, drawer }: { open: boolean; onClose: () => void
         <Item to="/manual" icon={BookOpen} label="All chapters" active={under(pathname, '/manual', '/capstone', '/briefs')} title="Every problem a product meets, one chapter each" />
         <Item to="/explore" icon={Telescope} label="Explore" tone="net" active={under(pathname, '/explore')} title="How does ___ work? A feed of curiosity questions" />
         <Item to="/build" icon={Hammer} label="Build" tone="warn" active={under(pathname, '/build')} title="I want to build ___ — the chapters it needs" />
+
+        <StackMenu />
 
         <h2 className="side-h">Your path</h2>
         <Item to="/path" icon={Route} label="Path" tone="ok" active={under(pathname, '/path', '/start', `/${c}/roadmap`)} title="Teach me from zero — the guided route" />
